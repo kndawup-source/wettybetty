@@ -32,21 +32,14 @@ html,body{
   font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;
 }
 button,input{font-family:inherit}
-button{cursor:pointer;border:0}
 button{
-  transition:transform .12s ease, filter .12s ease, background .12s ease, border-color .12s ease;
+  cursor:pointer;
+  border:0;
+  transition:transform .12s ease, filter .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
 }
 button:active{
   transform:scale(.96);
   filter:brightness(1.12);
-}
-.pickBtns .rain:active{
-  background:rgba(130,199,255,.24);
-  box-shadow:0 0 0 4px rgba(130,199,255,.08);
-}
-.pickBtns .clear:active{
-  background:rgba(184,255,122,.22);
-  box-shadow:0 0 0 4px rgba(184,255,122,.08);
 }
 
 .app{
@@ -166,6 +159,7 @@ button:active{
   justify-content:space-between;
   align-items:flex-start;
   gap:14px;
+  z-index:1;
 }
 .kicker{
   display:inline-flex;
@@ -206,6 +200,7 @@ button:active{
 }
 .weatherGrid{
   position:relative;
+  z-index:1;
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:8px;
@@ -245,10 +240,60 @@ button:active{
   background:var(--accent);
   color:#07100d;
 }
+.btn:active{
+  box-shadow:0 0 0 4px rgba(223,245,106,.1);
+}
 .btn.dark{
   background:rgba(255,255,255,.055);
   color:var(--text);
   border:1px solid var(--line);
+}
+
+.hotBoard{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.035);
+  border-radius:22px;
+  padding:14px;
+  margin:12px 0 16px;
+}
+.hotHead{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:4px;
+}
+.hotHead h2{
+  font-size:14px;
+  font-weight:900;
+}
+.hotHead span{
+  color:var(--accent);
+  font-size:10px;
+  font-weight:900;
+}
+.hotItem{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding:11px 0;
+  border-top:1px solid var(--line);
+}
+.hotItem:first-child{border-top:0}
+.hotRegion{
+  font-size:13px;
+  font-weight:900;
+}
+.hotSub{
+  margin-top:3px;
+  color:var(--muted);
+  font-size:11px;
+}
+.hotCredit{
+  flex:0 0 auto;
+  color:var(--accent);
+  font-size:13px;
+  font-weight:900;
 }
 
 .sectionHead{
@@ -390,6 +435,7 @@ button:active{
 .stakes button.active{
   background:var(--text);
   color:#050d16;
+  box-shadow:0 0 0 3px rgba(237,244,250,.08);
 }
 .pickBtns{
   display:grid;
@@ -400,7 +446,7 @@ button:active{
 .pickBtns button{
   height:46px;
   border-radius:15px;
-  font-size:13px;
+  font-size:14px;
   font-weight:900;
 }
 .pickBtns .rain{
@@ -408,10 +454,18 @@ button:active{
   border:1px solid rgba(130,199,255,.27);
   color:var(--blue);
 }
+.pickBtns .rain:active{
+  background:rgba(130,199,255,.24);
+  box-shadow:0 0 0 4px rgba(130,199,255,.08);
+}
 .pickBtns .clear{
   background:rgba(184,255,122,.12);
   border:1px solid rgba(184,255,122,.24);
   color:var(--green);
+}
+.pickBtns .clear:active{
+  background:rgba(184,255,122,.22);
+  box-shadow:0 0 0 4px rgba(184,255,122,.08);
 }
 .myPick{
   margin-top:13px;
@@ -457,9 +511,42 @@ button:active{
   font-size:11px;
   font-weight:900;
 }
+.reactions button:active{
+  background:rgba(255,255,255,.09);
+}
+.commentPreview{
+  margin-top:8px;
+  padding:10px 11px;
+  border-radius:14px;
+  background:rgba(255,255,255,.032);
+  border:1px solid rgba(255,255,255,.055);
+}
+.commentPreview b{
+  color:var(--accent);
+  font-size:10px;
+  font-weight:900;
+}
+.commentPreview p{
+  margin-top:4px;
+  color:#dce7ee;
+  font-size:12px;
+  line-height:1.45;
+}
+.commentToggle{
+  width:100%;
+  height:38px;
+  margin-top:9px;
+  border-radius:13px;
+  background:rgba(255,255,255,.045);
+  border:1px solid var(--line);
+  color:var(--soft);
+  font-size:12px;
+  font-weight:900;
+}
 .commentForm{
   display:flex;
   gap:7px;
+  margin-top:10px;
 }
 .commentForm input{
   flex:1;
@@ -664,19 +751,19 @@ button:active{
 
   <section class="scoreBar">
     <button onclick="openProfile()">
-      <span>HIT RATE</span>
+      <span>적중률</span>
       <b id="hitRateMini">0%</b>
     </button>
     <div>
-      <span>PICKS</span>
+      <span>참여</span>
       <b id="picksMini">0</b>
     </div>
     <div>
-      <span>WINS</span>
+      <span>적중</span>
       <b id="winsMini">0</b>
     </div>
     <div>
-      <span>STREAK</span>
+      <span>연승</span>
       <b id="streakMini">0</b>
     </div>
   </section>
@@ -684,7 +771,7 @@ button:active{
   <section class="weatherBoard">
     <div class="weatherTop">
       <div>
-        <div class="kicker">CURRENT WEATHER</div>
+        <div class="kicker">현재 날씨</div>
         <h1 class="weatherTemp" id="currentTemp">--°</h1>
         <p class="weatherDesc" id="currentDesc">위치 권한을 허용하면 현재 날씨가 표시됩니다.</p>
       </div>
@@ -708,13 +795,21 @@ button:active{
   </section>
 
   <div class="actions">
-    <button class="btn" id="checkinBtn" onclick="checkin()">DAILY CLAIM</button>
-    <button class="btn dark" onclick="copyInvite()">INVITE</button>
+    <button class="btn" id="checkinBtn" onclick="checkin()">출석 포인트 받기</button>
+    <button class="btn dark" onclick="copyInvite()">친구 초대</button>
   </div>
 
+  <section class="hotBoard">
+    <div class="hotHead">
+      <h2>지금 몰리는 지역</h2>
+      <span>LIVE</span>
+    </div>
+    <div id="hotList"></div>
+  </section>
+
   <div class="sectionHead">
-    <h2>Today’s Markets</h2>
-    <span>LIVE PICK</span>
+    <h2>오늘의 예측</h2>
+    <span>비 온다 vs 안 온다</span>
   </div>
 
   <main id="list"></main>
@@ -723,9 +818,9 @@ button:active{
 <div class="modal" id="joinModal">
   <div class="modalCard">
     <h2>닉네임 만들기</h2>
-    <p>첫 접속 보너스로 100 CREDIT을 지급합니다.</p>
+    <p>첫 접속 보너스로 100 포인트를 지급합니다.</p>
     <input id="nickInput" placeholder="닉네임 입력" maxlength="12" onkeydown="if(event.key==='Enter')createProfile()" />
-    <button class="btn" onclick="createProfile()">START</button>
+    <button class="btn" onclick="createProfile()">시작하기</button>
   </div>
 </div>
 
@@ -740,17 +835,17 @@ button:active{
     </div>
 
     <div class="profileStats">
-      <div><span>CREDIT</span><b id="modalCredit">0</b></div>
-      <div><span>HIT RATE</span><b id="modalHitRate">0%</b></div>
-      <div><span>STREAK</span><b id="modalStreak">0</b></div>
-      <div><span>PICKS</span><b id="modalPicks">0</b></div>
-      <div><span>WINS</span><b id="modalWins">0</b></div>
-      <div><span>PENDING</span><b id="modalPending">0</b></div>
+      <div><span>포인트</span><b id="modalCredit">0</b></div>
+      <div><span>적중률</span><b id="modalHitRate">0%</b></div>
+      <div><span>연승</span><b id="modalStreak">0</b></div>
+      <div><span>참여</span><b id="modalPicks">0</b></div>
+      <div><span>적중</span><b id="modalWins">0</b></div>
+      <div><span>대기</span><b id="modalPending">0</b></div>
     </div>
 
-    <button class="btn dark" onclick="copyInvite()">INVITE CODE COPY</button>
+    <button class="btn dark" onclick="copyInvite()">초대코드 복사</button>
 
-    <div class="historyTitle">RECENT SCORE</div>
+    <div class="historyTitle">최근 기록</div>
     <div id="historyList"></div>
   </div>
 </div>
@@ -768,6 +863,7 @@ let profile = null;
 let predictions = [];
 let drafts = {};
 let scoreHistory = [];
+let openComments = {};
 let stats = {
   totalPicks:0,
   wins:0,
@@ -816,12 +912,12 @@ function fmtTime(v){
 
 function remaining(closeTime){
   const diff = new Date(closeTime).getTime() - Date.now();
-  if(diff <= 0) return "CLOSED";
+  if(diff <= 0) return "마감";
   const m = Math.floor(diff / 60000);
   const h = Math.floor(m / 60);
   const mm = m % 60;
-  if(h > 0) return `${h}H ${mm}M LEFT`;
-  return `${mm}M LEFT`;
+  if(h > 0) return `${h}시간 ${mm}분 남음`;
+  return `${mm}분 남음`;
 }
 
 async function loadCurrentWeather(){
@@ -878,21 +974,21 @@ async function loadCurrentWeather(){
 
 function weatherText(code, rainProb, precipitation){
   if((precipitation || 0) > 0){
-    return { label:"🌧️", desc:"지금 비가 감지되고 있습니다. RAIN 흐름을 확인해보세요." };
+    return { label:"🌧️", desc:"지금 비가 감지되고 있습니다. 아래 예측 흐름을 확인해보세요." };
   }
   if(rainProb >= 70){
-    return { label:"☔", desc:"강수 가능성이 높습니다. 마감 직전 픽이 흔들릴 수 있어요." };
+    return { label:"☔", desc:"강수 가능성이 높습니다. 비 온다 쪽 선택이 몰릴 수 있어요." };
   }
   if(rainProb >= 40){
     return { label:"🌦️", desc:"애매한 하늘입니다. 사람들의 선택이 갈릴 가능성이 높아요." };
   }
   if([0,1].includes(code)){
-    return { label:"☀️", desc:"현재는 비교적 맑습니다. CLEAR 쪽 흐름을 확인해보세요." };
+    return { label:"☀️", desc:"현재는 비교적 맑습니다. 안 온다 쪽 흐름을 확인해보세요." };
   }
   if([2,3,45,48].includes(code)){
     return { label:"☁️", desc:"구름이 많습니다. 갑작스러운 변화에 주의하세요." };
   }
-  return { label:"🌤️", desc:"현재 날씨 기준으로 오늘의 픽을 확인해보세요." };
+  return { label:"🌤️", desc:"현재 날씨 기준으로 오늘의 예측을 확인해보세요." };
 }
 
 function setWeatherFallback(){
@@ -926,9 +1022,10 @@ async function load(){
   document.getElementById("joinModal").classList.remove("show");
 
   document.getElementById("nickname").textContent = profile.nickname;
-  document.getElementById("pointsEl").textContent = `${profile.points} CREDIT`;
+  document.getElementById("pointsEl").textContent = `${profile.points}P`;
 
   updateStatsUI();
+  renderHotList();
   render();
 }
 
@@ -950,6 +1047,40 @@ function updateStatsUI(){
   renderHistory();
 }
 
+function renderHotList(){
+  const box = document.getElementById("hotList");
+  if(!box) return;
+
+  const hot = [...predictions]
+    .sort((a,b)=>(b.totalStake || 0) - (a.totalStake || 0))
+    .slice(0,3);
+
+  if(!hot.length || hot.every(x => !x.totalStake)){
+    box.innerHTML = `<div class="empty" style="padding:14px 0">아직 몰리는 지역이 없습니다.</div>`;
+    return;
+  }
+
+  box.innerHTML = "";
+
+  hot.forEach((p, idx)=>{
+    const div = document.createElement("div");
+    div.className = "hotItem";
+
+    const left = document.createElement("div");
+    left.innerHTML = `
+      <div class="hotRegion">${idx + 1}. ${p.region}</div>
+      <div class="hotSub">비 온다 ${p.rainPercent}% · 안 온다 ${p.clearPercent}%</div>
+    `;
+
+    const right = document.createElement("div");
+    right.className = "hotCredit";
+    right.textContent = `${p.totalStake || 0}P`;
+
+    div.append(left, right);
+    box.appendChild(div);
+  });
+}
+
 function renderHistory(){
   const box = document.getElementById("historyList");
 
@@ -962,14 +1093,14 @@ function renderHistory(){
 
   scoreHistory.forEach(item=>{
     const settled = item.status === "settled" || item.result;
-    let resultText = "PENDING";
+    let resultText = "대기";
     let cls = "resultPending";
 
     if(settled && item.is_correct === true){
-      resultText = "WIN";
+      resultText = "적중";
       cls = "resultWin";
     }else if(settled && item.is_correct === false){
-      resultText = "LOSE";
+      resultText = "실패";
       cls = "resultLose";
     }
 
@@ -981,7 +1112,7 @@ function renderHistory(){
 
     const meta = document.createElement("span");
     meta.innerHTML = `
-      PICK ${String(item.choice || "").toUpperCase()} · ${item.stake} CREDIT ·
+      선택 ${item.choice === "rain" ? "비 온다" : "안 온다"} · ${item.stake}P ·
       <b class="${cls}">${resultText}</b>
     `;
 
@@ -998,7 +1129,7 @@ function render(){
   });
 
   if(!predictions.length){
-    list.innerHTML = `<div class="empty">진행 중인 마켓이 없습니다.</div>`;
+    list.innerHTML = `<div class="empty">진행 중인 예측이 없습니다.</div>`;
     return;
   }
 
@@ -1006,6 +1137,10 @@ function render(){
 
   predictions.forEach(p=>{
     const closed = new Date(p.close_time).getTime() < Date.now() || p.status !== "open";
+    const isOpen = !!openComments[p.id];
+    const comments = p.comments || [];
+    const previewComments = isOpen ? comments : comments.slice(0,1);
+
     const card = document.createElement("section");
     card.className = "card";
 
@@ -1030,11 +1165,11 @@ function render(){
     meta.className = "marketMeta";
 
     const settle = document.createElement("span");
-    settle.textContent = `SETTLEMENT ${fmtTime(p.target_time)} · ${p.rain_threshold_mm}mm+`;
+    settle.textContent = `결과 발표 ${fmtTime(p.target_time)} · ${p.rain_threshold_mm}mm+`;
 
     const official = document.createElement("span");
     official.className = "official";
-    official.textContent = `KMA ${p.official_forecast || "UNKNOWN"}`;
+    official.textContent = `예보 ${p.official_forecast || "UNKNOWN"}`;
 
     meta.append(settle, official);
 
@@ -1043,11 +1178,11 @@ function render(){
 
     const rain = document.createElement("div");
     rain.className = "odd rain";
-    rain.innerHTML = `<label>RAIN</label><strong>${p.rainPercent}%</strong><small>${p.rainStake} CREDIT</small>`;
+    rain.innerHTML = `<label>비 온다</label><strong>${p.rainPercent}%</strong><small>${p.rainStake}P</small>`;
 
     const clear = document.createElement("div");
     clear.className = "odd clear";
-    clear.innerHTML = `<label>CLEAR</label><strong>${p.clearPercent}%</strong><small>${p.clearStake} CREDIT</small>`;
+    clear.innerHTML = `<label>안 온다</label><strong>${p.clearPercent}%</strong><small>${p.clearStake}P</small>`;
 
     odds.append(rain, clear);
 
@@ -1060,7 +1195,7 @@ function render(){
     if(p.myVote){
       const my = document.createElement("div");
       my.className = "myPick";
-      my.textContent = `MY PICK · ${p.myVote.choice === "rain" ? "RAIN" : "CLEAR"} · ${p.myVote.stake} CREDIT`;
+      my.textContent = `내 선택 · ${p.myVote.choice === "rain" ? "비 온다" : "안 온다"} · ${p.myVote.stake}P`;
       card.appendChild(my);
     }else if(!closed){
       const entry = document.createElement("div");
@@ -1071,7 +1206,7 @@ function render(){
 
       [10,30,50,100].forEach(s=>{
         const b = document.createElement("button");
-        b.textContent = s;
+        b.textContent = `${s}P`;
         if(s === selectedStake) b.classList.add("active");
         if(profile.points < s) b.disabled = true;
         b.onclick = ()=>{ selectedStake = s; render(); };
@@ -1083,13 +1218,13 @@ function render(){
 
       const rainBtn = document.createElement("button");
       rainBtn.className = "rain";
-      rainBtn.textContent = "PICK RAIN";
+      rainBtn.textContent = "비 온다";
       rainBtn.disabled = profile.points < selectedStake;
       rainBtn.onclick = ()=>vote(p.id, "rain");
 
       const clearBtn = document.createElement("button");
       clearBtn.className = "clear";
-      clearBtn.textContent = "PICK CLEAR";
+      clearBtn.textContent = "안 온다";
       clearBtn.disabled = profile.points < selectedStake;
       clearBtn.onclick = ()=>vote(p.id, "clear");
 
@@ -1103,7 +1238,7 @@ function render(){
 
     const moodTitle = document.createElement("div");
     moodTitle.className = "moodTitle";
-    moodTitle.innerHTML = `<span>LIVE REACTION</span><span>${p.totalStake || 0} CREDIT</span>`;
+    moodTitle.innerHTML = `<span>실시간 반응</span><span>${p.totalStake || 0}P 참여</span>`;
 
     const reactions = document.createElement("div");
     reactions.className = "reactions";
@@ -1121,27 +1256,11 @@ function render(){
       reactions.appendChild(b);
     });
 
-    const form = document.createElement("div");
-    form.className = "commentForm";
+    mood.append(moodTitle, reactions);
 
-    const input = document.createElement("input");
-    input.placeholder = "지금 하늘, 체감 근거 남기기";
-    input.maxLength = 140;
-    input.dataset.commentInput = "1";
-    input.dataset.pid = p.id;
-    input.value = drafts[p.id] || "";
-    input.onkeydown = e => { if(e.key === "Enter") submitComment(p.id, input); };
-
-    const submit = document.createElement("button");
-    submit.textContent = "POST";
-    submit.onclick = ()=>submitComment(p.id, input);
-
-    form.append(input, submit);
-    mood.append(moodTitle, reactions, form);
-
-    (p.comments || []).forEach(c=>{
+    previewComments.forEach(c=>{
       const div = document.createElement("div");
-      div.className = "comment";
+      div.className = isOpen ? "comment" : "commentPreview";
 
       const nick = document.createElement("b");
       nick.textContent = c.nickname;
@@ -1152,6 +1271,35 @@ function render(){
       div.append(nick, body);
       mood.appendChild(div);
     });
+
+    const toggleBtn = document.createElement("button");
+    toggleBtn.className = "commentToggle";
+    toggleBtn.textContent = isOpen ? "반응 접기" : `반응 ${comments.length}개 보기`;
+    toggleBtn.onclick = ()=>{
+      openComments[p.id] = !openComments[p.id];
+      render();
+    };
+    mood.appendChild(toggleBtn);
+
+    if(isOpen){
+      const form = document.createElement("div");
+      form.className = "commentForm";
+
+      const input = document.createElement("input");
+      input.placeholder = "지금 하늘, 체감 근거 남기기";
+      input.maxLength = 140;
+      input.dataset.commentInput = "1";
+      input.dataset.pid = p.id;
+      input.value = drafts[p.id] || "";
+      input.onkeydown = e => { if(e.key === "Enter") submitComment(p.id, input); };
+
+      const submit = document.createElement("button");
+      submit.textContent = "POST";
+      submit.onclick = ()=>submitComment(p.id, input);
+
+      form.append(input, submit);
+      mood.appendChild(form);
+    }
 
     card.appendChild(mood);
     list.appendChild(card);
@@ -1179,7 +1327,7 @@ async function checkin(){
   const btn = document.getElementById("checkinBtn");
   btn.disabled = true;
   const json = await post("checkin");
-  toast(json.message || "DAILY CLAIM 완료");
+  toast(json.message || "출석 포인트 확인");
   await load();
   btn.disabled = false;
 }
@@ -1198,7 +1346,7 @@ async function submitComment(predictionId, input){
   }
 
   const json = await post("comment",{ predictionId, comment:text });
-  toast(json.message || "POST 완료");
+  toast(json.message || "반응 등록 완료");
   input.value = "";
   delete drafts[predictionId];
   await load();
