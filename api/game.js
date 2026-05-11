@@ -8,14 +8,13 @@ const supabase = createClient(
 export default async function handler(req, res) {
   try {
     res.setHeader("Cache-Control", "no-store");
-
     const userKey = String(req.query.userKey || "");
 
     const { data: predictions, error: pError } = await supabase
       .from("predictions")
       .select("*")
       .order("close_time", { ascending: true })
-      .limit(20);
+      .limit(30);
 
     if (pError) throw pError;
 
@@ -46,7 +45,7 @@ export default async function handler(req, res) {
         .select("*")
         .eq("user_key", userKey)
         .order("created_at", { ascending: false })
-        .limit(20);
+        .limit(30);
 
       scoreHistory = history || [];
 
@@ -73,13 +72,7 @@ export default async function handler(req, res) {
     }
 
     if (!predictionIds.length) {
-      return res.status(200).json({
-        ok: true,
-        profile,
-        stats,
-        scoreHistory,
-        predictions: []
-      });
+      return res.status(200).json({ ok: true, profile, stats, scoreHistory, predictions: [] });
     }
 
     const [votesResult, commentsResult, reactionsResult] = await Promise.all([
@@ -94,7 +87,7 @@ export default async function handler(req, res) {
         .in("prediction_id", predictionIds)
         .eq("is_hidden", false)
         .order("created_at", { ascending: false })
-        .limit(80),
+        .limit(120),
 
       supabase
         .from("reactions")
