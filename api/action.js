@@ -66,16 +66,16 @@ export default async function handler(req, res) {
         .insert({
           user_key: userKey,
           nickname,
-          points: 100,
+          points: 1000,
           referral_code: referralCode
         })
         .select()
         .single();
 
       if (error) throw error;
-      await logPoint(userKey, 100, "WELCOME CREDIT");
+      await logPoint(userKey, 1000, "WELCOME BONUS");
 
-      return res.json({ ok: true, message: "100 포인트 지급", profile: data });
+      return res.json({ ok: true, message: "가입 보너스 1,000P 지급", profile: data });
     }
 
     const profile = await getProfile(userKey);
@@ -91,7 +91,7 @@ export default async function handler(req, res) {
         return res.json({ ok: true, message: "오늘 이미 받았습니다." });
       }
 
-      const reward = 5;
+      const reward = 200;
 
       await supabase
         .from("profiles")
@@ -110,13 +110,13 @@ export default async function handler(req, res) {
     if (action === "vote") {
       const predictionId = body.predictionId;
       const choice = body.choice;
-      const stake = Number(body.stake || 10);
+      const stake = Number(body.stake || 100);
 
       if (!["rain", "clear"].includes(choice)) {
         return res.status(400).json({ ok: false, message: "invalid choice" });
       }
 
-      if (![10, 30, 50, 100].includes(stake)) {
+      if (![50, 100, 300, 500].includes(stake)) {
         return res.status(400).json({ ok: false, message: "invalid stake" });
       }
 
@@ -177,7 +177,7 @@ export default async function handler(req, res) {
 
       if (hidden) return res.json({ ok: true, message: "표현이 과해 숨김 처리되었습니다." });
 
-      const reward = 1;
+      const reward = 20;
 
       await supabase
         .from("profiles")
