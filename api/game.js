@@ -7,62 +7,19 @@ const supabase = createClient(
 
 export default async function handler(req, res) {
   try {
+    res.setHeader("Cache-Control", "no-store");
+
     const userKey = String(req.query.userKey || "");
 
-    const { data: predictions, error } = await supabase
+    const { data: predictions, error: pError } = await supabase
       .from("predictions")
       .select("*")
-      .order("close_time", { ascending: true });
+      .order("close_time", { ascending: true })
+      .limit(20);
 
-    if (error) throw error;
+    if (pError) throw pError;
 
-    const enriched = [];
-
-    for (const p of predictions || []) {
-      const { data: votes } = await supabase
-        .from("votes")
-        .select("choice, stake, user_key")
-        .eq("prediction_id", p.id);
-
-      const rainStake = votes?.filter(v => v.choice === "rain").reduce((a, v) => a + v.stake, 0) || 0;
-      const clearStake = votes?.filter(v => v.choice === "clear").reduce((a, v) => a + v.stake, 0) || 0;
-      const totalStake = rainStake + clearStake || 1;
-
-      const rainPercent = Math.round((rainStake / totalStake) * 100);
-      const clearPercent = 100 - rainPercent;
-      const myVote = votes?.find(v => v.user_key === userKey) || null;
-
-      const { data: comments } = await supabase
-        .from("comments")
-        .select("*")
-        .eq("prediction_id", p.id)
-        .eq("is_hidden", false)
-        .order("created_at", { ascending: false })
-        .limit(24);
-
-      const { data: reactions } = await supabase
-        .from("reactions")
-        .select("type")
-        .eq("prediction_id", p.id);
-
-      const reactionCount = {
-        angry: reactions?.filter(r => r.type === "angry").length || 0,
-        laugh: reactions?.filter(r => r.type === "laugh").length || 0,
-        agree: reactions?.filter(r => r.type === "agree").length || 0
-      };
-
-      enriched.push({
-        ...p,
-        rainStake,
-        clearStake,
-        totalStake: rainStake + clearStake,
-        rainPercent,
-        clearPercent,
-        myVote,
-        comments: comments || [],
-        reactionCount
-      });
-    }
+    const predictionIds = (predictions || []).map(p => p.id);
 
     let profile = null;
 
@@ -76,12 +33,96 @@ export default async function handler(req, res) {
       profile = data || null;
     }
 
+    if (!predictionIds.length) {
+      return res.status(200).json({
+        ok: true,
+        profile,
+        predictions: []
+      });
+    }
+
+    const [
+      votesResult,
+      commentsResult,
+      reactionsResult
+    ] = await Promise.all([
+      supabase
+        .from("votes")
+        .select("prediction_id, choice, stake, user_key")
+        .in("prediction_id", predictionIds),
+
+      supabase
+        .from("comments")
+        .select("id, prediction_id, nickname, body, created_at")
+        .in("prediction_id", predictionIds)
+        .eq("is_hidden", false)
+        .order("created_at", { ascending: false })
+        .limit(80),
+
+      supabase
+        .from("reactions")
+        .select("prediction_id, type")
+        .in("prediction_id", predictionIds)
+    ]);
+
+    if (votesResult.error) throw votesResult.error;
+    if (commentsResult.error) throw commentsResult.error;
+    if (reactionsResult.error) throw reactionsResult.error;
+
+    const votes = votesResult.data || [];
+    const comments = commentsResult.data || [];
+    const reactions = reactionsResult.data || [];
+
+    const enriched = predictions.map(p => {
+      const pVotes = votes.filter(v => v.prediction_id === p.id);
+      const pComments = comments
+        .filter(c => c.prediction_id === p.id)
+        .slice(0, 12);
+
+      const pReactions = reactions.filter(r => r.prediction_id === p.id);
+
+      const rainStake = pVotes
+        .filter(v => v.choice === "rain")
+        .reduce((sum, v) => sum + Number(v.stake || 0), 0);
+
+      const clearStake = pVotes
+        .filter(v => v.choice === "clear")
+        .reduce((sum, v) => sum + Number(v.stake || 0), 0);
+
+      const total = rainStake + clearStake || 1;
+
+      const rainPercent = Math.round((rainStake / total) * 100);
+      const clearPercent = 100 - rainPercent;
+
+      const myVote = pVotes.find(v => v.user_key === userKey) || null;
+
+      return {
+        ...p,
+        rainStake,
+        clearStake,
+        totalStake: rainStake + clearStake,
+        rainPercent,
+        clearPercent,
+        myVote,
+        comments: pComments,
+        reactionCount: {
+          angry: pReactions.filter(r => r.type === "angry").length,
+          laugh: pReactions.filter(r => r.type === "laugh").length,
+          agree: pReactions.filter(r => r.type === "agree").length
+        }
+      };
+    });
+
     return res.status(200).json({
       ok: true,
       profile,
       predictions: enriched
     });
+
   } catch (e) {
-    return res.status(500).json({ ok: false, message: e.message });
+    return res.status(500).json({
+      ok: false,
+      message: e.message
+    });
   }
 }
