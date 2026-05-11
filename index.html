@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>WETTY BETTY</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Noto+Sans+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#050d16;
+  --panel:#0b1620;
+  --panel2:#101f2b;
+  --panel3:#142836;
+  --line:rgba(255,255,255,.08);
+  --text:#edf4fa;
+  --muted:#879aa5;
+  --soft:#b7c8c8;
+  --accent:#dff56a;
+  --blue:#82c7ff;
+  --green:#b8ff7a;
+  --red:#ff6f6f;
+  --shadow:0 24px 70px rgba(0,0,0,.38);
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{
+  min-height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+button,input{font-family:inherit}
+button{cursor:pointer;border:0}
+.app{
+  width:100%;
+  max-width:480px;
+  margin:0 auto;
+  min-height:100dvh;
+  padding:18px 16px 56px;
+  background:
+    radial-gradient(circle at 50% -10%,rgba(223,245,106,.12),transparent 35%),
+    radial-gradient(circle at 100% 12%,rgba(130,199,255,.10),transparent 32%),
+    linear-gradient(180deg,#07121c 0%,#050d16 45%,#050d16 100%);
+}
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:18px;
+}
+.logo{
+  font-family:'Syne',sans-serif;
+  font-size:25px;
+  font-weight:900;
+  letter-spacing:-1px;
+  line-height:1;
+}
+.logo span{color:var(--accent)}
+.sub{
+  margin-top:7px;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.8px;
+}
+.profile{text-align:right;font-size:11px;color:var(--soft)}
+.points{
+  display:inline-flex;
+  margin-top:6px;
+  padding:7px 11px;
+  border-radius:999px;
+  background:rgba(223,245,106,.09);
+  border:1px solid rgba(223,245,106,.2);
+  color:var(--accent);
+  font-weight:900;
+  font-size:13px;
+}
+.hero{
+  position:relative;
+  overflow:hidden;
+  border:1px solid var(--line);
+  background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.025)),var(--panel);
+  border-radius:30px;
+  padding:24px;
+  margin-bottom:14px;
+  box-shadow:var(--shadow);
+}
+.hero:after{
+  content:"";
+  position:absolute;
+  right:-56px;
+  top:-68px;
+  width:180px;
+  height:180px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(223,245,106,.16),transparent 62%);
+}
+.kicker{
+  position:relative;
+  display:inline-flex;
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--line);
+  color:var(--soft);
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.8px;
+  margin-bottom:14px;
+}
+.hero h1{
+  position:relative;
+  font-size:31px;
+  line-height:1.14;
+  letter-spacing:-1.3px;
+  font-weight:900;
+}
+.hero p{
+  position:relative;
+  margin-top:11px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.6;
+}
+.actions{
+  position:relative;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-top:18px;
+}
+.btn{
+  border-radius:16px;
+  padding:13px 12px;
+  font-size:13px;
+  font-weight:900;
+  background:var(--accent);
+  color:#07100d;
+}
+.btn.dark{
+  background:rgba(255,255,255,.06);
+  color:var(--text);
+  border:1px solid var(--line);
+}
+.card{
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.022)),var(--panel);
+  border-radius:26px;
+  padding:18px;
+  margin:12px 0;
+  box-shadow:0 18px 48px rgba(0,0,0,.25);
+}
+.marketTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+.badge{
+  display:inline-flex;
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(130,199,255,.1);
+  border:1px solid rgba(130,199,255,.15);
+  color:var(--blue);
+  font-size:11px;
+  font-weight:900;
+}
+.timer{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:900;
+}
+.card-title{
+  margin-top:13px;
+  font-size:23px;
+  line-height:1.25;
+  letter-spacing:-.8px;
+  font-weight:900;
+}
+.marketMeta{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:10px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.5;
+}
+.official{
+  color:var(--soft);
+  font-weight:900;
+}
+.odds{
+  margin-top:16px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+.odd{
+  background:rgba(255,255,255,.045);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:15px;
+}
+.odd label{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.8px;
+}
+.odd strong{
+  display:block;
+  margin-top:7px;
+  font-family:'Syne',sans-serif;
+  font-size:32px;
+  line-height:1;
+  letter-spacing:-1px;
+}
+.odd small{
+  display:block;
+  margin-top:7px;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+}
+.odd.rain strong{color:var(--blue)}
+.odd.clear strong{color:var(--green)}
+.bar{
+  margin-top:14px;
+  height:9px;
+  border-radius:999px;
+  background:rgba(184,255,122,.22);
+  overflow:hidden;
+}
+.fill{
+  height:100%;
+  width:50%;
+  background:linear-gradient(90deg,var(--blue),#b5e1ff);
+  transition:width .4s ease;
+}
+.entry{
+  margin-top:14px;
+}
+.stakes{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:7px;
+}
+.stakes button{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.045);
+  color:var(--soft);
+  border-radius:13px;
+  padding:10px 0;
+  font-size:12px;
+  font-weight:900;
+}
+.stakes button.active{
+  background:var(--text);
+  color:#050d16;
+}
+.pickBtns{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-top:9px;
+}
+.pickBtns button{
+  border-radius:16px;
+  padding:14px 8px;
+  font-size:14px;
+  font-weight:900;
+}
+.pickBtns .rain{
+  background:rgba(130,199,255,.16);
+  border:1px solid rgba(130,199,255,.28);
+  color:var(--blue);
+}
+.pickBtns .clear{
+  background:rgba(184,255,122,.13);
+  border:1px solid rgba(184,255,122,.25);
+  color:var(--green);
+}
+.myPick{
+  margin-top:14px;
+  padding:12px 13px;
+  border-radius:16px;
+  background:rgba(223,245,106,.08);
+  border:1px solid rgba(223,245,106,.18);
+  color:var(--accent);
+  font-size:13px;
+  font-weight:900;
+}
+.mood{
+  margin-top:16px;
+  border-top:1px solid var(--line);
+  padding-top:14px;
+}
+.moodTitle{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  color:var(--soft);
+  font-size:12px;
+  font-weight:900;
+  margin-bottom:10px;
+}
+.reactions{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
+  margin-bottom:12px;
+}
+.reactions button{
+  border-radius:14px;
+  padding:10px 6px;
+  background:rgba(255,255,255,.045);
+  color:var(--soft);
+  border:1px solid var(--line);
+  font-size:12px;
+  font-weight:900;
+}
+.commentForm{
+  display:flex;
+  gap:8px;
+}
+.commentForm input{
+  flex:1;
+  min-width:0;
+  background:rgba(0,0,0,.18);
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px 13px;
+  font-size:13px;
+  outline:none;
+}
+.commentForm input::placeholder{color:#667786}
+.commentForm button{
+  border-radius:14px;
+  background:rgba(255,255,255,.08);
+  color:var(--text);
+  padding:0 14px;
+  font-size:13px;
+  font-weight:900;
+}
+.comment{
+  margin-top:9px;
+  padding:11px 12px;
+  border-radius:15px;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.06);
+}
+.comment b{
+  color:var(--accent);
+  font-size:11px;
+  font-weight:900;
+}
+.comment p{
+  margin-top:5px;
+  color:#dce7ee;
+  font-size:13px;
+  line-height:1.45;
+}
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.78);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  z-index:100;
+  backdrop-filter:blur(8px);
+}
+.modal.show{display:flex}
+.modalCard{
+  width:100%;
+  max-width:390px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:28px;
+  padding:24px;
+  box-shadow:var(--shadow);
+}
+.modalCard h2{
+  font-size:25px;
+  font-weight:900;
+  letter-spacing:-.8px;
+}
+.modalCard p{
+  margin-top:8px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+}
+.modalCard input{
+  width:100%;
+  margin-top:14px;
+  border:1px solid var(--line);
+  background:rgba(0,0,0,.2);
+  color:var(--text);
+  border-radius:16px;
+  padding:14px;
+  font-size:15px;
+  outline:none;
+}
+.modalCard button{
+  width:100%;
+  margin-top:12px;
+}
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:26px;
+  transform:translateX(-50%) translateY(8px);
+  opacity:0;
+  pointer-events:none;
+  background:var(--text);
+  color:#050d16;
+  padding:12px 18px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:900;
+  transition:.2s;
+  z-index:200;
+}
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+.empty{
+  padding:32px 0;
+  text-align:center;
+  color:var(--muted);
+  font-size:14px;
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+  <header class="header">
+    <div>
+      <div class="logo">WETTY <span>BETTY</span></div>
+      <div class="sub">WEATHER PICK CLUB</div>
+    </div>
+    <div class="profile">
+      <div id="nickname">GUEST</div>
+      <div class="points" id="pointsEl">0 CREDIT</div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="kicker">LIVE WEATHER MARKET</div>
+    <h1>오늘의 하늘은<br>어느 쪽일까.</h1>
+    <p>기상청 예보, 사람들의 픽, 실시간 반응까지. 현금 환전 없이 CREDIT으로만 즐기는 날씨 예측 클럽.</p>
+    <div class="actions">
+      <button class="btn" id="checkinBtn" onclick="checkin()">DAILY CLAIM</button>
+      <button class="btn dark" onclick="copyInvite()">INVITE</button>
+    </div>
+  </section>
+
+  <main id="list"></main>
+</div>
+
+<div class="modal" id="joinModal">
+  <div class="modalCard">
+    <h2>닉네임 만들기</h2>
+    <p>첫 접속 보너스로 100 CREDIT을 지급합니다.</p>
+    <input id="nickInput" placeholder="닉네임 입력" maxlength="12" onkeydown="if(event.key==='Enter')createProfile()" />
+    <button class="btn" onclick="createProfile()">START</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_GAME = "/api/game";
+const API_ACTION = "/api/action";
+const POLL_MS = 7000;
+
+let userKey = localStorage.getItem("wetty_user_key");
+let selectedStake = 10;
+let profile = null;
+let predictions = [];
+let drafts = {};
+
+if(!userKey){
+  userKey = crypto.randomUUID();
+  localStorage.setItem("wetty_user_key", userKey);
+}
+
+let toastTimer = null;
+
+function toast(msg){
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove("show"), 1900);
+}
+
+async function post(action, data = {}){
+  try{
+    const res = await fetch(API_ACTION,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ action, userKey, ...data })
+    });
+    return await res.json();
+  }catch(e){
+    return { ok:false, message:"요청 실패" };
+  }
+}
+
+function fmtTime(v){
+  return new Date(v).toLocaleString("ko-KR",{
+    month:"short",
+    day:"numeric",
+    hour:"2-digit",
+    minute:"2-digit"
+  });
+}
+
+function remaining(closeTime){
+  const diff = new Date(closeTime).getTime() - Date.now();
+  if(diff <= 0) return "CLOSED";
+  const m = Math.floor(diff / 60000);
+  const h = Math.floor(m / 60);
+  const mm = m % 60;
+  if(h > 0) return `${h}H ${mm}M LEFT`;
+  return `${mm}M LEFT`;
+}
+
+async function load(silent = false){
+  const res = await fetch(`${API_GAME}?userKey=${encodeURIComponent(userKey)}`);
+  const json = await res.json();
+
+  if(!json.ok){
+    toast(json.message || "불러오기 실패");
+    return;
+  }
+
+  profile = json.profile;
+  predictions = json.predictions || [];
+
+  if(!profile){
+    document.getElementById("joinModal").classList.add("show");
+    return;
+  }
+
+  document.getElementById("joinModal").classList.remove("show");
+  document.getElementById("nickname").textContent = profile.nickname;
+  document.getElementById("pointsEl").textContent = `${profile.points} CREDIT`;
+
+  render();
+}
+
+function render(){
+  const list = document.getElementById("list");
+
+  list.querySelectorAll("[data-comment-input]").forEach(input=>{
+    drafts[input.dataset.pid] = input.value;
+  });
+
+  if(!predictions.length){
+    list.innerHTML = `<div class="empty">진행 중인 마켓이 없습니다.</div>`;
+    return;
+  }
+
+  list.innerHTML = "";
+
+  predictions.forEach(p=>{
+    const closed = new Date(p.close_time).getTime() < Date.now() || p.status !== "open";
+    const card = document.createElement("section");
+    card.className = "card";
+
+    const top = document.createElement("div");
+    top.className = "marketTop";
+
+    const badge = document.createElement("div");
+    badge.className = "badge";
+    badge.textContent = p.region;
+
+    const timer = document.createElement("div");
+    timer.className = "timer";
+    timer.textContent = remaining(p.close_time);
+
+    top.append(badge, timer);
+
+    const title = document.createElement("div");
+    title.className = "card-title";
+    title.textContent = p.title;
+
+    const meta = document.createElement("div");
+    meta.className = "marketMeta";
+
+    const settle = document.createElement("span");
+    settle.textContent = `SETTLEMENT ${fmtTime(p.target_time)} · ${p.rain_threshold_mm}mm+`;
+
+    const official = document.createElement("span");
+    official.className = "official";
+    official.textContent = `KMA ${p.official_forecast || "UNKNOWN"}`;
+
+    meta.append(settle, official);
+
+    const odds = document.createElement("div");
+    odds.className = "odds";
+
+    const rain = document.createElement("div");
+    rain.className = "odd rain";
+    rain.innerHTML = `<label>RAIN</label><strong>${p.rainPercent}%</strong><small>${p.rainStake} CREDIT</small>`;
+
+    const clear = document.createElement("div");
+    clear.className = "odd clear";
+    clear.innerHTML = `<label>CLEAR</label><strong>${p.clearPercent}%</strong><small>${p.clearStake} CREDIT</small>`;
+
+    odds.append(rain, clear);
+
+    const bar = document.createElement("div");
+    bar.className = "bar";
+    bar.innerHTML = `<div class="fill" style="width:${Math.max(0, Math.min(100, p.rainPercent))}%"></div>`;
+
+    card.append(top, title, meta, odds, bar);
+
+    if(p.myVote){
+      const my = document.createElement("div");
+      my.className = "myPick";
+      my.textContent = `MY PICK · ${p.myVote.choice === "rain" ? "RAIN" : "CLEAR"} · ${p.myVote.stake} CREDIT`;
+      card.appendChild(my);
+    }else if(!closed){
+      const entry = document.createElement("div");
+      entry.className = "entry";
+
+      const stakes = document.createElement("div");
+      stakes.className = "stakes";
+
+      [10,30,50,100].forEach(s=>{
+        const b = document.createElement("button");
+        b.textContent = s;
+        if(s === selectedStake) b.classList.add("active");
+        if(profile.points < s) b.disabled = true;
+        b.onclick = ()=>{ selectedStake = s; render(); };
+        stakes.appendChild(b);
+      });
+
+      const pickBtns = document.createElement("div");
+      pickBtns.className = "pickBtns";
+
+      const rainBtn = document.createElement("button");
+      rainBtn.className = "rain";
+      rainBtn.textContent = "PICK RAIN";
+      rainBtn.disabled = profile.points < selectedStake;
+      rainBtn.onclick = ()=>vote(p.id, "rain");
+
+      const clearBtn = document.createElement("button");
+      clearBtn.className = "clear";
+      clearBtn.textContent = "PICK CLEAR";
+      clearBtn.disabled = profile.points < selectedStake;
+      clearBtn.onclick = ()=>vote(p.id, "clear");
+
+      pickBtns.append(rainBtn, clearBtn);
+      entry.append(stakes, pickBtns);
+      card.appendChild(entry);
+    }
+
+    const mood = document.createElement("div");
+    mood.className = "mood";
+
+    const moodTitle = document.createElement("div");
+    moodTitle.className = "moodTitle";
+    moodTitle.innerHTML = `<span>LIVE REACTION</span><span>${p.totalStake || 0} CREDIT IN MARKET</span>`;
+
+    const reactions = document.createElement("div");
+    reactions.className = "reactions";
+
+    const reactionItems = [
+      ["angry", "예보 또 틀림", p.reactionCount?.angry || 0],
+      ["laugh", "웃김", p.reactionCount?.laugh || 0],
+      ["agree", "인정", p.reactionCount?.agree || 0]
+    ];
+
+    reactionItems.forEach(([type, label, count])=>{
+      const b = document.createElement("button");
+      b.textContent = `${label} ${count}`;
+      b.onclick = ()=>react(p.id, type);
+      reactions.appendChild(b);
+    });
+
+    const form = document.createElement("div");
+    form.className = "commentForm";
+
+    const input = document.createElement("input");
+    input.placeholder = "지금 하늘, 예보, 체감 근거 남기기";
+    input.maxLength = 140;
+    input.dataset.commentInput = "1";
+    input.dataset.pid = p.id;
+    input.value = drafts[p.id] || "";
+    input.onkeydown = e => { if(e.key === "Enter") submitComment(p.id, input); };
+
+    const submit = document.createElement("button");
+    submit.textContent = "POST";
+    submit.onclick = ()=>submitComment(p.id, input);
+
+    form.append(input, submit);
+
+    mood.append(moodTitle, reactions, form);
+
+    (p.comments || []).forEach(c=>{
+      const div = document.createElement("div");
+      div.className = "comment";
+
+      const nick = document.createElement("b");
+      nick.textContent = c.nickname;
+
+      const body = document.createElement("p");
+      body.textContent = c.body;
+
+      div.append(nick, body);
+      mood.appendChild(div);
+    });
+
+    card.appendChild(mood);
+    list.appendChild(card);
+  });
+}
+
+async function createProfile(){
+  const nickname = document.getElementById("nickInput").value.trim() || "Player";
+  const json = await post("create_profile",{ nickname });
+  toast(json.message || "가입 완료");
+  load(true);
+}
+
+async function checkin(){
+  const btn = document.getElementById("checkinBtn");
+  btn.disabled = true;
+  const json = await post("checkin");
+  toast(json.message || "DAILY CLAIM 완료");
+  await load(true);
+  btn.disabled = false;
+}
+
+async function vote(predictionId, choice){
+  const json = await post("vote",{ predictionId, choice, stake:selectedStake });
+  toast(json.message || "ENTRY 완료");
+  await load(true);
+}
+
+async function submitComment(predictionId, input){
+  const text = input.value.trim();
+  if(text.length < 2){
+    toast("조금 더 입력해주세요.");
+    return;
+  }
+
+  const json = await post("comment",{ predictionId, comment:text });
+  toast(json.message || "POST 완료");
+  input.value = "";
+  delete drafts[predictionId];
+  await load(true);
+}
+
+async function react(predictionId, type){
+  const json = await post("react",{ predictionId, type });
+  toast(json.message || "반응 완료");
+  await load(true);
+}
+
+function copyInvite(){
+  const code = profile?.referral_code || "";
+  const text = `WETTY BETTY 초대코드: ${code}`;
+  navigator.clipboard.writeText(text);
+  toast("초대코드 복사 완료");
+}
+
+load();
+setInterval(()=>load(true), POLL_MS);
+</script>
+</body>
+</html>
