@@ -425,9 +425,10 @@ async function load(){
   document.getElementById("pointsEl").textContent=`${profile.points}P`;
 
   updateStatsUI();
-  renderHotList();
-  renderNearList();
-  render();
+renderHotList();
+renderNearList();
+render();
+scheduleLiveBuzz();
 }
 
 function sortedPredictions(){
