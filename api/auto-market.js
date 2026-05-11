@@ -59,66 +59,46 @@ function getTimeSlot(){
   const isWeekend = day === 0 || day === 6;
 
   if(isWeekend && hour < 16){
-    return {
-      key:"weekend",
-      label:"주말나들이",
-      close_time:makeKstDate(10, 0),
-      target_time:makeKstDate(18, 0)
-    };
+    return { key:"weekend", label:"주말나들이", close_time:makeKstDate(16,0), target_time:makeKstDate(18,0) };
   }
 
-  if(hour < 9){
-    return {
-      key:"morning",
-      label:"출근길",
-      close_time:makeKstDate(7, 0),
-      target_time:makeKstDate(9, 0)
-    };
+  if(hour < 7){
+    return { key:"morning", label:"출근길", close_time:makeKstDate(7,0), target_time:makeKstDate(9,0) };
   }
 
-  if(hour < 14){
-    return {
-      key:"lunch",
-      label:"점심시간",
-      close_time:makeKstDate(12, 0),
-      target_time:makeKstDate(14, 0)
-    };
+  if(hour < 12){
+    return { key:"lunch", label:"점심시간", close_time:makeKstDate(12,0), target_time:makeKstDate(14,0) };
+  }
+
+  if(hour < 17){
+    return { key:"evening", label:"퇴근길", close_time:makeKstDate(17,0), target_time:makeKstDate(20,0) };
   }
 
   if(hour < 20){
-    return {
-      key:"evening",
-      label:"퇴근길",
-      close_time:makeKstDate(17, 0),
-      target_time:makeKstDate(20, 0)
-    };
+    return { key:"night", label:"밤외출", close_time:makeKstDate(20,0), target_time:makeKstDate(23,0) };
   }
 
-  if(hour < 23){
-    return {
-      key:"night",
-      label:"밤외출",
-      close_time:makeKstDate(20, 0),
-      target_time:makeKstDate(23, 0)
-    };
-  }
-
-  return {
-    key:"morning",
-    label:"내일 출근길",
-    close_time:makeKstDate(7, 0, 1),
-    target_time:makeKstDate(9, 0, 1)
-  };
+  return { key:"morning", label:"내일 출근길", close_time:makeKstDate(7,0,1), target_time:makeKstDate(9,0,1) };
 }
 
 function currentHourIndex(times = []){
-  const nowHour = new Date().getHours();
+  const now = new Date();
+
+  let bestIndex = 0;
+  let bestDiff = Infinity;
 
   for(let i = 0; i < times.length; i++){
-    if(new Date(times[i]).getHours() === nowHour) return i;
+    const diff = Math.abs(
+      new Date(times[i]).getTime() - now.getTime()
+    );
+
+    if(diff < bestDiff){
+      bestDiff = diff;
+      bestIndex = i;
+    }
   }
 
-  return 0;
+  return bestIndex;
 }
 
 function titleFor(region, category, slot){
