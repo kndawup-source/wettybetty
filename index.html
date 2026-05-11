@@ -20,6 +20,7 @@
   --accent:#dff56a;
   --blue:#82c7ff;
   --green:#b8ff7a;
+  --red:#ff6f6f;
   --shadow:0 22px 64px rgba(0,0,0,.34);
 }
 
@@ -45,7 +46,6 @@ button{cursor:pointer;border:0}
     linear-gradient(180deg,#07121c 0%,#050d16 46%,#050d16 100%);
 }
 
-/* Header */
 .header{
   height:58px;
   display:flex;
@@ -54,19 +54,15 @@ button{cursor:pointer;border:0}
   gap:12px;
   margin-bottom:12px;
 }
-.brand{
-  min-width:0;
-}
 .logo{
   font-family:'Syne',sans-serif;
   font-size:23px;
   font-weight:900;
   letter-spacing:-1px;
-  line-height:1;
 }
 .logo span{color:var(--accent)}
 .sub{
-  margin-top:6px;
+  margin-top:5px;
   color:var(--muted);
   font-size:10px;
   font-weight:900;
@@ -74,8 +70,7 @@ button{cursor:pointer;border:0}
 }
 .profileChip{
   flex:0 0 auto;
-  min-width:118px;
-  max-width:150px;
+  width:138px;
   padding:9px 10px;
   border-radius:18px;
   background:rgba(255,255,255,.045);
@@ -100,8 +95,38 @@ button{cursor:pointer;border:0}
   text-overflow:ellipsis;
 }
 
-/* Hero */
-.hero{
+.scoreBar{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-bottom:12px;
+}
+.scoreBar button,
+.scoreBar div{
+  min-height:52px;
+  border-radius:18px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line);
+  padding:9px 8px;
+  text-align:left;
+}
+.scoreBar span{
+  display:block;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.7px;
+}
+.scoreBar b{
+  display:block;
+  margin-top:5px;
+  color:var(--text);
+  font-size:15px;
+  font-weight:900;
+}
+.scoreBar button b{color:var(--accent)}
+
+.weatherBoard{
   position:relative;
   overflow:hidden;
   border:1px solid var(--line);
@@ -113,7 +138,7 @@ button{cursor:pointer;border:0}
   margin-bottom:12px;
   box-shadow:var(--shadow);
 }
-.hero:after{
+.weatherBoard:after{
   content:"";
   position:absolute;
   right:-60px;
@@ -165,10 +190,7 @@ button{cursor:pointer;border:0}
   justify-content:center;
   background:rgba(255,255,255,.055);
   border:1px solid var(--line);
-  color:var(--accent);
-  font-family:'Syne',sans-serif;
-  font-size:15px;
-  font-weight:900;
+  font-size:34px;
 }
 .weatherGrid{
   position:relative;
@@ -196,12 +218,12 @@ button{cursor:pointer;border:0}
   font-size:15px;
   font-weight:900;
 }
+
 .actions{
-  position:relative;
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:8px;
-  margin-top:14px;
+  margin-bottom:14px;
 }
 .btn{
   height:44px;
@@ -217,7 +239,6 @@ button{cursor:pointer;border:0}
   border:1px solid var(--line);
 }
 
-/* Section */
 .sectionHead{
   display:flex;
   justify-content:space-between;
@@ -227,7 +248,6 @@ button{cursor:pointer;border:0}
 .sectionHead h2{
   font-size:15px;
   font-weight:900;
-  letter-spacing:-.3px;
 }
 .sectionHead span{
   color:var(--muted);
@@ -235,7 +255,6 @@ button{cursor:pointer;border:0}
   font-weight:900;
 }
 
-/* Card */
 .card{
   border:1px solid var(--line);
   background:
@@ -267,7 +286,6 @@ button{cursor:pointer;border:0}
   text-overflow:ellipsis;
 }
 .timer{
-  flex:0 0 auto;
   color:var(--muted);
   font-size:10px;
   font-weight:900;
@@ -342,7 +360,6 @@ button{cursor:pointer;border:0}
   width:50%;
   background:linear-gradient(90deg,var(--blue),#b5e1ff);
 }
-
 .entry{margin-top:14px}
 .stakes{
   display:grid;
@@ -472,7 +489,6 @@ button{cursor:pointer;border:0}
   line-height:1.45;
 }
 
-/* Modal */
 .modal{
   position:fixed;
   inset:0;
@@ -488,16 +504,32 @@ button{cursor:pointer;border:0}
 .modalCard{
   width:100%;
   max-width:390px;
+  max-height:86dvh;
+  overflow:auto;
   background:var(--panel);
   border:1px solid var(--line);
   border-radius:28px;
   padding:24px;
   box-shadow:var(--shadow);
 }
+.modalTop{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+}
 .modalCard h2{
   font-size:24px;
   font-weight:900;
   letter-spacing:-.8px;
+}
+.closeBtn{
+  width:34px;
+  height:34px;
+  border-radius:12px;
+  background:rgba(255,255,255,.06);
+  color:var(--text);
+  font-weight:900;
 }
 .modalCard p{
   margin-top:8px;
@@ -517,10 +549,63 @@ button{cursor:pointer;border:0}
   font-size:15px;
   outline:none;
 }
-.modalCard button{
+.modalCard .btn{
   width:100%;
   margin-top:12px;
 }
+.profileStats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-top:18px;
+}
+.profileStats div{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.04);
+  border-radius:17px;
+  padding:12px 10px;
+}
+.profileStats span{
+  display:block;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+}
+.profileStats b{
+  display:block;
+  margin-top:5px;
+  color:var(--text);
+  font-size:17px;
+  font-weight:900;
+}
+.historyTitle{
+  margin-top:20px;
+  font-size:13px;
+  font-weight:900;
+  color:var(--soft);
+}
+.historyItem{
+  margin-top:9px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.035);
+  border-radius:16px;
+  padding:12px;
+}
+.historyItem strong{
+  display:block;
+  font-size:13px;
+  line-height:1.35;
+}
+.historyItem span{
+  display:block;
+  margin-top:5px;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+}
+.resultWin{color:var(--accent)}
+.resultLose{color:var(--red)}
+.resultPending{color:var(--blue)}
 
 .toast{
   position:fixed;
@@ -554,25 +639,44 @@ button{cursor:pointer;border:0}
 <body>
 <div class="app">
   <header class="header">
-    <div class="brand">
+    <div>
       <div class="logo">WETTY <span>BETTY</span></div>
       <div class="sub">WEATHER PICK CLUB</div>
     </div>
 
-    <div class="profileChip">
+    <button class="profileChip" onclick="openProfile()">
       <div class="profileName" id="nickname">GUEST</div>
       <div class="points" id="pointsEl">0 CREDIT</div>
-    </div>
+    </button>
   </header>
 
-  <section class="hero">
+  <section class="scoreBar">
+    <button onclick="openProfile()">
+      <span>HIT RATE</span>
+      <b id="hitRateMini">0%</b>
+    </button>
+    <div>
+      <span>PICKS</span>
+      <b id="picksMini">0</b>
+    </div>
+    <div>
+      <span>WINS</span>
+      <b id="winsMini">0</b>
+    </div>
+    <div>
+      <span>STREAK</span>
+      <b id="streakMini">0</b>
+    </div>
+  </section>
+
+  <section class="weatherBoard">
     <div class="weatherTop">
       <div>
         <div class="kicker">CURRENT WEATHER</div>
         <h1 class="weatherTemp" id="currentTemp">--°</h1>
         <p class="weatherDesc" id="currentDesc">위치 권한을 허용하면 현재 날씨가 표시됩니다.</p>
       </div>
-      <div class="weatherIcon" id="weatherIcon">SKY</div>
+      <div class="weatherIcon" id="weatherIcon">🌤️</div>
     </div>
 
     <div class="weatherGrid">
@@ -581,7 +685,7 @@ button{cursor:pointer;border:0}
         <b id="feelsLike">--°</b>
       </div>
       <div>
-        <span>강수</span>
+        <span>1H 강수</span>
         <b id="rainChance">--%</b>
       </div>
       <div>
@@ -589,12 +693,12 @@ button{cursor:pointer;border:0}
         <b id="windSpeed">--</b>
       </div>
     </div>
-
-    <div class="actions">
-      <button class="btn" id="checkinBtn" onclick="checkin()">DAILY CLAIM</button>
-      <button class="btn dark" onclick="copyInvite()">INVITE</button>
-    </div>
   </section>
+
+  <div class="actions">
+    <button class="btn" id="checkinBtn" onclick="checkin()">DAILY CLAIM</button>
+    <button class="btn dark" onclick="copyInvite()">INVITE</button>
+  </div>
 
   <div class="sectionHead">
     <h2>Today’s Markets</h2>
@@ -613,6 +717,32 @@ button{cursor:pointer;border:0}
   </div>
 </div>
 
+<div class="modal" id="profileModal">
+  <div class="modalCard">
+    <div class="modalTop">
+      <div>
+        <h2 id="profileTitle">PROFILE</h2>
+        <p id="profileSub">내 예측 기록과 스코어를 확인하세요.</p>
+      </div>
+      <button class="closeBtn" onclick="closeProfile()">×</button>
+    </div>
+
+    <div class="profileStats">
+      <div><span>CREDIT</span><b id="modalCredit">0</b></div>
+      <div><span>HIT RATE</span><b id="modalHitRate">0%</b></div>
+      <div><span>STREAK</span><b id="modalStreak">0</b></div>
+      <div><span>PICKS</span><b id="modalPicks">0</b></div>
+      <div><span>WINS</span><b id="modalWins">0</b></div>
+      <div><span>PENDING</span><b id="modalPending">0</b></div>
+    </div>
+
+    <button class="btn dark" onclick="copyInvite()">INVITE CODE COPY</button>
+
+    <div class="historyTitle">RECENT SCORE</div>
+    <div id="historyList"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -625,6 +755,15 @@ let selectedStake = 10;
 let profile = null;
 let predictions = [];
 let drafts = {};
+let scoreHistory = [];
+let stats = {
+  totalPicks:0,
+  wins:0,
+  losses:0,
+  pending:0,
+  hitRate:0,
+  currentStreak:0
+};
 
 if(!userKey){
   userKey = crypto.randomUUID();
@@ -695,12 +834,23 @@ async function loadCurrentWeather(){
 
       const current = data.current || {};
       const hourly = data.hourly || {};
-      const rainProb = hourly.precipitation_probability?.[0] ?? 0;
+      const times = hourly.time || [];
+      const probs = hourly.precipitation_probability || [];
+      const nowHour = new Date().getHours();
+
+      let rainProb = 0;
+      for(let i=0; i<times.length; i++){
+        const hour = new Date(times[i]).getHours();
+        if(hour === nowHour){
+          rainProb = probs[i] ?? 0;
+          break;
+        }
+      }
 
       document.getElementById("currentTemp").textContent = `${Math.round(current.temperature_2m ?? 0)}°`;
       document.getElementById("feelsLike").textContent = `${Math.round(current.apparent_temperature ?? 0)}°`;
       document.getElementById("rainChance").textContent = `${rainProb}%`;
-      document.getElementById("windSpeed").textContent = `${Math.round(current.wind_speed_10m ?? 0)}m/s`;
+      document.getElementById("windSpeed").textContent = `${Number(current.wind_speed_10m ?? 0).toFixed(1)}m/s`;
 
       const info = weatherText(current.weather_code, rainProb, current.precipitation);
       document.getElementById("currentDesc").textContent = info.desc;
@@ -716,21 +866,21 @@ async function loadCurrentWeather(){
 
 function weatherText(code, rainProb, precipitation){
   if((precipitation || 0) > 0){
-    return { label:"RAIN", desc:"지금 비가 감지되고 있습니다. RAIN 흐름을 확인해보세요." };
+    return { label:"🌧️", desc:"지금 비가 감지되고 있습니다. RAIN 흐름을 확인해보세요." };
   }
   if(rainProb >= 70){
-    return { label:"RISK", desc:"강수 가능성이 높습니다. 마감 직전 픽이 흔들릴 수 있어요." };
+    return { label:"☔", desc:"강수 가능성이 높습니다. 마감 직전 픽이 흔들릴 수 있어요." };
   }
   if(rainProb >= 40){
-    return { label:"MIX", desc:"애매한 하늘입니다. 사람들의 선택이 갈릴 가능성이 높아요." };
+    return { label:"🌦️", desc:"애매한 하늘입니다. 사람들의 선택이 갈릴 가능성이 높아요." };
   }
   if([0,1].includes(code)){
-    return { label:"CLEAR", desc:"현재는 비교적 맑습니다. CLEAR 쪽 흐름을 확인해보세요." };
+    return { label:"☀️", desc:"현재는 비교적 맑습니다. CLEAR 쪽 흐름을 확인해보세요." };
   }
   if([2,3,45,48].includes(code)){
-    return { label:"CLOUD", desc:"구름이 많습니다. 갑작스러운 변화에 주의하세요." };
+    return { label:"☁️", desc:"구름이 많습니다. 갑작스러운 변화에 주의하세요." };
   }
-  return { label:"SKY", desc:"현재 날씨 기준으로 오늘의 픽을 확인해보세요." };
+  return { label:"🌤️", desc:"현재 날씨 기준으로 오늘의 픽을 확인해보세요." };
 }
 
 function setWeatherFallback(){
@@ -739,7 +889,7 @@ function setWeatherFallback(){
   document.getElementById("feelsLike").textContent = "--°";
   document.getElementById("rainChance").textContent = "--%";
   document.getElementById("windSpeed").textContent = "--";
-  document.getElementById("weatherIcon").textContent = "SKY";
+  document.getElementById("weatherIcon").textContent = "🌤️";
 }
 
 async function load(){
@@ -753,6 +903,8 @@ async function load(){
 
   profile = json.profile;
   predictions = json.predictions || [];
+  scoreHistory = json.scoreHistory || [];
+  stats = json.stats || stats;
 
   if(!profile){
     document.getElementById("joinModal").classList.add("show");
@@ -760,10 +912,70 @@ async function load(){
   }
 
   document.getElementById("joinModal").classList.remove("show");
+
   document.getElementById("nickname").textContent = profile.nickname;
   document.getElementById("pointsEl").textContent = `${profile.points} CREDIT`;
 
+  updateStatsUI();
   render();
+}
+
+function updateStatsUI(){
+  document.getElementById("hitRateMini").textContent = `${stats.hitRate || 0}%`;
+  document.getElementById("picksMini").textContent = stats.totalPicks || 0;
+  document.getElementById("winsMini").textContent = stats.wins || 0;
+  document.getElementById("streakMini").textContent = stats.currentStreak || 0;
+
+  document.getElementById("profileTitle").textContent = profile?.nickname || "PROFILE";
+  document.getElementById("profileSub").textContent = `초대코드 ${profile?.referral_code || "-"}`;
+  document.getElementById("modalCredit").textContent = profile?.points || 0;
+  document.getElementById("modalHitRate").textContent = `${stats.hitRate || 0}%`;
+  document.getElementById("modalStreak").textContent = stats.currentStreak || 0;
+  document.getElementById("modalPicks").textContent = stats.totalPicks || 0;
+  document.getElementById("modalWins").textContent = stats.wins || 0;
+  document.getElementById("modalPending").textContent = stats.pending || 0;
+
+  renderHistory();
+}
+
+function renderHistory(){
+  const box = document.getElementById("historyList");
+
+  if(!scoreHistory.length){
+    box.innerHTML = `<div class="historyItem"><span>아직 참여 기록이 없습니다.</span></div>`;
+    return;
+  }
+
+  box.innerHTML = "";
+
+  scoreHistory.forEach(item=>{
+    const settled = item.status === "settled" || item.result;
+    let resultText = "PENDING";
+    let cls = "resultPending";
+
+    if(settled && item.is_correct === true){
+      resultText = "WIN";
+      cls = "resultWin";
+    }else if(settled && item.is_correct === false){
+      resultText = "LOSE";
+      cls = "resultLose";
+    }
+
+    const div = document.createElement("div");
+    div.className = "historyItem";
+
+    const title = document.createElement("strong");
+    title.textContent = item.title;
+
+    const meta = document.createElement("span");
+    meta.innerHTML = `
+      PICK ${String(item.choice || "").toUpperCase()} · ${item.stake} CREDIT ·
+      <b class="${cls}">${resultText}</b>
+    `;
+
+    div.append(title, meta);
+    box.appendChild(div);
+  });
 }
 
 function render(){
@@ -932,6 +1144,16 @@ function render(){
     card.appendChild(mood);
     list.appendChild(card);
   });
+}
+
+function openProfile(){
+  if(!profile) return;
+  updateStatsUI();
+  document.getElementById("profileModal").classList.add("show");
+}
+
+function closeProfile(){
+  document.getElementById("profileModal").classList.remove("show");
 }
 
 async function createProfile(){
