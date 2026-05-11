@@ -227,19 +227,6 @@ export default async function handler(req, res){
     const auth = req.headers.authorization;
     const key = req.headers["x-cron-key"] || req.query.key;
 
-    if(process.env.CRON_SECRET){
-      const ok =
-        auth === `Bearer ${process.env.CRON_SECRET}` ||
-        key === process.env.CRON_SECRET;
-
-      if(!ok){
-        return res.status(401).json({
-          ok:false,
-          message:"unauthorized"
-        });
-      }
-    }
-
     const prepared = [];
 
     const results = await Promise.allSettled(
