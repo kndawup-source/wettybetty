@@ -215,6 +215,14 @@ button:active{transform:scale(.96);filter:brightness(1.12)}
     <div class="boardHead"><h2>지금 몰리는 지역</h2><span>LIVE</span></div>
     <div id="hotList"></div>
   </section>
+  
+  <section class="board" id="rankBoard">
+  <div class="boardHead">
+    <h2>오늘의 TOP 예측가</h2>
+    <span>RANKING</span>
+  </div>
+  <div id="rankList"></div>
+</section>
 
   <div class="sectionHead">
     <h2>TOP 5 예측</h2>
@@ -277,7 +285,7 @@ let scoreHistory=[];
 let openComments={};
 let userLocation=null;
 let stats={totalPicks:0,wins:0,losses:0,pending:0,hitRate:0,currentStreak:0};
-
+let leaderboard = [];
 if(!userKey){
   userKey=crypto.randomUUID();
   localStorage.setItem("wetty_user_key",userKey);
@@ -414,6 +422,7 @@ async function load(){
   predictions=json.predictions||[];
   scoreHistory=json.scoreHistory||[];
   stats=json.stats||stats;
+  leaderboard=json.leaderboard||[];
 
   if(!profile){
     document.getElementById("joinModal").classList.add("show");
