@@ -33,6 +33,21 @@ html,body{
 }
 button,input{font-family:inherit}
 button{cursor:pointer;border:0}
+button{
+  transition:transform .12s ease, filter .12s ease, background .12s ease, border-color .12s ease;
+}
+button:active{
+  transform:scale(.96);
+  filter:brightness(1.12);
+}
+.pickBtns .rain:active{
+  background:rgba(130,199,255,.24);
+  box-shadow:0 0 0 4px rgba(130,199,255,.08);
+}
+.pickBtns .clear:active{
+  background:rgba(184,255,122,.22);
+  box-shadow:0 0 0 4px rgba(184,255,122,.08);
+}
 
 .app{
   width:100%;
@@ -129,24 +144,21 @@ button{cursor:pointer;border:0}
 .weatherBoard{
   position:relative;
   overflow:hidden;
-  border:1px solid var(--line);
-  background:
-    linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.022)),
-    var(--panel);
+  border:1px solid rgba(255,255,255,.07);
+  background:#0d1823;
   border-radius:30px;
   padding:20px;
   margin-bottom:12px;
-  box-shadow:var(--shadow);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,.34),
+    inset 0 1px 0 rgba(255,255,255,.03);
 }
 .weatherBoard:after{
   content:"";
   position:absolute;
-  right:-60px;
-  top:-72px;
-  width:190px;
-  height:190px;
-  border-radius:50%;
-  background:radial-gradient(circle,rgba(223,245,106,.14),transparent 64%);
+  inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,0));
+  pointer-events:none;
 }
 .weatherTop{
   position:relative;
@@ -1174,7 +1186,7 @@ async function checkin(){
 
 async function vote(predictionId, choice){
   const json = await post("vote",{ predictionId, choice, stake:selectedStake });
-  toast(json.message || "ENTRY 완료");
+  toast(choice === "rain" ? "비 온다 선택 완료" : "안 온다 선택 완료");
   await load();
 }
 
