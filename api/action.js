@@ -5,9 +5,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-const BAD_WORDS = [
-  "씨발","시발","ㅅㅂ","병신","ㅂㅅ","좆","개새","미친년","미친놈"
-];
+const BAD_WORDS = ["씨발","시발","ㅅㅂ","병신","ㅂㅅ","좆","개새","미친년","미친놈"];
 
 function cleanText(v, max = 200) {
   return String(v || "").trim().replace(/\s+/g, " ").slice(0, max);
@@ -25,11 +23,7 @@ function hasBadWord(text) {
 }
 
 async function logPoint(userKey, amount, reason) {
-  await supabase.from("point_logs").insert({
-    user_key: userKey,
-    amount,
-    reason
-  });
+  await supabase.from("point_logs").insert({ user_key: userKey, amount, reason });
 }
 
 async function getProfile(userKey) {
@@ -38,7 +32,6 @@ async function getProfile(userKey) {
     .select("*")
     .eq("user_key", userKey)
     .maybeSingle();
-
   return data;
 }
 
@@ -63,6 +56,9 @@ export default async function handler(req, res) {
         return res.status(400).json({ ok: false, message: "사용할 수 없는 닉네임입니다." });
       }
 
+      const exists = await getProfile(userKey);
+      if (exists) return res.json({ ok: true, message: "이미 가입되어 있습니다.", profile: exists });
+
       const referralCode = "WB" + Math.random().toString(36).slice(2, 8).toUpperCase();
 
       const { data, error } = await supabase
@@ -77,10 +73,9 @@ export default async function handler(req, res) {
         .single();
 
       if (error) throw error;
-
       await logPoint(userKey, 100, "WELCOME CREDIT");
 
-      return res.json({ ok: true, message: "100 CREDIT 지급", profile: data });
+      return res.json({ ok: true, message: "100 포인트 지급", profile: data });
     }
 
     const profile = await getProfile(userKey);
@@ -109,7 +104,7 @@ export default async function handler(req, res) {
 
       await logPoint(userKey, reward, "DAILY CLAIM");
 
-      return res.json({ ok: true, message: `DAILY +${reward} CREDIT` });
+      return res.json({ ok: true, message: `출석 +${reward}P` });
     }
 
     if (action === "vote") {
@@ -126,7 +121,7 @@ export default async function handler(req, res) {
       }
 
       if (profile.points < stake) {
-        return res.status(400).json({ ok: false, message: "CREDIT 부족" });
+        return res.status(400).json({ ok: false, message: "포인트 부족" });
       }
 
       const { data: prediction } = await supabase
@@ -136,11 +131,11 @@ export default async function handler(req, res) {
         .maybeSingle();
 
       if (!prediction || prediction.status !== "open") {
-        return res.status(400).json({ ok: false, message: "닫힌 마켓입니다." });
+        return res.status(400).json({ ok: false, message: "닫힌 예측입니다." });
       }
 
       if (new Date(prediction.close_time).getTime() < Date.now()) {
-        return res.status(400).json({ ok: false, message: "마감된 마켓입니다." });
+        return res.status(400).json({ ok: false, message: "마감된 예측입니다." });
       }
 
       const { error } = await supabase.from("votes").insert({
@@ -150,18 +145,16 @@ export default async function handler(req, res) {
         stake
       });
 
-      if (error) {
-        return res.status(400).json({ ok: false, message: "이미 선택했습니다." });
-      }
+      if (error) return res.status(400).json({ ok: false, message: "이미 선택했습니다." });
 
       await supabase
         .from("profiles")
         .update({ points: profile.points - stake })
         .eq("user_key", userKey);
 
-      await logPoint(userKey, -stake, "MARKET ENTRY");
+      await logPoint(userKey, -stake, "PICK ENTRY");
 
-      return res.json({ ok: true, message: `${stake} CREDIT ENTRY 완료` });
+      return res.json({ ok: true, message: `${stake}P 선택 완료` });
     }
 
     if (action === "comment") {
@@ -182,9 +175,7 @@ export default async function handler(req, res) {
         is_hidden: hidden
       });
 
-      if (hidden) {
-        return res.json({ ok: true, message: "표현이 과해 숨김 처리되었습니다." });
-      }
+      if (hidden) return res.json({ ok: true, message: "표현이 과해 숨김 처리되었습니다." });
 
       const reward = 1;
 
@@ -193,9 +184,9 @@ export default async function handler(req, res) {
         .update({ points: profile.points + reward })
         .eq("user_key", userKey);
 
-      await logPoint(userKey, reward, "MARKET ANALYSIS");
+      await logPoint(userKey, reward, "REACTION COMMENT");
 
-      return res.json({ ok: true, message: `ANALYSIS +${reward} CREDIT` });
+      return res.json({ ok: true, message: `댓글 +${reward}P` });
     }
 
     if (action === "react") {
@@ -206,13 +197,15 @@ export default async function handler(req, res) {
         return res.status(400).json({ ok: false, message: "invalid reaction" });
       }
 
-      await supabase.from("reactions").insert({
+      const { error } = await supabase.from("reactions").insert({
         prediction_id: predictionId,
         user_key: userKey,
         type
       });
 
-      return res.json({ ok: true, message: "반응 기록" });
+      if (error) return res.json({ ok: true, message: "이미 반응했습니다." });
+
+      return res.json({ ok: true, message: "반응 완료" });
     }
 
     return res.status(400).json({ ok: false, message: "unknown action" });
