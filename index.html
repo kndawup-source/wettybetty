@@ -137,6 +137,31 @@ button:active{transform:scale(.96);filter:brightness(1.12)}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(8px);opacity:0;pointer-events:none;background:var(--text);color:#050d16;padding:12px 18px;border-radius:999px;font-size:13px;font-weight:900;transition:.2s;z-index:200}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{padding:20px 0;text-align:center;color:var(--muted);font-size:13px}
+.liveToast{
+  position:fixed;
+  left:50%;
+  bottom:78px;
+  width:calc(100% - 32px);
+  max-width:448px;
+  transform:translateX(-50%) translateY(12px);
+  opacity:0;
+  z-index:210;
+  padding:13px 15px;
+  border-radius:18px;
+  background:rgba(11,22,32,.96);
+  border:1px solid rgba(223,245,106,.18);
+  color:var(--text);
+  font-size:13px;
+  font-weight:900;
+  box-shadow:0 18px 44px rgba(0,0,0,.42);
+  transition:.22s ease;
+  backdrop-filter:blur(10px);
+}
+
+.liveToast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
 </style>
 </head>
 
@@ -244,7 +269,7 @@ const API_ACTION="/api/action";
 const POLL_MS=15000;
 
 let userKey=localStorage.getItem("wetty_user_key");
-let selectedStake=10;
+let selectedStake=100;
 let profile=null;
 let predictions=[];
 let drafts={};
@@ -285,13 +310,29 @@ function fmtTime(v){
 }
 
 function remaining(closeTime){
-  const diff=new Date(closeTime).getTime()-Date.now();
-  if(diff<=0)return"마감";
-  const m=Math.floor(diff/60000);
-  const h=Math.floor(m/60);
-  const mm=m%60;
-  if(h>0)return`${h}시간 ${mm}분 남음`;
-  return`${mm}분 남음`;
+  if(!closeTime) return "마감 시간 없음";
+
+  const diff = new Date(closeTime).getTime() - Date.now();
+
+  if(Number.isNaN(diff)) return "시간 확인 필요";
+
+  if(diff <= 0) return "마감";
+
+  const totalMinutes = Math.ceil(diff / 60000);
+
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+
+  if(days > 0){
+    return `${days}일 ${hours}시간 남음`;
+  }
+
+  if(hours > 0){
+    return `${hours}시간 ${minutes}분 남음`;
+  }
+
+  return `${minutes}분 남음`;
 }
 
 function distanceKm(a,b,c,d){
@@ -587,7 +628,7 @@ function createMarketCard(p,isSmall){
 
     const stakes=document.createElement("div");
     stakes.className="stakes";
-    [10,30,50,100].forEach(s=>{
+[50,100,300,500].forEach(s=>{
       const b=document.createElement("button");
       b.textContent=`${s}P`;
       if(s===selectedStake)b.classList.add("active");
@@ -691,8 +732,23 @@ async function checkin(){
   btn.disabled=false;
 }
 async function vote(predictionId,choice){
-  const json=await post("vote",{predictionId,choice,stake:selectedStake});
-  toast(choice==="rain"?"비 온다 선택 완료":"안 온다 선택 완료");
+  const json = await post("vote",{
+    predictionId,
+    choice,
+    stake:selectedStake
+  });
+
+  if(!json.ok){
+    toast(json.message || "참여 실패");
+    return;
+  }
+
+  toast(
+    choice === "rain"
+      ? `${selectedStake}P · 비 온다 선택`
+      : `${selectedStake}P · 안 온다 선택`
+  );
+
   await load();
 }
 async function submitComment(predictionId,input){
@@ -708,6 +764,82 @@ async function react(predictionId,type){
   const json=await post("react",{predictionId,type});
   toast(json.message||"반응 완료");
   await load();
+}
+let liveBuzzTimer = null;
+let lastBuzzKey = "";
+
+function scheduleLiveBuzz(){
+  clearTimeout(liveBuzzTimer);
+
+  if(!predictions.length) return;
+
+  const delay = 14000 + Math.floor(Math.random() * 26000);
+
+  liveBuzzTimer = setTimeout(()=>{
+    showLiveBuzz();
+    scheduleLiveBuzz();
+  }, delay);
+}
+
+function showLiveBuzz(){
+
+  const targets = [...predictions]
+    .filter(p => p.status === "open")
+    .sort((a,b)=>(b.totalStake || 0) - (a.totalStake || 0))
+    .slice(0,8);
+
+  if(!targets.length) return;
+
+  const p = targets[Math.floor(Math.random() * targets.length)];
+
+  const side =
+    Math.random() > 0.45
+      ? "비 온다"
+      : "안 온다";
+
+  const amount =
+    [300,500,800,1200,2000,3500,5000]
+    [Math.floor(Math.random() * 7)];
+
+  const messages = [
+    `${p.region} ${side}에 ${amount.toLocaleString()}P 유입`,
+    `${p.region} 예측 참여 급증 중`,
+    `${p.region} 마감 직전 몰리는 중`,
+    `${p.region} 흐름이 크게 흔들리는 중`,
+    `${p.region} 현재 가장 뜨거운 예측 중 하나`
+  ];
+
+  const msg =
+    messages[Math.floor(Math.random() * messages.length)];
+
+  if(msg === lastBuzzKey) return;
+
+  lastBuzzKey = msg;
+
+  liveToast(msg);
+}
+
+function liveToast(message){
+
+  const el = document.createElement("div");
+
+  el.className = "liveToast";
+  el.textContent = message;
+
+  document.body.appendChild(el);
+
+  requestAnimationFrame(()=>{
+    el.classList.add("show");
+  });
+
+  setTimeout(()=>{
+    el.classList.remove("show");
+
+    setTimeout(()=>{
+      el.remove();
+    },250);
+
+  },2400);
 }
 function copyInvite(){
   const code=profile?.referral_code||"";
