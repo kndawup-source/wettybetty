@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/*.js": {
+      "runtime": "@vercel/node@3.0.7"
+    }
+  },
   "crons": [
     {
       "path": "/api/auto-market-v2",
