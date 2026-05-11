@@ -40,8 +40,75 @@ const REGIONS = [
   { country:"FR", name:"프랑스 · 파리 마레", short:"파리 마레", lat:48.8566, lon:2.3522, type:"street" }
 ];
 
-function addHours(h){
-  return new Date(Date.now() + h * 60 * 60 * 1000).toISOString();
+function kstNow(){
+  return new Date(new Date().toLocaleString("en-US", { timeZone:"Asia/Seoul" }));
+}
+
+function makeKstDate(hour, minute = 0, addDays = 0){
+  const now = kstNow();
+  const d = new Date(now);
+  d.setDate(d.getDate() + addDays);
+  d.setHours(hour, minute, 0, 0);
+  return new Date(d.getTime() - 9 * 60 * 60 * 1000).toISOString();
+}
+
+function getTimeSlot(){
+  const now = kstNow();
+  const day = now.getDay();
+  const hour = now.getHours();
+  const isWeekend = day === 0 || day === 6;
+
+  if(isWeekend && hour < 16){
+    return {
+      key:"weekend",
+      label:"주말나들이",
+      close_time:makeKstDate(10, 0),
+      target_time:makeKstDate(18, 0)
+    };
+  }
+
+  if(hour < 9){
+    return {
+      key:"morning",
+      label:"출근길",
+      close_time:makeKstDate(7, 0),
+      target_time:makeKstDate(9, 0)
+    };
+  }
+
+  if(hour < 14){
+    return {
+      key:"lunch",
+      label:"점심시간",
+      close_time:makeKstDate(12, 0),
+      target_time:makeKstDate(14, 0)
+    };
+  }
+
+  if(hour < 20){
+    return {
+      key:"evening",
+      label:"퇴근길",
+      close_time:makeKstDate(17, 0),
+      target_time:makeKstDate(20, 0)
+    };
+  }
+
+  if(hour < 23){
+    return {
+      key:"night",
+      label:"밤외출",
+      close_time:makeKstDate(20, 0),
+      target_time:makeKstDate(23, 0)
+    };
+  }
+
+  return {
+    key:"morning",
+    label:"내일 출근길",
+    close_time:makeKstDate(7, 0, 1),
+    target_time:makeKstDate(9, 0, 1)
+  };
 }
 
 function currentHourIndex(times = []){
@@ -54,58 +121,51 @@ function currentHourIndex(times = []){
   return 0;
 }
 
-function titleFor(region, category){
+function titleFor(region, category, slot){
   const p = region.short;
+  const s = slot.label;
 
-  const titleMap = {
-    rain: {
-      commute: `${p} 퇴근길, 우산 필요할까?`,
-      night: `${p} 오늘 밤, 비 맞을까?`,
-      river: `${p} 한강 쪽, 비 피할 수 있을까?`,
-      beach: `${p} 바닷가, 갑자기 쏟아질까?`,
-      travel: `${p} 도착할 때 비 올까?`,
-      street: `${p}, 우산 없이 버틸 수 있을까?`,
-      wind: `${p}, 비바람 올까?`
-    },
-    dust: {
-      default: `${p}, 마스크 없이 나가면 후회할까?`
-    },
-    heat: {
-      commute: `${p} 퇴근길, 밖에 오래 있기 힘들까?`,
-      river: `${p} 야외 산책, 더위 괜찮을까?`,
-      beach: `${p} 바닷가, 더위 체감 심할까?`,
-      travel: `${p}, 낮에 돌아다니기 힘들까?`,
-      default: `${p}, 지금 밖에 10분 이상 가능할까?`
-    },
-    cold: {
-      commute: `${p} 출퇴근길, 겉옷 필요할까?`,
-      river: `${p} 산책, 추워서 포기할까?`,
-      travel: `${p}, 얇게 입으면 후회할까?`,
-      default: `${p}, 생각보다 추울까?`
-    },
-    wind: {
-      river: `${p} 한강 쪽, 바람 많이 불까?`,
-      beach: `${p} 바닷바람, 꽤 셀까?`,
-      travel: `${p}, 이동할 때 바람 때문에 불편할까?`,
-      default: `${p}, 우산 뒤집힐 정도로 바람 셀까?`
-    },
-    humidity: {
-      default: `${p}, 습해서 불쾌할까?`
-    },
-    activity: {
-      river: `${p} 야외활동, 오늘 가능할까?`,
-      beach: `${p} 바깥 일정, 무리 없을까?`,
-      travel: `${p}, 돌아다니기 괜찮을까?`,
-      default: `${p}, 오늘 밖에 나가기 괜찮을까?`
-    }
-  };
+  if(category === "rain"){
+    if(slot.key === "morning") return `${p} 출근길, 우산 필요할까?`;
+    if(slot.key === "evening") return `${p} 퇴근길, 우산 챙겨야 할까?`;
+    if(slot.key === "lunch") return `${p} 점심시간, 비 피할 수 있을까?`;
+    if(slot.key === "night") return `${p} 오늘 밤, 비 맞을까?`;
+    if(slot.key === "weekend") return `${p} 주말나들이, 비 피할 수 있을까?`;
+    return `${p} ${s}, 우산 필요할까?`;
+  }
 
-  return titleMap[category]?.[region.type] ||
-    titleMap[category]?.default ||
-    `${p}, 오늘 날씨 괜찮을까?`;
+  if(category === "dust"){
+    if(slot.key === "morning") return `${p} 출근길, 마스크 필요할까?`;
+    if(slot.key === "weekend") return `${p} 주말 외출, 공기 괜찮을까?`;
+    return `${p} ${s}, 마스크 없이 괜찮을까?`;
+  }
+
+  if(category === "heat"){
+    if(slot.key === "evening") return `${p} 퇴근길, 더위 체감 심할까?`;
+    if(slot.key === "weekend") return `${p} 주말나들이, 더위 괜찮을까?`;
+    return `${p} ${s}, 밖에 오래 있기 힘들까?`;
+  }
+
+  if(category === "cold"){
+    if(slot.key === "morning") return `${p} 출근길, 겉옷 필요할까?`;
+    if(slot.key === "night") return `${p} 밤외출, 얇게 입으면 후회할까?`;
+    return `${p} ${s}, 생각보다 추울까?`;
+  }
+
+  if(category === "wind"){
+    if(region.type === "river") return `${p} ${s}, 바람 많이 불까?`;
+    if(region.type === "beach") return `${p} ${s}, 바닷바람 셀까?`;
+    return `${p} ${s}, 바람 때문에 불편할까?`;
+  }
+
+  if(category === "humidity"){
+    return `${p} ${s}, 습해서 불쾌할까?`;
+  }
+
+  return `${p} ${s}, 밖에 나가기 괜찮을까?`;
 }
 
-function makeMarket(region, weather, air){
+function makeMarket(region, weather, air, slot){
   const current = weather.current || {};
   const hourly = weather.hourly || {};
   const airHourly = air.hourly || {};
@@ -193,11 +253,11 @@ function makeMarket(region, weather, air){
   const chosen = candidates[0];
 
   return {
-    title: titleFor(region, chosen.category),
-    category: chosen.category,
-    official_forecast: chosen.official_forecast,
-    priority: chosen.priority,
-    rain_threshold_mm: chosen.threshold
+    title:titleFor(region, chosen.category, slot),
+    category:chosen.category,
+    official_forecast:chosen.official_forecast,
+    priority:chosen.priority,
+    rain_threshold_mm:chosen.threshold
   };
 }
 
@@ -221,12 +281,13 @@ async function fetchWeather(region){
 
 export default async function handler(req, res){
   try{
+    const slot = getTimeSlot();
     const prepared = [];
 
     const results = await Promise.allSettled(
       REGIONS.map(async region => {
         const { weather, air } = await fetchWeather(region);
-        const market = makeMarket(region, weather, air);
+        const market = makeMarket(region, weather, air, slot);
         return { region, market };
       })
     );
@@ -249,7 +310,8 @@ export default async function handler(req, res){
         .select("id")
         .eq("region", region.name)
         .eq("category", market.category)
-        .gte("created_at", new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString())
+        .eq("time_slot", slot.key)
+        .gte("created_at", new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString())
         .limit(1);
 
       if(exists?.length){
@@ -260,21 +322,22 @@ export default async function handler(req, res){
       const { data, error } = await supabase
         .from("predictions")
         .insert({
-          title: market.title,
-          region: region.name,
-          country: region.country,
-          market_label: "WEATHER PICK",
-          official_forecast: market.official_forecast,
-          target_time: addHours(3),
-          close_time: addHours(2),
-          status: "open",
-          result: null,
-          rain_threshold_mm: market.rain_threshold_mm,
-          lat: region.lat,
-          lon: region.lon,
-          category: market.category,
-          priority: market.priority,
-          auto_generated: true
+          title:market.title,
+          region:region.name,
+          country:region.country,
+          market_label:slot.label,
+          official_forecast:market.official_forecast,
+          target_time:slot.target_time,
+          close_time:slot.close_time,
+          status:"open",
+          result:null,
+          rain_threshold_mm:market.rain_threshold_mm,
+          lat:region.lat,
+          lon:region.lon,
+          category:market.category,
+          priority:market.priority,
+          auto_generated:true,
+          time_slot:slot.key
         })
         .select()
         .single();
@@ -285,8 +348,9 @@ export default async function handler(req, res){
 
     return res.status(200).json({
       ok:true,
-      created_count: created.length,
-      skipped_count: skipped.length,
+      time_slot:slot,
+      created_count:created.length,
+      skipped_count:skipped.length,
       created
     });
 
