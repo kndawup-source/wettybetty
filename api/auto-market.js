@@ -224,9 +224,7 @@ async function fetchWeather(region){
 
 export default async function handler(req, res){
   try{
-    const auth = req.headers.authorization;
-    const key = req.headers["x-cron-key"] || req.query.key;
-
+    
     const prepared = [];
 
     const results = await Promise.allSettled(
