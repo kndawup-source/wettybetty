@@ -458,14 +458,35 @@ button{cursor:pointer;border:0}
   </header>
 
   <section class="hero">
-    <div class="kicker">LIVE WEATHER MARKET</div>
-    <h1>오늘의 하늘은<br>어느 쪽일까.</h1>
-    <p>기상청 예보, 사람들의 픽, 실시간 반응까지. 현금 환전 없이 CREDIT으로만 즐기는 날씨 예측 클럽.</p>
-    <div class="actions">
-      <button class="btn" id="checkinBtn" onclick="checkin()">DAILY CLAIM</button>
-      <button class="btn dark" onclick="copyInvite()">INVITE</button>
+  <div class="weatherTop">
+    <div>
+      <div class="kicker">CURRENT WEATHER</div>
+      <h1 id="currentTemp">--°</h1>
+      <p id="currentDesc">현재 날씨를 불러오는 중입니다.</p>
     </div>
-  </section>
+    <div class="weatherIcon" id="weatherIcon">--</div>
+  </div>
+
+  <div class="weatherGrid">
+    <div>
+      <span>체감</span>
+      <b id="feelsLike">--°</b>
+    </div>
+    <div>
+      <span>강수확률</span>
+      <b id="rainChance">--%</b>
+    </div>
+    <div>
+      <span>바람</span>
+      <b id="windSpeed">--</b>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn" id="checkinBtn" onclick="checkin()">DAILY CLAIM</button>
+    <button class="btn dark" onclick="copyInvite()">INVITE</button>
+  </div>
+</section>
 
   <main id="list"></main>
 </div>
