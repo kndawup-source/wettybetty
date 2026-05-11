@@ -22,6 +22,15 @@ export default async function handler(req, res) {
     const predictionIds = (predictions || []).map(p => p.id);
 
     let profile = null;
+    let scoreHistory = [];
+    let stats = {
+      totalPicks: 0,
+      wins: 0,
+      losses: 0,
+      pending: 0,
+      hitRate: 0,
+      currentStreak: 0
+    };
 
     if (userKey) {
       const { data } = await supabase
@@ -31,21 +40,49 @@ export default async function handler(req, res) {
         .maybeSingle();
 
       profile = data || null;
+
+      const { data: history } = await supabase
+        .from("user_score_history")
+        .select("*")
+        .eq("user_key", userKey)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      scoreHistory = history || [];
+
+      const settled = scoreHistory.filter(x => x.status === "settled" || x.result);
+      const wins = settled.filter(x => x.is_correct === true).length;
+      const losses = settled.filter(x => x.is_correct === false).length;
+      const pending = scoreHistory.length - settled.length;
+
+      let streak = 0;
+      for (const item of scoreHistory) {
+        if (!(item.status === "settled" || item.result)) continue;
+        if (item.is_correct === true) streak++;
+        else break;
+      }
+
+      stats = {
+        totalPicks: scoreHistory.length,
+        wins,
+        losses,
+        pending,
+        hitRate: settled.length ? Math.round((wins / settled.length) * 100) : 0,
+        currentStreak: streak
+      };
     }
 
     if (!predictionIds.length) {
       return res.status(200).json({
         ok: true,
         profile,
+        stats,
+        scoreHistory,
         predictions: []
       });
     }
 
-    const [
-      votesResult,
-      commentsResult,
-      reactionsResult
-    ] = await Promise.all([
+    const [votesResult, commentsResult, reactionsResult] = await Promise.all([
       supabase
         .from("votes")
         .select("prediction_id, choice, stake, user_key")
@@ -75,10 +112,7 @@ export default async function handler(req, res) {
 
     const enriched = predictions.map(p => {
       const pVotes = votes.filter(v => v.prediction_id === p.id);
-      const pComments = comments
-        .filter(c => c.prediction_id === p.id)
-        .slice(0, 12);
-
+      const pComments = comments.filter(c => c.prediction_id === p.id).slice(0, 8);
       const pReactions = reactions.filter(r => r.prediction_id === p.id);
 
       const rainStake = pVotes
@@ -90,11 +124,7 @@ export default async function handler(req, res) {
         .reduce((sum, v) => sum + Number(v.stake || 0), 0);
 
       const total = rainStake + clearStake || 1;
-
       const rainPercent = Math.round((rainStake / total) * 100);
-      const clearPercent = 100 - rainPercent;
-
-      const myVote = pVotes.find(v => v.user_key === userKey) || null;
 
       return {
         ...p,
@@ -102,8 +132,8 @@ export default async function handler(req, res) {
         clearStake,
         totalStake: rainStake + clearStake,
         rainPercent,
-        clearPercent,
-        myVote,
+        clearPercent: 100 - rainPercent,
+        myVote: pVotes.find(v => v.user_key === userKey) || null,
         comments: pComments,
         reactionCount: {
           angry: pReactions.filter(r => r.type === "angry").length,
@@ -116,13 +146,11 @@ export default async function handler(req, res) {
     return res.status(200).json({
       ok: true,
       profile,
+      stats,
+      scoreHistory,
       predictions: enriched
     });
-
   } catch (e) {
-    return res.status(500).json({
-      ok: false,
-      message: e.message
-    });
+    return res.status(500).json({ ok: false, message: e.message });
   }
 }
