@@ -52,6 +52,13 @@ button:active{transform:scale(.96);filter:brightness(1.12)}
   letter-spacing:-4px;
   font-weight:900;
 }
+.weatherTemp span{
+  font-size:.42em;
+  vertical-align:top;
+  position:relative;
+  top:10px;
+  margin-left:2px;
+}
 .weatherDesc{margin-top:12px;color:var(--muted);font-size:13px;line-height:1.55;max-width:260px}
 .weatherIcon{
   width:76px;
@@ -459,7 +466,8 @@ async function loadCurrentWeather(){
       const w=await fetchRegionWeather(lat,lon);
       if(!w){setWeatherFallback();return;}
 
-      document.getElementById("currentTemp").textContent=`${Math.round(w.temp)}°`;
+document.getElementById("currentTemp").innerHTML =
+  `${Math.round(w.temp)}<span>°</span>`;
       document.getElementById("feelsLike").textContent=`${Math.round(w.feelsLike)}°`;
       document.getElementById("rainChance").textContent=`${w.rainProb}%`;
       document.getElementById("windSpeed").textContent=`${w.wind.toFixed(1)}m/s`;
