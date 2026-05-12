@@ -510,36 +510,62 @@ function setWeatherFallback(){
 }
 
 async function load(){
-  const res=await fetch(`${API_GAME}?userKey=${encodeURIComponent(userKey)}`);
-  const json=await res.json();
+  if(isLoading) return;
+  isLoading=true;
 
-  if(!json.ok){
-    toast(json.message||"불러오기 실패");
-    return;
+  try{
+    const res=await fetch(`${API_GAME}?userKey=${encodeURIComponent(userKey)}`);
+
+    let json=null;
+
+    try{
+      json=await res.json();
+    }catch(e){
+      toast("서버 응답을 읽지 못했습니다.");
+      return;
+    }
+
+    if(!res.ok || !json.ok){
+      toast(json?.message || "불러오기 실패");
+      return;
+    }
+
+    profile=json.profile || null;
+    predictions=Array.isArray(json.predictions) ? json.predictions : [];
+    scoreHistory=Array.isArray(json.scoreHistory) ? json.scoreHistory : [];
+    stats=json.stats || {
+      totalPicks:0,
+      wins:0,
+      losses:0,
+      pending:0,
+      hitRate:0,
+      currentStreak:0
+    };
+    leaderboard=Array.isArray(json.leaderboard) ? json.leaderboard : [];
+
+    if(!profile){
+      document.getElementById("joinModal").classList.add("show");
+      return;
+    }
+
+    document.getElementById("joinModal").classList.remove("show");
+
+    document.getElementById("nickname").textContent=profile.nickname || "Player";
+    document.getElementById("pointsEl").textContent=`${Number(profile.points||0).toLocaleString()}P`;
+
+    updateStatsUI();
+    renderHotList();
+    renderNearList();
+    renderHotPick();
+    renderRanking();
+    render();
+    scheduleLiveBuzz();
+
+  }catch(e){
+    toast("데이터를 불러오지 못했습니다.");
+  }finally{
+    isLoading=false;
   }
-
-  profile=json.profile;
-  predictions=json.predictions||[];
-  scoreHistory=json.scoreHistory||[];
-  stats=json.stats||stats;
-  leaderboard=json.leaderboard||[];
-
-  if(!profile){
-    document.getElementById("joinModal").classList.add("show");
-    return;
-  }
-
-  document.getElementById("joinModal").classList.remove("show");
-  document.getElementById("nickname").textContent=profile.nickname;
-  document.getElementById("pointsEl").textContent=`${profile.points}P`;
-
-  updateStatsUI();
-  renderHotList();
-  renderNearList();
-  renderHotPick();
-  renderRanking();
-  render();
-  scheduleLiveBuzz();
 }
 
 function sortedPredictions(){
@@ -975,17 +1001,37 @@ function closeProfile(){
 }
 
 async function createProfile(){
-  const nickname=document.getElementById("nickInput").value.trim()||"Player";
+  const input=document.getElementById("nickInput");
+  const nickname=input.value.trim();
+
+  if(nickname.length<2){
+    toast("닉네임은 2자 이상 입력해주세요.");
+    return;
+  }
+
   const json=await post("create_profile",{nickname});
-  toast(json.message||"가입 완료");
-  load();
+
+  if(!json.ok){
+    toast(json.message || "가입 실패");
+    return;
+  }
+
+  toast(json.message || "가입 완료");
+  await load();
 }
 
 async function checkin(){
+  if(!profile){
+    toast("먼저 닉네임을 만들어주세요.");
+    return;
+  }
+
   const btn=document.getElementById("checkinBtn");
   btn.disabled=true;
+
   const json=await post("checkin");
-  toast(json.message||"출석 포인트 확인");
+  toast(json.message || "출석 포인트 확인");
+
   await load();
   btn.disabled=false;
 }
@@ -1079,17 +1125,53 @@ function liveToast(message){
   },2400);
 }
 
-function copyInvite(){
-  const code=profile?.referral_code||"";
-  navigator.clipboard.writeText(`WETTY BETTY 초대코드: ${code}`);
-  toast("초대코드 복사 완료");
+async function copyInvite(){
+  const code=profile?.referral_code || "";
+
+  if(!code){
+    toast("초대코드가 아직 없습니다.");
+    return;
+  }
+
+  const text=`WETTY BETTY 초대코드: ${code}`;
+
+  try{
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(text);
+    }else{
+      const textarea=document.createElement("textarea");
+      textarea.value=text;
+      textarea.style.position="fixed";
+      textarea.style.opacity="0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      textarea.remove();
+    }
+
+    toast("초대코드 복사 완료");
+  }catch(e){
+    toast("복사에 실패했습니다.");
+  }
 }
+
+document.addEventListener("visibilitychange",()=>{
+  if(!document.hidden){
+    load();
+    loadCurrentWeather();
+  }
+});
 
 loadCurrentWeather();
 load();
 
-setInterval(()=>load(),POLL_MS);
-setInterval(loadCurrentWeather,10*60*1000);
+setInterval(()=>{
+  if(!document.hidden) load();
+},POLL_MS);
+
+setInterval(()=>{
+  if(!document.hidden) loadCurrentWeather();
+},10*60*1000);
 </script>
 </body>
 </html>
