@@ -513,7 +513,10 @@ async function load(){
   isLoading=true;
 
   try{
-    const res=await fetch(`${API_GAME}?userKey=${encodeURIComponent(userKey)}`);
+    const res=await fetch(
+  `${API_GAME}?userKey=${encodeURIComponent(userKey)}&_=${Date.now()}`,
+  { cache:"no-store" }
+);
 
     let json=null;
 
