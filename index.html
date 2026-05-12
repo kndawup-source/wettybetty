@@ -1029,11 +1029,16 @@ async function checkin(){
   const btn=document.getElementById("checkinBtn");
   btn.disabled=true;
 
-  const json=await post("checkin");
-  toast(json.message || "출석 포인트 확인");
+  try{
+    const json=await post("checkin");
 
-  await load();
-  btn.disabled=false;
+    toast(json.message || "출석 포인트 확인");
+
+    await load();
+
+  }finally{
+    btn.disabled=false;
+  }
 }
 
 async function vote(predictionId,choice){
