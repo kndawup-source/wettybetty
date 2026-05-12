@@ -1602,7 +1602,40 @@ async function submitVote(){
   toast(`${selectedStake}P · 선택 완료`);
 
   closeConfirm();
-  await load();
+profile.points -= selectedStake;
+
+const prediction=predictions.find(
+  p=>p.id===predictionId
+);
+
+if(prediction){
+
+  prediction.myVote={
+    choice,
+    stake:selectedStake
+  };
+
+  if(choice==="rain"){
+    prediction.rainStake += selectedStake;
+  }else{
+    prediction.clearStake += selectedStake;
+  }
+
+  prediction.totalStake += selectedStake;
+
+  const total =
+    prediction.rainStake +
+    prediction.clearStake;
+
+  prediction.rainPercent =
+    Math.round((prediction.rainStake/total)*100);
+
+  prediction.clearPercent =
+    100 - prediction.rainPercent;
+}
+
+updateStatsUI();
+render();
 }
 
 async function submitComment(predictionId,input){
