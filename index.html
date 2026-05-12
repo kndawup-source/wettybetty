@@ -366,6 +366,38 @@ function distanceKm(a,b,c,d){
 }
 
 function weatherText(code,rainProb,precipitation){
+  async function reverseGeocode(lat, lon){
+  try{
+    const url =
+      `https://nominatim.openstreetmap.org/reverse` +
+      `?format=jsonv2&lat=${lat}&lon=${lon}`;
+
+    const res = await fetch(url,{
+      headers:{
+        "Accept":"application/json"
+      }
+    });
+
+    if(!res.ok) return null;
+
+    const json = await res.json();
+
+    const addr = json.address || {};
+
+    return (
+      addr.suburb ||
+      addr.borough ||
+      addr.city_district ||
+      addr.town ||
+      addr.county ||
+      addr.city ||
+      "현재 위치"
+    );
+
+  }catch(e){
+    return null;
+  }
+}
   if((precipitation||0)>0) return{label:"🌧️",desc:"현재 비가 감지되고 있습니다."};
   if(rainProb>=70) return{label:"☔",desc:"강수 가능성이 높습니다."};
   if(rainProb>=40) return{label:"🌦️",desc:"비 가능성이 애매하게 걸려 있습니다."};
