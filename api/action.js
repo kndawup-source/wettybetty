@@ -176,7 +176,34 @@ export default async function handler(req, res) {
       });
 
       if (error) return res.status(400).json({ ok: false, message: "이미 선택했습니다." });
+      const nextRainStake =
+  choice === "rain"
+    ? Number(prediction.rain_stake || 0) + stake
+    : Number(prediction.rain_stake || 0);
 
+const nextClearStake =
+  choice === "clear"
+    ? Number(prediction.clear_stake || 0) + stake
+    : Number(prediction.clear_stake || 0);
+
+const nextTotalStake =
+  Number(prediction.total_stake || 0) + stake;
+
+const { error: updatePredictionError } = await supabase
+  .from("predictions")
+  .update({
+    rain_stake: nextRainStake,
+    clear_stake: nextClearStake,
+    total_stake: nextTotalStake
+  })
+  .eq("id", predictionId);
+
+if (updatePredictionError) {
+  return res.status(500).json({
+    ok: false,
+    message: "예측 반영 실패"
+  });
+}
       await supabase
         .from("profiles")
         .update({ points: Number(profile.points || 0) - stake })
