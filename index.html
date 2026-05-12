@@ -28,7 +28,14 @@ button:disabled{opacity:.45;cursor:not-allowed}
     radial-gradient(circle at 100% 12%,rgba(130,199,255,.08),transparent 32%),
     linear-gradient(180deg,#07121c 0%,#050d16 46%,#050d16 100%);
 }
-.header{height:58px;display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.header{
+  min-height:52px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
 .logo{
   font-family:'Syne',sans-serif;
   font-size:23px;
@@ -45,7 +52,11 @@ button:disabled{opacity:.45;cursor:not-allowed}
 }
 .logo span{color:var(--accent)}
 .sub{margin-top:5px;color:var(--muted);font-size:10px;font-weight:900;letter-spacing:1px}
-.profileChip{width:138px;padding:9px 10px;border-radius:18px;background:rgba(255,255,255,.045);border:1px solid var(--line);text-align:right}
+.profileChip{
+  width:138px;
+  padding:8px 10px;
+  height:52px;
+  border-radius:18px;
 .profileName{color:var(--soft);font-size:11px;font-weight:900;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .points{margin-top:3px;color:var(--accent);font-size:12px;font-weight:900;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .scoreBar{
