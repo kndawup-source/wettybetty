@@ -131,6 +131,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .hotPickTitle{margin-top:8px;font-size:17px;line-height:1.28;font-weight:900}
 .hotPickMeta{margin-top:8px;display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px;font-weight:900}
 .actions{position:relative;z-index:3;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.actions.single{
+  grid-template-columns:1fr;
+}
 .btn{position:relative;z-index:2;height:44px;border-radius:15px;font-size:12px;font-weight:900;background:#dff56a;color:#07100d;box-shadow:none;overflow:hidden}
 .btn.dark{background:#111d27;color:var(--text);border:1px solid var(--line)}
 .board{border:1px solid var(--line);background:rgba(255,255,255,.035);border-radius:22px;padding:14px;margin:12px 0 16px}
@@ -438,10 +441,11 @@ button:disabled{opacity:.45;cursor:not-allowed}
     </div>
   </section>
 
-  <div class="actions">
-    <button class="btn" id="checkinBtn" onclick="checkin()">출석 포인트 받기</button>
-    <button class="btn dark" onclick="copyInvite()">친구 초대</button>
-  </div>
+<div class="actions single">
+  <button class="btn" id="checkinBtn" onclick="checkin()">
+    출석 포인트 받기
+  </button>
+</div>
 
   <section class="board" id="nearBoard" style="display:none">
     <div class="boardHead"><h2>지금 근처 예측</h2><span>NEARBY</span></div>
@@ -1304,25 +1308,39 @@ odds.append(rain,clear);
     const stakes=document.createElement("div");
     stakes.className="stakes";
 
-    [50,100,300,500].forEach(s=>{
-      const b=document.createElement("button");
-      b.textContent=`${s}P`;
-b.dataset.stake=s;
-if(s===selectedStake)b.classList.add("active");
-      if(Number(profile?.points||0)<s)b.disabled=true;
-      b.onclick=()=>{
-  selectedStake=s;
+[50,100,300,500].forEach(s=>{
+  const b=document.createElement("button");
 
-  document.querySelectorAll(".stakes button").forEach(btn=>{
-    btn.classList.toggle("active", Number(btn.dataset.stake) === selectedStake);
-  });
+  b.textContent=`${s}P`;
+  b.dataset.stake=s;
 
-  document.querySelectorAll(".odd").forEach(btn=>{
-    btn.disabled = Number(profile?.points || 0) < selectedStake;
-  });
-};
-      stakes.appendChild(b);
+  if(s===selectedStake){
+    b.classList.add("active");
+  }
+
+  if(Number(profile?.points||0)<s){
+    b.disabled=true;
+  }
+
+  b.onclick=()=>{
+
+    selectedStake=s;
+
+    card.querySelectorAll(".stakes button").forEach(btn=>{
+      btn.classList.toggle(
+        "active",
+        Number(btn.dataset.stake) === selectedStake
+      );
     });
+
+    card.querySelectorAll(".odd").forEach(btn=>{
+      btn.disabled =
+        Number(profile?.points || 0) < selectedStake;
+    });
+  };
+
+  stakes.appendChild(b);
+});
 
     entry.append(stakes);
     card.appendChild(entry);
@@ -1534,6 +1552,7 @@ function vote(predictionId,choice,buttonEl){
 }
 
 function closeConfirm(){
+
   pendingVote=null;
 
   document.body.style.overflow="";
@@ -1542,11 +1561,12 @@ function closeConfirm(){
   document.getElementById("confirmSheet").classList.remove("show");
 
   document.querySelectorAll(".odd.selected").forEach(btn=>{
-  btn.classList.remove("selected");
-});
-document.querySelectorAll(".odd").forEach(btn=>{
-  btn.disabled=false;
-});
+    btn.classList.remove("selected");
+  });
+
+  document.querySelectorAll(".odd").forEach(btn=>{
+    btn.disabled=false;
+  });
 }
 
 async function submitVote(){
