@@ -471,6 +471,12 @@ async function loadCurrentWeather(){
       const lat=pos.coords.latitude;
       const lon=pos.coords.longitude;
       userLocation={lat,lon};
+      const regionName = await reverseGeocode(lat, lon);
+
+document.getElementById("weatherRegion").textContent =
+  regionName
+    ? `📍 ${regionName}`
+    : "현재 위치";
 
       const w=await fetchRegionWeather(lat,lon);
       if(!w){setWeatherFallback();return;}
