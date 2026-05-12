@@ -98,7 +98,8 @@ export default async function handler(req, res) {
       return json(res, 200, {
         ok: true,
         message: "정산할 예측이 없습니다.",
-        settled: 0
+        settled: 0,
+        results: []
       });
     }
 
@@ -141,62 +142,57 @@ export default async function handler(req, res) {
 
         const voteRows = votes || [];
 
+        let winCount = 0;
+        let loseCount = 0;
+        let totalPayout = 0;
+
         for (const vote of voteRows) {
+          if (vote.status === "settled") {
+            continue;
+          }
+
           const isCorrect = vote.choice === resultChoice;
           const payout = isCorrect ? getPayout(vote.stake) : 0;
 
-          const { data: existingHistory } = await supabase
-            .from("user_score_history")
-            .select("id, status")
-            .eq("user_key", vote.user_key)
-            .eq("prediction_id", currentPrediction.id)
-            .maybeSingle();
+          if (isCorrect) winCount++;
+          else loseCount++;
 
-          if (existingHistory) {
-            await supabase
-              .from("user_score_history")
-              .update({
-                status: "settled",
-                result: resultChoice,
-                is_correct: isCorrect,
-                payout,
-                actual_value: actualRain,
-                settled_at: now
-              })
-              .eq("id", existingHistory.id);
-          } else {
-            await supabase
-              .from("user_score_history")
-              .insert({
-                user_key: vote.user_key,
-                prediction_id: currentPrediction.id,
-                title: currentPrediction.title,
-                choice: vote.choice,
-                stake: vote.stake,
-                status: "settled",
-                result: resultChoice,
-                is_correct: isCorrect,
-                payout,
-                actual_value: actualRain,
-                settled_at: now
-              });
-          }
+          totalPayout += payout;
+
+          const { error: voteUpdateError } = await supabase
+            .from("votes")
+            .update({
+              status: "settled",
+              result: resultChoice,
+              is_correct: isCorrect,
+              payout,
+              actual_value: actualRain,
+              settled_at: now
+            })
+            .eq("id", vote.id)
+            .neq("status", "settled");
+
+          if (voteUpdateError) throw voteUpdateError;
 
           if (payout > 0) {
-            const { data: profile } = await supabase
+            const { data: profile, error: profileError } = await supabase
               .from("profiles")
               .select("points, streak")
               .eq("user_key", vote.user_key)
               .maybeSingle();
 
+            if (profileError) throw profileError;
+
             if (profile) {
-              await supabase
+              const { error: profileUpdateError } = await supabase
                 .from("profiles")
                 .update({
                   points: Number(profile.points || 0) + payout,
                   streak: Number(profile.streak || 0) + 1
                 })
                 .eq("user_key", vote.user_key);
+
+              if (profileUpdateError) throw profileUpdateError;
 
               await supabase.from("point_logs").insert({
                 user_key: vote.user_key,
@@ -205,11 +201,13 @@ export default async function handler(req, res) {
               });
             }
           } else {
-            const { data: profile } = await supabase
+            const { data: profile, error: profileError } = await supabase
               .from("profiles")
               .select("streak")
               .eq("user_key", vote.user_key)
               .maybeSingle();
+
+            if (profileError) throw profileError;
 
             if (profile) {
               await supabase
@@ -222,7 +220,7 @@ export default async function handler(req, res) {
           }
         }
 
-        await supabase
+        const { error: predictionUpdateError } = await supabase
           .from("predictions")
           .update({
             status: "settled",
@@ -233,6 +231,8 @@ export default async function handler(req, res) {
           .eq("id", currentPrediction.id)
           .eq("status", "open");
 
+        if (predictionUpdateError) throw predictionUpdateError;
+
         results.push({
           id: currentPrediction.id,
           title: currentPrediction.title,
@@ -240,6 +240,9 @@ export default async function handler(req, res) {
           actualRain,
           result: resultChoice,
           votes: voteRows.length,
+          wins: winCount,
+          losses: loseCount,
+          totalPayout,
           settled: true
         });
       } catch (innerError) {
