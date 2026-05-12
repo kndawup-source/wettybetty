@@ -1289,9 +1289,20 @@ odds.append(rain,clear);
     [50,100,300,500].forEach(s=>{
       const b=document.createElement("button");
       b.textContent=`${s}P`;
-      if(s===selectedStake)b.classList.add("active");
+b.dataset.stake=s;
+if(s===selectedStake)b.classList.add("active");
       if(Number(profile?.points||0)<s)b.disabled=true;
-      b.onclick=()=>{selectedStake=s;render();};
+      b.onclick=()=>{
+  selectedStake=s;
+
+  document.querySelectorAll(".stakes button").forEach(btn=>{
+    btn.classList.toggle("active", Number(btn.dataset.stake) === selectedStake);
+  });
+
+  document.querySelectorAll(".odd").forEach(btn=>{
+    btn.disabled = Number(profile?.points || 0) < selectedStake;
+  });
+};
       stakes.appendChild(b);
     });
 
