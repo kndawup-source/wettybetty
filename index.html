@@ -225,6 +225,118 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .empty{padding:20px 0;text-align:center;color:var(--muted);font-size:13px}
 .liveToast{position:fixed;left:50%;bottom:78px;width:calc(100% - 32px);max-width:448px;transform:translateX(-50%) translateY(12px);opacity:0;z-index:210;padding:13px 15px;border-radius:18px;background:rgba(11,22,32,.96);border:1px solid rgba(223,245,106,.18);color:var(--text);font-size:13px;font-weight:900;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:.22s ease;backdrop-filter:blur(10px)}
 .liveToast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.pickBtns button{
+  position:relative;
+  overflow:hidden;
+  transition:
+    transform .08s ease,
+    filter .12s ease,
+    box-shadow .16s ease,
+    opacity .16s ease;
+}
+
+.pickBtns button:active{
+  transform:scale(.93);
+  filter:brightness(1.18);
+}
+
+.pickBtns button.selected{
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.12),
+    0 0 24px rgba(255,255,255,.12);
+}
+
+.pickFlash{
+  animation:pickFlash .34s ease;
+}
+
+@keyframes pickFlash{
+  0%{transform:scale(1);filter:brightness(1)}
+  45%{transform:scale(1.05);filter:brightness(1.45)}
+  100%{transform:scale(1);filter:brightness(1)}
+}
+
+.confirmDim{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.54);
+  backdrop-filter:blur(4px);
+  z-index:299;
+  opacity:0;
+  pointer-events:none;
+  transition:.18s;
+}
+
+.confirmDim.show{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.confirmSheet{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:300;
+  padding:18px 16px calc(18px + env(safe-area-inset-bottom));
+  background:#0b1620;
+  border-top-left-radius:28px;
+  border-top-right-radius:28px;
+  border-top:1px solid rgba(255,255,255,.08);
+  box-shadow:0 -20px 50px rgba(0,0,0,.45);
+  transform:translateY(110%);
+  transition:transform .22s ease;
+}
+
+.confirmSheet.show{
+  transform:translateY(0);
+}
+
+.confirmLabel{
+  color:var(--accent);
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.7px;
+}
+
+.confirmTitle{
+  margin-top:7px;
+  font-size:20px;
+  line-height:1.35;
+  font-weight:900;
+}
+
+.confirmMeta{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.5;
+}
+
+.confirmActions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:18px;
+}
+
+.confirmActions button{
+  height:50px;
+  border-radius:16px;
+  font-size:14px;
+  font-weight:900;
+}
+
+.confirmCancel{
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--line);
+  color:var(--text);
+}
+
+.confirmSubmit{
+  background:var(--accent);
+  color:#07100d;
+}
 </style>
 </head>
 
@@ -344,7 +456,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
     <input id="nickInput" placeholder="닉네임 입력" maxlength="12" />
 <input id="pinInput" placeholder="PIN 4자리" maxlength="4" inputmode="numeric" />
 <button class="btn" onclick="createProfile()">로그인 / 시작하기</button>
-    <button class="btn" onclick="createProfile()">시작하기</button>
+
   </div>
 </div>
 
@@ -375,7 +487,20 @@ button:disabled{opacity:.45;cursor:not-allowed}
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="confirmDim" id="confirmDim" onclick="closeConfirm()"></div>
 
+<div class="confirmSheet" id="confirmSheet">
+  <div>
+    <div class="confirmLabel">FINAL CONFIRM</div>
+    <div class="confirmTitle" id="confirmTitle">예측 참여</div>
+    <div class="confirmMeta" id="confirmMeta">선택 내용을 확인해주세요.</div>
+  </div>
+
+  <div class="confirmActions">
+    <button class="confirmCancel" onclick="closeConfirm()">취소</button>
+    <button class="confirmSubmit" id="confirmSubmitBtn">참여하기</button>
+  </div>
+</div>
 <script>
 const API_GAME="/api/game";
 const API_ACTION="/api/action";
@@ -395,6 +520,7 @@ let liveBuzzTimer=null;
 let lastBuzzKey="";
 let toastTimer=null;
 let isLoading=false;
+let pendingVote=null;
 
 const regionWeatherCache=new Map();
 const REGION_WEATHER_TTL=10*60*1000;
@@ -1145,13 +1271,13 @@ function createMarketCard(p,isSmall){
     rainBtn.className="rain";
     rainBtn.textContent=labels.yes;
     rainBtn.disabled=Number(profile?.points||0)<selectedStake;
-    rainBtn.onclick=()=>vote(p.id,"rain");
+    rainBtn.onclick=()=>vote(p.id,"rain",rainBtn);
 
     const clearBtn=document.createElement("button");
     clearBtn.className="clear";
     clearBtn.textContent=labels.no;
     clearBtn.disabled=Number(profile?.points||0)<selectedStake;
-    clearBtn.onclick=()=>vote(p.id,"clear");
+    clearBtn.onclick=()=>vote(p.id,"clear",clearBtn);
 
     pickBtns.append(rainBtn,clearBtn);
     entry.append(stakes,pickBtns);
@@ -1325,15 +1451,74 @@ async function checkin(){
   }
 }
 
-async function vote(predictionId,choice){
-  const json=await post("vote",{predictionId,choice,stake:selectedStake});
+function vote(predictionId,choice,buttonEl){
+  const prediction=predictions.find(p=>p.id===predictionId);
+  if(!prediction) return;
+
+  const labels=pickLabels(prediction.category);
+  const picked=choice==="rain" ? labels.yes : labels.no;
+
+  pendingVote={
+    predictionId,
+    choice
+  };
+
+  if(buttonEl){
+    buttonEl.classList.add("pickFlash");
+    buttonEl.classList.add("selected");
+
+    setTimeout(()=>{
+      buttonEl.classList.remove("pickFlash");
+    },340);
+
+    if(navigator.vibrate){
+      navigator.vibrate(16);
+    }
+  }
+
+  document.getElementById("confirmTitle").textContent=prediction.title;
+  document.getElementById("confirmMeta").textContent=`${picked} 선택 · ${selectedStake}P 참여`;
+  document.body.style.overflow="hidden";
+  document.getElementById("confirmDim").classList.add("show");
+  document.getElementById("confirmSheet").classList.add("show");
+}
+
+function closeConfirm(){
+  pendingVote=null;
+
+  document.body.style.overflow="";
+
+  document.getElementById("confirmDim").classList.remove("show");
+  document.getElementById("confirmSheet").classList.remove("show");
+
+  document.querySelectorAll(".pickBtns button.selected").forEach(btn=>{
+    btn.classList.remove("selected");
+  });
+}
+
+async function submitVote(){
+  if(!pendingVote) return;
+
+  const { predictionId, choice } = pendingVote;
+
+  const json=await post("vote",{
+    predictionId,
+    choice,
+    stake:selectedStake
+  });
 
   if(!json.ok){
-    toast(json.message||"참여 실패");
+    toast(json.message || "참여 실패");
     return;
   }
 
+  if(navigator.vibrate){
+    navigator.vibrate([18,30,18]);
+  }
+
   toast(`${selectedStake}P · 선택 완료`);
+
+  closeConfirm();
   await load();
 }
 
@@ -1462,6 +1647,7 @@ setInterval(()=>{
 setInterval(()=>{
   if(!document.hidden) loadCurrentWeather();
 },10*60*1000);
+document.getElementById("confirmSubmitBtn").onclick=submitVote;
 </script>
 </body>
 </html>
