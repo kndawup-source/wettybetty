@@ -554,6 +554,7 @@ let liveBuzzTimer=null;
 let lastBuzzKey="";
 let toastTimer=null;
 let isLoading=false;
+let isVoting=false;
 let pendingVote=null;
 
 const regionWeatherCache=new Map();
@@ -1586,7 +1587,8 @@ function closeConfirm(){
 }
 
 async function submitVote(){
-  if(!pendingVote) return;
+  if(!pendingVote || isVoting) return;
+  isVoting=true;
 
   const submitBtn=document.getElementById("confirmSubmitBtn");
   submitBtn.classList.add("loading");
@@ -1672,14 +1674,15 @@ async function react(predictionId,type){
 }
 
 function scheduleLiveBuzz(){
-  clearTimeout(liveBuzzTimer);
+  if(liveBuzzTimer) return;
 
   const openTargets=predictions.filter(isOpenPrediction);
-  if(!openTargets.length)return;
+  if(!openTargets.length) return;
 
-  const delay=14000+Math.floor(Math.random()*26000);
+  const delay=18000+Math.floor(Math.random()*24000);
 
   liveBuzzTimer=setTimeout(()=>{
+    liveBuzzTimer=null;
     showLiveBuzz();
     scheduleLiveBuzz();
   },delay);
