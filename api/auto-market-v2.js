@@ -6,7 +6,6 @@ const supabase = createClient(
 );
 
 const REGIONS = [
-  // 서울 주요 지역
   { country:"KR", name:"서울 · 강남역", short:"강남역", lat:37.4979, lon:127.0276, type:"commute" },
   { country:"KR", name:"서울 · 성수동", short:"성수동", lat:37.5446, lon:127.0557, type:"night" },
   { country:"KR", name:"서울 · 잠실", short:"잠실", lat:37.5133, lon:127.1002, type:"river" },
@@ -20,7 +19,6 @@ const REGIONS = [
   { country:"KR", name:"서울 · 이태원", short:"이태원", lat:37.5345, lon:126.9946, type:"night" },
   { country:"KR", name:"서울 · 명동", short:"명동", lat:37.5636, lon:126.9834, type:"street" },
 
-  // 경기 주요 지역
   { country:"KR", name:"경기 · 성남시", short:"성남시", lat:37.4200, lon:127.1265, type:"commute" },
   { country:"KR", name:"경기 · 판교", short:"판교", lat:37.3947, lon:127.1112, type:"commute" },
   { country:"KR", name:"경기 · 분당 정자", short:"분당 정자", lat:37.3672, lon:127.1080, type:"street" },
@@ -29,7 +27,6 @@ const REGIONS = [
   { country:"KR", name:"경기 · 하남 미사", short:"하남 미사", lat:37.5672, lon:127.1907, type:"river" },
   { country:"KR", name:"경기 · 용인 에버랜드", short:"에버랜드", lat:37.2946, lon:127.2022, type:"travel" },
 
-  // 5대 광역시 + 인천
   { country:"KR", name:"부산 · 해운대", short:"해운대", lat:35.1631, lon:129.1635, type:"beach" },
   { country:"KR", name:"부산 · 서면", short:"서면", lat:35.1577, lon:129.0592, type:"street" },
   { country:"KR", name:"대구 · 동성로", short:"동성로", lat:35.8693, lon:128.5956, type:"street" },
@@ -39,7 +36,6 @@ const REGIONS = [
   { country:"KR", name:"인천 · 월미도", short:"월미도", lat:37.4750, lon:126.5962, type:"beach" },
   { country:"KR", name:"울산 · 삼산동", short:"삼산동", lat:35.5396, lon:129.3383, type:"street" },
 
-  // 주요 관광지
   { country:"KR", name:"제주 · 제주공항", short:"제주공항", lat:33.5104, lon:126.4914, type:"travel" },
   { country:"KR", name:"제주 · 애월", short:"애월", lat:33.4627, lon:126.3100, type:"travel" },
   { country:"KR", name:"제주 · 성산일출봉", short:"성산일출봉", lat:33.4581, lon:126.9425, type:"travel" },
@@ -51,7 +47,6 @@ const REGIONS = [
   { country:"KR", name:"충남 · 대천해수욕장", short:"대천해수욕장", lat:36.3054, lon:126.5153, type:"beach" },
   { country:"KR", name:"경남 · 통영 동피랑", short:"동피랑", lat:34.8452, lon:128.4240, type:"travel" },
 
-  // 해외 주요 도시
   { country:"JP", name:"일본 · 도쿄 시부야", short:"시부야", lat:35.6595, lon:139.7005, type:"street" },
   { country:"JP", name:"일본 · 오사카 난바", short:"난바", lat:34.6655, lon:135.5019, type:"street" },
   { country:"TH", name:"태국 · 방콕 아속", short:"방콕 아속", lat:13.7373, lon:100.5605, type:"travel" },
@@ -69,7 +64,6 @@ function makeKstDate(hour, minute = 0, addDays = 0){
   const d = new Date(now);
   d.setDate(d.getDate() + addDays);
   d.setHours(hour, minute, 0, 0);
-
   return new Date(d.getTime() - 9 * 60 * 60 * 1000).toISOString();
 }
 
@@ -153,13 +147,11 @@ function getTimeSlot(){
 
 function currentHourIndex(times = []){
   const now = new Date();
-
   let bestIndex = 0;
   let bestDiff = Infinity;
 
   for(let i = 0; i < times.length; i++){
     const diff = Math.abs(new Date(times[i]).getTime() - now.getTime());
-
     if(diff < bestDiff){
       bestDiff = diff;
       bestIndex = i;
@@ -173,38 +165,23 @@ function titleFor(region, category, slot){
   const place = region.short;
   const t = timeLabel(slot.targetHour);
 
-  if(category === "rain"){
-    return `${place} · ${t}까지 비 올까?`;
-  }
-
-  if(category === "wind"){
-    return `${place} · ${t}까지 바람 셀까?`;
-  }
-
-  if(category === "heat"){
-    return `${place} · ${t}까지 더울까?`;
-  }
-
-  if(category === "cold"){
-    return `${place} · ${t}까지 추울까?`;
-  }
-
-  if(category === "dust"){
-    return `${place} · ${t}까지 공기 안 좋을까?`;
-  }
-
-  if(category === "humidity"){
-    return `${place} · ${t}까지 습할까?`;
-  }
+  if(category === "rain") return `${place} · ${t}까지 비 올까?`;
+  if(category === "wind") return `${place} · ${t}까지 바람 셀까?`;
+  if(category === "heat") return `${place} · ${t}까지 더울까?`;
+  if(category === "cold") return `${place} · ${t}까지 추울까?`;
+  if(category === "dust") return `${place} · ${t}까지 공기 안 좋을까?`;
+  if(category === "humidity") return `${place} · ${t}까지 습할까?`;
 
   return `${place} · ${t}까지 외출 괜찮을까?`;
 }
 
-function makeMarket(region, weather, slot){
+function makeMarket(region, weather, air, slot){
   const current = weather.current || {};
   const hourly = weather.hourly || {};
+  const airHourly = air.hourly || {};
 
   const idx = currentHourIndex(hourly.time || []);
+  const airIdx = currentHourIndex(airHourly.time || []);
 
   const temp = Number(current.temperature_2m ?? 0);
   const feels = Number(current.apparent_temperature ?? temp);
@@ -212,6 +189,10 @@ function makeMarket(region, weather, slot){
   const humidity = Number(current.relative_humidity_2m ?? 0);
   const precipitation = Number(current.precipitation ?? 0);
   const rainProb = Number(hourly.precipitation_probability?.[idx] ?? 0);
+
+  const pm10 = Number(airHourly.pm10?.[airIdx] ?? 0);
+  const pm25 = Number(airHourly.pm2_5?.[airIdx] ?? 0);
+  const dust = Number(airHourly.dust?.[airIdx] ?? 0);
 
   const candidates = [];
 
@@ -223,7 +204,21 @@ function makeMarket(region, weather, slot){
     });
   }
 
-  if(wind >= 8){
+  if(pm25 >= 35 || pm10 >= 80 || dust >= 100){
+    candidates.push({
+      category:"dust",
+      priority:pm25 >= 50 || pm10 >= 120 ? 92 : 78,
+      official_forecast:`PM2.5 ${Math.round(pm25)} · PM10 ${Math.round(pm10)}`
+    });
+  }
+
+  if(wind >= 14){
+    candidates.push({
+      category:"wind",
+      priority:95,
+      official_forecast:`강풍 ${wind.toFixed(1)}m/s`
+    });
+  }else if(wind >= 8){
     candidates.push({
       category:"wind",
       priority:75,
@@ -276,63 +271,66 @@ function makeMarket(region, weather, slot){
 }
 
 async function fetchWeather(region){
-  const url =
+  const weatherUrl =
     `https://api.open-meteo.com/v1/forecast?latitude=${region.lat}&longitude=${region.lon}` +
     `&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,wind_speed_10m` +
     `&hourly=precipitation_probability&timezone=auto`;
 
-  return await fetch(url).then(r=>r.json());
+  const airUrl =
+    `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${region.lat}&longitude=${region.lon}` +
+    `&hourly=pm10,pm2_5,dust&timezone=auto`;
+
+  const [weather, air] = await Promise.all([
+    fetch(weatherUrl).then(r=>r.json()),
+    fetch(airUrl).then(r=>r.json()).catch(()=>({ hourly:{} }))
+  ]);
+
+  return { weather, air };
 }
 
 export default async function handler(req, res){
   try{
     const slot = getTimeSlot();
 
-    const results = await Promise.all(
+    const results = await Promise.allSettled(
       REGIONS.map(async region => {
-        const weather = await fetchWeather(region);
-        const market = makeMarket(region, weather, slot);
-
+        const { weather, air } = await fetchWeather(region);
+        const market = makeMarket(region, weather, air, slot);
         return { region, market };
       })
     );
 
-    results.sort((a,b)=>b.market.priority-a.market.priority);
+    const prepared = [];
 
-    const targets = results.slice(0, 35);
+    for(const r of results){
+      if(r.status === "fulfilled") prepared.push(r.value);
+    }
+
+    prepared.sort((a,b)=>b.market.priority-a.market.priority);
+
+    const targets = prepared.slice(0, 35);
     const created = [];
     const skipped = [];
 
     for(const item of targets){
       const { region, market } = item;
-      for(const item of targets){
-  const { region, market } = item;
+      const regionName = region.name;
 
-  const { data: alreadyExists } = await supabase
-    .from("predictions")
-    .select("id")
-    .eq("region", region.name)
-    .eq("time_slot", slot.key)
-    .eq("target_time", slot.target_time)
-    .maybeSingle();
-
-  if(alreadyExists){
-    skipped.push(region.name);
-    continue;
-  }
-
-  // 기존 insert 코드 계속
-      const { data: exists } = await supabase
+      const { data: alreadyExists, error:existsError } = await supabase
         .from("predictions")
         .select("id")
-        .eq("region", region.name)
-        .eq("category", market.category)
+        .eq("region", regionName)
         .eq("time_slot", slot.key)
-        .gte("created_at", new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString())
-        .limit(1);
+        .eq("target_time", slot.target_time)
+        .maybeSingle();
 
-      if(exists?.length){
-        skipped.push(region.name);
+      if(existsError){
+        skipped.push(`${regionName}: ${existsError.message}`);
+        continue;
+      }
+
+      if(alreadyExists){
+        skipped.push(`${regionName}: already exists`);
         continue;
       }
 
@@ -340,7 +338,7 @@ export default async function handler(req, res){
         .from("predictions")
         .insert({
           title:market.title,
-          region:region.name,
+          region:regionName,
           country:region.country,
           market_label:slot.label,
           official_forecast:market.official_forecast,
@@ -360,8 +358,7 @@ export default async function handler(req, res){
         .single();
 
       if(error){
-        console.log(error);
-        skipped.push(`${region.name}: ${error.message}`);
+        skipped.push(`${regionName}: ${error.message}`);
         continue;
       }
 
