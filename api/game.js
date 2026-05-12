@@ -1,3 +1,7 @@
+export const config = {
+  runtime: "nodejs"
+};
+
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
