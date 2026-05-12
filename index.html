@@ -557,11 +557,57 @@ async function load(){
 }
 
 function sortedPredictions(){
+
+  const now = Date.now();
+
   return [...predictions].sort((a,b)=>{
-    const scoreA=(a.totalStake||0)+(a.priority||0);
-    const scoreB=(b.totalStake||0)+(b.priority||0);
-    if(scoreB!==scoreA) return scoreB-scoreA;
-    return new Date(a.close_time)-new Date(b.close_time);
+
+    const aClosed =
+      a.status !== "open" ||
+      new Date(a.close_time).getTime() <= now;
+
+    const bClosed =
+      b.status !== "open" ||
+      new Date(b.close_time).getTime() <= now;
+
+    if(aClosed !== bClosed){
+      return aClosed ? 1 : -1;
+    }
+
+    let aDistance = 9999;
+    let bDistance = 9999;
+
+    if(userLocation){
+      aDistance = distanceKm(
+        userLocation.lat,
+        userLocation.lon,
+        a.lat,
+        a.lon
+      );
+
+      bDistance = distanceKm(
+        userLocation.lat,
+        userLocation.lon,
+        b.lat,
+        b.lon
+      );
+    }
+
+    const aHot = (a.totalStake || 0) + (a.priority || 0);
+    const bHot = (b.totalStake || 0) + (b.priority || 0);
+
+    if(aDistance !== bDistance){
+      return aDistance - bDistance;
+    }
+
+    if(bHot !== aHot){
+      return bHot - aHot;
+    }
+
+    return (
+      new Date(a.close_time).getTime() -
+      new Date(b.close_time).getTime()
+    );
   });
 }
 
