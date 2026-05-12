@@ -93,7 +93,7 @@ function makeKstDate(hour, minute = 0, addDays = 0){
 }
 
 function timeLabel(hour){
-  if(hour === 0) return "자정";
+  if(hour === 0 || hour === 24) return "자정";
   if(hour < 12) return `오전 ${hour}시`;
   if(hour === 12) return "오후 12시";
   return `오후 ${hour - 12}시`;
@@ -105,9 +105,31 @@ function getTimeSlot(){
   const hour = now.getHours();
   const isWeekend = day === 0 || day === 6;
 
+  if(hour < 6){
+    return {
+      key:"early_morning",
+      label:"새벽외출",
+      targetHour:6,
+      closeHour:6,
+      close_time:makeKstDate(6,0),
+      target_time:makeKstDate(6,0)
+    };
+  }
+
+  if(isWeekend && hour < 12){
+    return {
+      key:"weekend_morning",
+      label:"주말오전",
+      targetHour:12,
+      closeHour:12,
+      close_time:makeKstDate(12,0),
+      target_time:makeKstDate(12,0)
+    };
+  }
+
   if(isWeekend && hour < 18){
     return {
-      key:"weekend",
+      key:"weekend_day",
       label:"주말나들이",
       targetHour:18,
       closeHour:18,
@@ -149,24 +171,13 @@ function getTimeSlot(){
     };
   }
 
-  if(hour < 23){
-    return {
-      key:"night",
-      label:"밤외출",
-      targetHour:23,
-      closeHour:23,
-      close_time:makeKstDate(23,0),
-      target_time:makeKstDate(23,0)
-    };
-  }
-
   return {
-    key:"tomorrow_morning",
-    label:"내일 출근길",
-    targetHour:9,
-    closeHour:9,
-    close_time:makeKstDate(9,0,1),
-    target_time:makeKstDate(9,0,1)
+    key:"night",
+    label:"밤외출",
+    targetHour:24,
+    closeHour:24,
+    close_time:makeKstDate(23,59),
+    target_time:makeKstDate(23,59)
   };
 }
 
