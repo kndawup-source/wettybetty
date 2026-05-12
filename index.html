@@ -35,7 +35,12 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .profileChip{width:138px;padding:9px 10px;border-radius:18px;background:rgba(255,255,255,.045);border:1px solid var(--line);text-align:right}
 .profileName{color:var(--soft);font-size:11px;font-weight:900;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .points{margin-top:3px;color:var(--accent);font-size:12px;font-weight:900;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.scoreBar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.scoreBar{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-bottom:14px;
+}
 .scoreBar button,.scoreBar div{min-height:52px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid var(--line);padding:9px 8px;text-align:left}
 .scoreBar span{display:block;color:var(--muted);font-size:9px;font-weight:900;letter-spacing:.7px}
 .scoreBar b{display:block;margin-top:5px;color:var(--text);font-size:15px;font-weight:900}
@@ -188,11 +193,23 @@ button:disabled{opacity:.45;cursor:not-allowed}
   </header>
 
   <section class="scoreBar">
-    <button onclick="openProfile()"><span>적중률</span><b id="hitRateMini">0%</b></button>
-    <div><span>참여</span><b id="picksMini">0</b></div>
-    <div><span>적중</span><b id="winsMini">0</b></div>
-    <div><span>연승</span><b id="streakMini">0</b></div>
-  </section>
+
+  <div>
+    <span>보유 포인트</span>
+    <b id="pointsMini">0P</b>
+  </div>
+
+  <div>
+    <span>현재 연승</span>
+    <b id="streakMini">0🔥</b>
+  </div>
+
+  <button onclick="openProfile()">
+    <span>주간 랭킹</span>
+    <b id="rankMini">LIVE</b>
+  </button>
+
+</section>
 
   <section class="weatherBoard">
     <div class="weatherTop">
@@ -291,7 +308,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
     </div>
     <div class="profileStats">
       <div><span>포인트</span><b id="modalCredit">0</b></div>
-      <div><span>적중률</span><b id="modalHitRate">0%</b></div>
+      <div>
+  <span>누적 적중률</span>
+  <b id="modalHitRate">0%</b>
+</div>
       <div><span>연승</span><b id="modalStreak">0</b></div>
       <div><span>참여</span><b id="modalPicks">0</b></div>
       <div><span>적중</span><b id="modalWins">0</b></div>
@@ -703,11 +723,15 @@ function marketStatus(p){
 }
 
 function updateStatsUI(){
-  document.getElementById("hitRateMini").textContent=`${stats.hitRate||0}%`;
-  document.getElementById("picksMini").textContent=stats.totalPicks||0;
-  document.getElementById("winsMini").textContent=stats.wins||0;
-  document.getElementById("streakMini").textContent=stats.currentStreak||0;
+  document.getElementById("pointsMini").textContent =
+  `${Number(profile?.points || 0).toLocaleString()}P`;
 
+document.getElementById("streakMini").textContent =
+  `${stats.currentStreak || 0}🔥`;
+
+document.getElementById("rankMini").textContent =
+  leaderboard?.length ? "TOP" : "-";
+  
   document.getElementById("profileTitle").textContent=profile?.nickname||"PROFILE";
   document.getElementById("profileSub").textContent=`초대코드 ${profile?.referral_code||"-"}`;
   document.getElementById("modalCredit").textContent=Number(profile?.points||0).toLocaleString();
