@@ -10,7 +10,21 @@ const supabase = createClient(
 );
 
 const MAX_OPEN = 35;
+const MIN_OPEN = 16;
 const CREATE_LIMIT = 12;
+const BATCH_SIZE = 8;
+
+const CORE_REGION_NAMES = [
+  "서울 · 강남역",
+  "서울 · 성수동",
+  "서울 · 잠실",
+  "서울 · 홍대입구",
+  "서울 · 여의도",
+  "서울 · 광화문",
+  "경기 · 판교",
+  "부산 · 해운대",
+  "제주 · 제주공항"
+];
 
 const REGIONS = [
   { country:"KR", name:"서울 · 강남역", short:"강남역", lat:37.4979, lon:127.0276, type:"commute" },
@@ -187,6 +201,7 @@ function titleFor(region, category, slot){
   if(region.type === "river") return `${place} · ${t}까지 한강 나가기 괜찮을까?`;
   if(region.type === "travel") return `${place} · ${t}까지 여행하기 괜찮을까?`;
   if(region.type === "night") return `${place} · ${t}까지 밤외출 괜찮을까?`;
+  if(region.type === "commute") return `${place} · ${t}까지 이동 괜찮을까?`;
 
   return `${place} · ${t}까지 외출 괜찮을까?`;
 }
@@ -239,7 +254,7 @@ function makeMarket(region, weather, air, slot){
       category:"rain",
       priority:rainProb >= 80 || precipitation > 0 ? 100 : 82,
       official_forecast:`비 가능성 ${rainProb}%`,
-      threshold:0.1
+      issue:true
     });
   }
 
@@ -248,7 +263,7 @@ function makeMarket(region, weather, air, slot){
       category:"dust",
       priority:pm25 >= 50 || pm10 >= 120 ? 92 : 78,
       official_forecast:`PM2.5 ${Math.round(pm25)} · PM10 ${Math.round(pm10)}`,
-      threshold:pm25 >= 35 ? 35 : 80
+      issue:true
     });
   }
 
@@ -257,14 +272,14 @@ function makeMarket(region, weather, air, slot){
       category:"wind",
       priority:95,
       official_forecast:`강풍 ${wind.toFixed(1)}m/s`,
-      threshold:14
+      issue:true
     });
   }else if(wind >= 8){
     candidates.push({
       category:"wind",
       priority:75,
       official_forecast:`바람 ${wind.toFixed(1)}m/s`,
-      threshold:8
+      issue:true
     });
   }
 
@@ -273,7 +288,7 @@ function makeMarket(region, weather, air, slot){
       category:"heat",
       priority:72,
       official_forecast:`체감 ${Math.round(feels)}°`,
-      threshold:30
+      issue:true
     });
   }
 
@@ -282,7 +297,7 @@ function makeMarket(region, weather, air, slot){
       category:"cold",
       priority:72,
       official_forecast:`체감 ${Math.round(feels)}°`,
-      threshold:3
+      issue:true
     });
   }
 
@@ -291,16 +306,18 @@ function makeMarket(region, weather, air, slot){
       category:"humidity",
       priority:62,
       official_forecast:`습도 ${Math.round(humidity)}%`,
-      threshold:80
+      issue:true
     });
   }
 
   if(!candidates.length){
+    const coreBonus = CORE_REGION_NAMES.includes(region.name) ? 20 : 0;
+
     candidates.push({
       category:"activity",
-      priority:40,
+      priority:40 + coreBonus,
       official_forecast:`비 가능성 ${rainProb}% · 체감 ${Math.round(feels)}°`,
-      threshold:0
+      issue:false
     });
   }
 
@@ -312,7 +329,7 @@ function makeMarket(region, weather, air, slot){
     category:chosen.category,
     priority:chosen.priority,
     official_forecast:chosen.official_forecast,
-    threshold:chosen.threshold
+    issue:chosen.issue
   };
 }
 
@@ -377,7 +394,7 @@ export default async function handler(req, res){
       activeOpen.map(p => `${p.region}_${p.time_slot}_${p.target_time}`)
     );
 
-    const prepared = await fetchInBatches(REGIONS, 8, async region => {
+    const prepared = await fetchInBatches(REGIONS, BATCH_SIZE, async region => {
       const { weather, air } = await fetchWeather(region);
       const market = makeMarket(region, weather, air, slot);
 
@@ -387,17 +404,30 @@ export default async function handler(req, res){
       };
     });
 
-    prepared.sort((a,b) => b.market.priority - a.market.priority);
+    const issueMarkets = prepared
+      .filter(x => x.market.issue)
+      .sort((a,b) => b.market.priority - a.market.priority);
 
+    const fallbackMarkets = prepared
+      .filter(x => !x.market.issue)
+      .sort((a,b) => b.market.priority - a.market.priority);
+
+    const neededByMinOpen = Math.max(0, MIN_OPEN - activeOpen.length);
     const available = Math.max(0, MAX_OPEN - activeOpen.length);
-    const targetLimit = Math.min(CREATE_LIMIT, available);
+    const targetLimit = Math.min(
+      Math.max(CREATE_LIMIT, neededByMinOpen),
+      available
+    );
+
+    const selected = [
+      ...issueMarkets,
+      ...fallbackMarkets
+    ].slice(0, targetLimit);
 
     const created = [];
     const skipped = [];
 
-    for(const item of prepared){
-      if(created.length >= targetLimit) break;
-
+    for(const item of selected){
       const { region, market } = item;
       const key = `${region.name}_${slot.key}_${slot.target_time}`;
 
@@ -454,11 +484,14 @@ export default async function handler(req, res){
 
       created.push(data);
       existingKeys.add(key);
+
+      if(created.length >= targetLimit) break;
     }
 
     return json(res, 200, {
       ok:true,
       message:`신규 예측 ${created.length}개 생성 완료`,
+      mode:"wide_pool_issue_first_with_fallback",
       time_slot:{
         key:slot.key,
         label:slot.label,
@@ -469,7 +502,9 @@ export default async function handler(req, res){
       },
       total_regions:REGIONS.length,
       open_count:activeOpen.length,
-      prepared_count:prepared.length,
+      issue_candidates:issueMarkets.length,
+      fallback_candidates:fallbackMarkets.length,
+      selected_count:selected.length,
       created_count:created.length,
       skipped_count:skipped.length,
       skipped,
