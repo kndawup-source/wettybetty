@@ -86,57 +86,57 @@ function getTimeSlot(){
   const hour = now.getHours();
   const isWeekend = day === 0 || day === 6;
 
-  if(isWeekend && hour < 16){
+  if(isWeekend && hour < 18){
     return {
       key:"weekend",
       label:"주말나들이",
       targetHour:18,
-      closeHour:16,
-      close_time:makeKstDate(16,0),
+      closeHour:18,
+      close_time:makeKstDate(18,0),
       target_time:makeKstDate(18,0)
     };
   }
 
-  if(hour < 7){
+  if(hour < 9){
     return {
       key:"morning",
       label:"출근길",
       targetHour:9,
-      closeHour:7,
-      close_time:makeKstDate(7,0),
+      closeHour:9,
+      close_time:makeKstDate(9,0),
       target_time:makeKstDate(9,0)
     };
   }
 
-  if(hour < 12){
+  if(hour < 14){
     return {
       key:"lunch",
       label:"점심시간",
       targetHour:14,
-      closeHour:12,
-      close_time:makeKstDate(12,0),
+      closeHour:14,
+      close_time:makeKstDate(14,0),
       target_time:makeKstDate(14,0)
-    };
-  }
-
-  if(hour < 17){
-    return {
-      key:"evening",
-      label:"퇴근길",
-      targetHour:20,
-      closeHour:17,
-      close_time:makeKstDate(17,0),
-      target_time:makeKstDate(20,0)
     };
   }
 
   if(hour < 20){
     return {
+      key:"evening",
+      label:"퇴근길",
+      targetHour:20,
+      closeHour:20,
+      close_time:makeKstDate(20,0),
+      target_time:makeKstDate(20,0)
+    };
+  }
+
+  if(hour < 23){
+    return {
       key:"night",
       label:"밤외출",
       targetHour:23,
-      closeHour:20,
-      close_time:makeKstDate(20,0),
+      closeHour:23,
+      close_time:makeKstDate(23,0),
       target_time:makeKstDate(23,0)
     };
   }
@@ -145,8 +145,8 @@ function getTimeSlot(){
     key:"morning",
     label:"내일 출근길",
     targetHour:9,
-    closeHour:7,
-    close_time:makeKstDate(7,0,1),
+    closeHour:9,
+    close_time:makeKstDate(9,0,1),
     target_time:makeKstDate(9,0,1)
   };
 }
