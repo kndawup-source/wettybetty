@@ -481,8 +481,7 @@ async function loadCurrentWeather(){
       const w=await fetchRegionWeather(lat,lon);
       if(!w){setWeatherFallback();return;}
 
-document.getElementById("currentTemp").innerHTML =
-  `${Math.round(w.temp)}<span>°</span>`;
+document.getElementById("currentTemp").innerHTML=`${Math.round(w.temp)}<span>°</span>`;
       document.getElementById("feelsLike").textContent=`${Math.round(w.feelsLike)}°`;
       document.getElementById("rainChance").textContent=`${w.rainProb}%`;
       document.getElementById("windSpeed").textContent=`${w.wind.toFixed(1)}m/s`;
