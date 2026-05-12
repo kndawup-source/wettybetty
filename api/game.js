@@ -11,11 +11,12 @@ const supabase = createClient(
 
 function calcLeaderboard(scoreRows = [], profiles = []) {
   const profileMap = new Map();
+
   profiles.forEach(p => {
     profileMap.set(p.user_key, {
       nickname: p.nickname,
-      points: p.points || 0,
-      streak: p.streak || 0
+      points: Number(p.points || 0),
+      streak: Number(p.streak || 0)
     });
   });
 
@@ -24,6 +25,7 @@ function calcLeaderboard(scoreRows = [], profiles = []) {
   scoreRows.forEach(row => {
     if (!map.has(row.user_key)) {
       const p = profileMap.get(row.user_key) || {};
+
       map.set(row.user_key, {
         nickname: p.nickname || "익명",
         points: p.points || 0,
@@ -38,15 +40,20 @@ function calcLeaderboard(scoreRows = [], profiles = []) {
     item.total += 1;
 
     const settled = row.status === "settled" || row.result;
+
     if (!settled) item.pending += 1;
     if (settled && row.is_correct === true) item.wins += 1;
   });
 
   return [...map.values()]
-    .map(x => ({
-      ...x,
-      hitRate: x.total ? Math.round((x.wins / Math.max(1, x.total - x.pending)) * 100) : 0
-    }))
+    .map(x => {
+      const settledTotal = Math.max(0, x.total - x.pending);
+
+      return {
+        ...x,
+        hitRate: settledTotal > 0 ? Math.round((x.wins / settledTotal) * 100) : 0
+      };
+    })
     .sort((a, b) => {
       if (b.hitRate !== a.hitRate) return b.hitRate - a.hitRate;
       if (b.streak !== a.streak) return b.streak - a.streak;
@@ -56,9 +63,15 @@ function calcLeaderboard(scoreRows = [], profiles = []) {
 }
 
 export default async function handler(req, res) {
-  try {
-    res.setHeader("Cache-Control", "no-store");
+  res.setHeader(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, proxy-revalidate"
+  );
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("Surrogate-Control", "no-store");
 
+  try {
     const userKey = String(req.query.userKey || "");
 
     const { data: predictions, error: pError } = await supabase
@@ -83,20 +96,24 @@ export default async function handler(req, res) {
     };
 
     if (userKey) {
-      const { data } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_key", userKey)
         .maybeSingle();
 
-      profile = data || null;
+      if (profileError) throw profileError;
 
-      const { data: history } = await supabase
+      profile = profileData || null;
+
+      const { data: history, error: historyError } = await supabase
         .from("user_score_history")
         .select("*")
         .eq("user_key", userKey)
         .order("created_at", { ascending: false })
         .limit(30);
+
+      if (historyError) throw historyError;
 
       scoreHistory = history || [];
 
@@ -106,8 +123,12 @@ export default async function handler(req, res) {
       const pending = scoreHistory.length - settled.length;
 
       let streak = 0;
+
       for (const item of scoreHistory) {
-        if (!(item.status === "settled" || item.result)) continue;
+        const isSettled = item.status === "settled" || item.result;
+
+        if (!isSettled) continue;
+
         if (item.is_correct === true) streak++;
         else break;
       }
@@ -133,36 +154,41 @@ export default async function handler(req, res) {
       });
     }
 
-    const [votesResult, commentsResult, reactionsResult, allHistoryResult, profilesResult] =
-      await Promise.all([
-        supabase
-          .from("votes")
-          .select("prediction_id, choice, stake, user_key")
-          .in("prediction_id", predictionIds),
+    const [
+      votesResult,
+      commentsResult,
+      reactionsResult,
+      allHistoryResult,
+      profilesResult
+    ] = await Promise.all([
+      supabase
+        .from("votes")
+        .select("prediction_id, choice, stake, user_key")
+        .in("prediction_id", predictionIds),
 
-        supabase
-          .from("comments")
-          .select("id, prediction_id, nickname, body, created_at")
-          .in("prediction_id", predictionIds)
-          .eq("is_hidden", false)
-          .order("created_at", { ascending: false })
-          .limit(160),
+      supabase
+        .from("comments")
+        .select("id, prediction_id, nickname, body, created_at")
+        .in("prediction_id", predictionIds)
+        .eq("is_hidden", false)
+        .order("created_at", { ascending: false })
+        .limit(160),
 
-        supabase
-          .from("reactions")
-          .select("prediction_id, type")
-          .in("prediction_id", predictionIds),
+      supabase
+        .from("reactions")
+        .select("prediction_id, type")
+        .in("prediction_id", predictionIds),
 
-        supabase
-          .from("user_score_history")
-          .select("user_key, status, result, is_correct, stake")
-          .limit(1000),
+      supabase
+        .from("user_score_history")
+        .select("user_key, status, result, is_correct, stake")
+        .limit(1000),
 
-        supabase
-          .from("profiles")
-          .select("user_key, nickname, points, streak")
-          .limit(500)
-      ]);
+      supabase
+        .from("profiles")
+        .select("user_key, nickname, points, streak")
+        .limit(500)
+    ]);
 
     if (votesResult.error) throw votesResult.error;
     if (commentsResult.error) throw commentsResult.error;
@@ -179,9 +205,11 @@ export default async function handler(req, res) {
       profilesResult.data || []
     );
 
-    const enriched = predictions.map(p => {
+    const enriched = (predictions || []).map(p => {
       const pVotes = votes.filter(v => v.prediction_id === p.id);
-      const pComments = comments.filter(c => c.prediction_id === p.id).slice(0, 8);
+      const pComments = comments
+        .filter(c => c.prediction_id === p.id)
+        .slice(0, 8);
       const pReactions = reactions.filter(r => r.prediction_id === p.id);
 
       const rainStake = pVotes
@@ -192,16 +220,18 @@ export default async function handler(req, res) {
         .filter(v => v.choice === "clear")
         .reduce((sum, v) => sum + Number(v.stake || 0), 0);
 
-      const total = rainStake + clearStake || 1;
-      const rainPercent = Math.round((rainStake / total) * 100);
+      const totalStake = rainStake + clearStake;
+      const totalForPercent = totalStake || 1;
+      const rainPercent = Math.round((rainStake / totalForPercent) * 100);
+      const clearPercent = totalStake > 0 ? 100 - rainPercent : 50;
 
       return {
         ...p,
         rainStake,
         clearStake,
-        totalStake: rainStake + clearStake,
-        rainPercent,
-        clearPercent: 100 - rainPercent,
+        totalStake,
+        rainPercent: totalStake > 0 ? rainPercent : 50,
+        clearPercent,
         myVote: pVotes.find(v => v.user_key === userKey) || null,
         comments: pComments,
         reactionCount: {
@@ -221,6 +251,9 @@ export default async function handler(req, res) {
       predictions: enriched
     });
   } catch (e) {
-    return res.status(500).json({ ok: false, message: e.message });
+    return res.status(500).json({
+      ok: false,
+      message: e.message || "server error"
+    });
   }
 }
