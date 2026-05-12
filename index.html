@@ -19,9 +19,7 @@
 html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif}
 button,input{font-family:inherit}
 button{cursor:pointer;border:0;transition:.12s}
-button:active{
-  filter:brightness(1.08);
-}
+button:active{transform:scale(.96);filter:brightness(1.12)}
 button:disabled{opacity:.45;cursor:not-allowed}
 .app{
   width:100%;max-width:480px;margin:0 auto;min-height:100dvh;padding:16px 16px 56px;
@@ -30,68 +28,14 @@ button:disabled{opacity:.45;cursor:not-allowed}
     radial-gradient(circle at 100% 12%,rgba(130,199,255,.08),transparent 32%),
     linear-gradient(180deg,#07121c 0%,#050d16 46%,#050d16 100%);
 }
-.header{
-  min-height:52px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-  margin-bottom:12px;
-}
-
-.logo{
-  font-family:'Syne',sans-serif;
-  font-size:20px;
-  font-weight:900;
-  letter-spacing:-0.8px;
-  line-height:1;
-  display:block;
-  white-space:nowrap;
-  flex-shrink:0;
-}
-
-.logo span{
-  color:var(--accent);
-}
-
-.sub{
-  display:none;
-}
-
-.profileChip{
-  width:138px;
-  height:52px;
-  padding:8px 10px;
-  border-radius:18px;
-  background:rgba(255,255,255,.045);
-  border:1px solid var(--line);
-  text-align:right;
-}
-
-.profileName{
-  color:var(--soft);
-  font-size:11px;
-  font-weight:900;
-  overflow:hidden;
-  white-space:nowrap;
-  text-overflow:ellipsis;
-}
-
-.points{
-  margin-top:3px;
-  color:var(--accent);
-  font-size:12px;
-  font-weight:900;
-  overflow:hidden;
-  white-space:nowrap;
-  text-overflow:ellipsis;
-}
-.scoreBar{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
-  margin-bottom:14px;
-}
+.header{height:58px;display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.logo{font-family:'Syne',sans-serif;font-size:23px;font-weight:900;letter-spacing:-1px}
+.logo span{color:var(--accent)}
+.sub{margin-top:5px;color:var(--muted);font-size:10px;font-weight:900;letter-spacing:1px}
+.profileChip{width:138px;padding:9px 10px;border-radius:18px;background:rgba(255,255,255,.045);border:1px solid var(--line);text-align:right}
+.profileName{color:var(--soft);font-size:11px;font-weight:900;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.points{margin-top:3px;color:var(--accent);font-size:12px;font-weight:900;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.scoreBar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
 .scoreBar button,.scoreBar div{min-height:52px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid var(--line);padding:9px 8px;text-align:left}
 .scoreBar span{display:block;color:var(--muted);font-size:9px;font-weight:900;letter-spacing:.7px}
 .scoreBar b{display:block;margin-top:5px;color:var(--text);font-size:15px;font-weight:900}
@@ -103,20 +47,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .weatherTemp{margin-top:10px;font-family:'Syne',sans-serif;font-size:74px;line-height:.82;letter-spacing:-4px;font-weight:900}
 .weatherTemp span{font-size:.42em;vertical-align:top;position:relative;top:10px;margin-left:2px}
 .weatherDesc{margin-top:12px;color:var(--muted);font-size:13px;line-height:1.55;max-width:260px}
-.weatherIcon{
-  width:76px;
-  height:76px;
-  flex:0 0 76px;
-  border-radius:24px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:rgba(255,255,255,.055);
-  border:1px solid var(--line);
-  font-size:34px;
-  line-height:1;
-  transform:translateY(1px);
-}
+.weatherIcon{width:76px;height:76px;flex:0 0 76px;border-radius:24px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.055);border:1px solid var(--line);font-size:34px;line-height:1}
 .weatherGrid{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
 .weatherGrid div{padding:12px 8px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
 .weatherGrid span{display:block;color:var(--muted);font-size:9px;font-weight:900;white-space:nowrap}
@@ -126,9 +57,6 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .hotPickTitle{margin-top:8px;font-size:17px;line-height:1.28;font-weight:900}
 .hotPickMeta{margin-top:8px;display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px;font-weight:900}
 .actions{position:relative;z-index:3;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-.actions.single{
-  grid-template-columns:1fr;
-}
 .btn{position:relative;z-index:2;height:44px;border-radius:15px;font-size:12px;font-weight:900;background:#dff56a;color:#07100d;box-shadow:none;overflow:hidden}
 .btn.dark{background:#111d27;color:var(--text);border:1px solid var(--line)}
 .board{border:1px solid var(--line);background:rgba(255,255,255,.035);border-radius:22px;padding:14px;margin:12px 0 16px}
@@ -140,40 +68,18 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .boardTitle{font-size:13px;font-weight:900}
 .boardSub{margin-top:3px;color:var(--muted);font-size:11px}
 .boardRight{color:var(--accent);font-size:13px;font-weight:900;white-space:nowrap}
-#rankBoard .boardItem:nth-child(1){
-  background:rgba(255,215,0,.06);
-  border-radius:16px;
-  padding-left:10px;
-  padding-right:10px;
-}
-
-#rankBoard .boardItem:nth-child(2){
-  background:rgba(192,192,192,.05);
-  border-radius:16px;
-  padding-left:10px;
-  padding-right:10px;
-}
-
-#rankBoard .boardItem:nth-child(3){
-  background:rgba(205,127,50,.05);
-  border-radius:16px;
-  padding-left:10px;
-  padding-right:10px;
-}
 .sectionHead{display:flex;justify-content:space-between;align-items:center;margin:18px 2px 10px}
 .sectionHead h2{font-size:15px;font-weight:900}
 .sectionHead span{color:var(--muted);font-size:11px;font-weight:900}
 .card{border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.052),rgba(255,255,255,.02)),var(--panel);border-radius:25px;padding:16px;margin:10px 0;box-shadow:0 16px 42px rgba(0,0,0,.23)}
-.card.small{
-  padding:16px;border-radius:25px;box-shadow:none}
+.card.small{padding:13px;border-radius:20px;box-shadow:none}
 .marketTop{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .badge{display:inline-flex;padding:6px 10px;border-radius:999px;background:rgba(130,199,255,.095);border:1px solid rgba(130,199,255,.14);color:var(--blue);font-size:10px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .timer{color:var(--muted);font-size:10px;font-weight:900}
 .timer.urgent{color:#ff8d8d;animation:pulse 1s infinite}
 @keyframes pulse{0%{opacity:1}50%{opacity:.45}100%{opacity:1}}
 .card-title{margin-top:12px;font-size:22px;line-height:1.25;letter-spacing:-.8px;font-weight:900}
-.card.small .card-title{
-  font-size:18px;margin-top:12px}
+.card.small .card-title{font-size:15px;margin-top:9px}
 .marketStatus{display:inline-flex;margin-top:10px;padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.055);border:1px solid var(--line);color:var(--soft);font-size:10px;font-weight:900}
 .marketStatus.hot{color:#ffda6a;border-color:rgba(255,218,106,.22);background:rgba(255,218,106,.09)}
 .marketStatus.debate{color:var(--blue);border-color:rgba(130,199,255,.2);background:rgba(130,199,255,.08)}
@@ -197,7 +103,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .stakes{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
 .stakes button{height:38px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--soft);border-radius:13px;font-size:12px;font-weight:900}
 .stakes button.active{background:var(--text);color:#050d16}
-
+.pickBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.pickBtns button{height:46px;border-radius:15px;font-size:14px;font-weight:900}
+.pickBtns .rain{background:rgba(130,199,255,.14);border:1px solid rgba(130,199,255,.27);color:var(--blue)}
+.pickBtns .clear{background:rgba(184,255,122,.12);border:1px solid rgba(184,255,122,.24);color:var(--green)}
 .myPick{margin-top:13px;padding:12px;border-radius:15px;background:rgba(223,245,106,.075);border:1px solid rgba(223,245,106,.17);color:var(--accent);font-size:12px;font-weight:900}
 .mood{margin-top:15px;border-top:1px solid var(--line);padding-top:13px}
 .moodTitle{display:flex;justify-content:space-between;gap:8px;color:var(--soft);font-size:11px;font-weight:900;margin-bottom:9px}
@@ -242,136 +151,6 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .empty{padding:20px 0;text-align:center;color:var(--muted);font-size:13px}
 .liveToast{position:fixed;left:50%;bottom:78px;width:calc(100% - 32px);max-width:448px;transform:translateX(-50%) translateY(12px);opacity:0;z-index:210;padding:13px 15px;border-radius:18px;background:rgba(11,22,32,.96);border:1px solid rgba(223,245,106,.18);color:var(--text);font-size:13px;font-weight:900;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:.22s ease;backdrop-filter:blur(10px)}
 .liveToast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-.pickFlash{
-  animation:pickFlash .34s ease;
-}
-
-@keyframes pickFlash{
-  0%{transform:scale(1);filter:brightness(1)}
-  45%{transform:scale(1.05);filter:brightness(1.45)}
-  100%{transform:scale(1);filter:brightness(1)}
-}
-
-.confirmDim{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.54);
-  backdrop-filter:blur(4px);
-  z-index:299;
-  opacity:0;
-  pointer-events:none;
-  transition:.18s;
-}
-
-.confirmDim.show{
-  opacity:1;
-  pointer-events:auto;
-}
-
-.confirmSheet{
-  position:fixed;
-  left:0;
-  right:0;
-  bottom:0;
-  z-index:300;
-  padding:18px 16px calc(18px + env(safe-area-inset-bottom));
-  background:#0b1620;
-  border-top-left-radius:28px;
-  border-top-right-radius:28px;
-  border-top:1px solid rgba(255,255,255,.08);
-  box-shadow:0 -20px 50px rgba(0,0,0,.45);
-  transform:translateY(110%);
-  transition:transform .22s ease;
-}
-
-.confirmSheet.show{
-  transform:translateY(0);
-}
-
-.confirmLabel{
-  color:var(--accent);
-  font-size:11px;
-  font-weight:900;
-  letter-spacing:.7px;
-}
-
-.confirmTitle{
-  margin-top:7px;
-  font-size:20px;
-  line-height:1.35;
-  font-weight:900;
-}
-
-.confirmMeta{
-  margin-top:10px;
-  color:var(--muted);
-  font-size:12px;
-  line-height:1.5;
-}
-
-.confirmActions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-  margin-top:18px;
-}
-
-.confirmActions button{
-  height:50px;
-  border-radius:16px;
-  font-size:14px;
-  font-weight:900;
-}
-
-.confirmCancel{
-  background:rgba(255,255,255,.06);
-  border:1px solid var(--line);
-  color:var(--text);
-}
-
-.confirmSubmit{
-  background:var(--accent);
-  color:#07100d;
-}
-.confirmSubmit.loading{
-  opacity:.7;
-  pointer-events:none;
-}
-.odd{
-  position:relative;
-  overflow:hidden;
-  will-change:transform;
-  transform:translateZ(0);
-  cursor:pointer;
-}
-
-.odd:active{
-  transform:scale(.92);
-  filter:brightness(1.22);
-}
-
-.odd::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:rgba(255,255,255,.06);
-  opacity:0;
-  transition:.12s;
-  pointer-events:none;
-}
-
-.odd:active::after{
-  opacity:1;
-}
-
-.odd.selected{
-  transform:scale(.96);
-  filter:brightness(1.2);
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.16),
-    0 0 28px rgba(255,255,255,.16);
-}
 </style>
 </head>
 
@@ -389,30 +168,16 @@ button:disabled{opacity:.45;cursor:not-allowed}
   </header>
 
   <section class="scoreBar">
-
-  <div>
-    <span>보유 포인트</span>
-    <b id="pointsMini">0P</b>
-  </div>
-
-  <div>
-    <span>현재 연승</span>
-    <b id="streakMini">0🔥</b>
-  </div>
-
-  <button onclick="openProfile()">
-    <span>주간 랭킹</span>
-    <b id="rankMini">LIVE</b>
-  </button>
-
-</section>
+    <button onclick="openProfile()"><span>적중률</span><b id="hitRateMini">0%</b></button>
+    <div><span>참여</span><b id="picksMini">0</b></div>
+    <div><span>적중</span><b id="winsMini">0</b></div>
+    <div><span>연승</span><b id="streakMini">0</b></div>
+  </section>
 
   <section class="weatherBoard">
     <div class="weatherTop">
       <div>
-        <div class="kicker" id="weatherRegion">
-  현재 위치
-</div>
+        <div class="kicker">현재 날씨</div>
         <h1 class="weatherTemp" id="currentTemp">--°</h1>
         <p class="weatherDesc" id="currentDesc">위치 권한을 허용하면 현재 날씨가 표시됩니다.</p>
       </div>
@@ -439,6 +204,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
     </div>
   </section>
 
+  <div class="actions">
+    <button class="btn" id="checkinBtn" onclick="checkin()">출석 포인트 받기</button>
+    <button class="btn dark" onclick="copyInvite()">친구 초대</button>
+  </div>
 
   <section class="board" id="nearBoard" style="display:none">
     <div class="boardHead"><h2>지금 근처 예측</h2><span>NEARBY</span></div>
@@ -446,18 +215,12 @@ button:disabled{opacity:.45;cursor:not-allowed}
   </section>
 
   <section class="board">
-    <div class="boardHead">
-  <h2>실시간 HOT 지역</h2>
-  <span>TRENDING</span>
-</div>
+    <div class="boardHead"><h2>지금 몰리는 지역</h2><span>LIVE</span></div>
     <div id="hotList"></div>
   </section>
 
   <section class="board" id="rankBoard">
-    <div class="boardHead">
-  <h2>주간 TOP 예측가</h2>
-  <span>THIS WEEK</span>
-</div>
+    <div class="boardHead"><h2>오늘의 TOP 예측가</h2><span>RANKING</span></div>
     <div id="rankList"></div>
   </section>
 
@@ -484,10 +247,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
   <div class="modalCard">
     <h2>닉네임 만들기</h2>
     <p>첫 접속 보너스로 10,000 포인트를 지급합니다.</p>
-    <input id="nickInput" placeholder="닉네임 입력" maxlength="12" />
-<input id="pinInput" placeholder="PIN 4자리" maxlength="4" inputmode="numeric" />
-<button class="btn" onclick="createProfile()">로그인 / 시작하기</button>
-
+    <input id="nickInput" placeholder="닉네임 입력" maxlength="12" onkeydown="if(event.key==='Enter')createProfile()" />
+    <button class="btn" onclick="createProfile()">시작하기</button>
   </div>
 </div>
 
@@ -502,39 +263,20 @@ button:disabled{opacity:.45;cursor:not-allowed}
     </div>
     <div class="profileStats">
       <div><span>포인트</span><b id="modalCredit">0</b></div>
-      <div>
-  <span>누적 적중률</span>
-  <b id="modalHitRate">0%</b>
-</div>
+      <div><span>적중률</span><b id="modalHitRate">0%</b></div>
       <div><span>연승</span><b id="modalStreak">0</b></div>
       <div><span>참여</span><b id="modalPicks">0</b></div>
       <div><span>적중</span><b id="modalWins">0</b></div>
       <div><span>대기</span><b id="modalPending">0</b></div>
     </div>
     <button class="btn dark" onclick="copyInvite()">초대코드 복사</button>
-    <button class="btn dark" onclick="logout()" style="margin-top:8px">
-  로그아웃
-</button>
     <div class="historyTitle">최근 기록</div>
     <div id="historyList"></div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
-<div class="confirmDim" id="confirmDim" onclick="closeConfirm()"></div>
 
-<div class="confirmSheet" id="confirmSheet">
-  <div>
-    <div class="confirmLabel">FINAL CONFIRM</div>
-    <div class="confirmTitle" id="confirmTitle">예측 참여</div>
-    <div class="confirmMeta" id="confirmMeta">선택 내용을 확인해주세요.</div>
-  </div>
-
-  <div class="confirmActions">
-    <button class="confirmCancel" onclick="closeConfirm()">취소</button>
-    <button class="confirmSubmit" id="confirmSubmitBtn">참여하기</button>
-  </div>
-</div>
 <script>
 const API_GAME="/api/game";
 const API_ACTION="/api/action";
@@ -554,8 +296,6 @@ let liveBuzzTimer=null;
 let lastBuzzKey="";
 let toastTimer=null;
 let isLoading=false;
-let isVoting=false;
-let pendingVote=null;
 
 const regionWeatherCache=new Map();
 const REGION_WEATHER_TTL=10*60*1000;
@@ -616,76 +356,20 @@ function remaining(closeTime){
 
 function distanceKm(a,b,c,d){
   if(a==null||b==null||c==null||d==null) return 99999;
-
   const R=6371;
   const dLat=(c-a)*Math.PI/180;
   const dLon=(d-b)*Math.PI/180;
-
-  const x =
-    Math.sin(dLat/2)**2 +
-    Math.cos(a*Math.PI/180) *
-    Math.cos(c*Math.PI/180) *
-    Math.sin(dLon/2)**2;
-
-  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
-}
-
-async function reverseGeocode(lat, lon){
-  try{
-    const url =
-      `https://nominatim.openstreetmap.org/reverse` +
-      `?format=jsonv2&lat=${lat}&lon=${lon}`;
-
-    const res = await fetch(url,{
-      headers:{
-        "Accept":"application/json"
-      },
-      cache:"no-store"
-    });
-
-    if(!res.ok) return null;
-
-    const json = await res.json();
-    const addr = json.address || {};
-
-    return (
-      addr.suburb ||
-      addr.borough ||
-      addr.city_district ||
-      addr.quarter ||
-      addr.town ||
-      addr.county ||
-      addr.city ||
-      "현재 위치"
-    );
-
-  }catch(e){
-    return null;
-  }
+  const x=Math.sin(dLat/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
 }
 
 function weatherText(code,rainProb,precipitation){
-  if((precipitation||0)>0){
-    return {label:"🌧️",desc:"현재 비가 감지되고 있습니다."};
-  }
-
-  if(rainProb>=70){
-    return {label:"☔",desc:"강수 가능성이 높습니다."};
-  }
-
-  if(rainProb>=40){
-    return {label:"🌦️",desc:"비 가능성이 애매하게 걸려 있습니다."};
-  }
-
-  if([0,1].includes(code)){
-    return {label:"☀️",desc:"현재는 비교적 맑습니다."};
-  }
-
-  if([2,3,45,48].includes(code)){
-    return {label:"☁️",desc:"구름이 많습니다."};
-  }
-
-  return {label:"🌤️",desc:"현재 날씨 기준으로 예측 흐름을 확인해보세요."};
+  if((precipitation||0)>0) return{label:"🌧️",desc:"현재 비가 감지되고 있습니다."};
+  if(rainProb>=70) return{label:"☔",desc:"강수 가능성이 높습니다."};
+  if(rainProb>=40) return{label:"🌦️",desc:"비 가능성이 애매하게 걸려 있습니다."};
+  if([0,1].includes(code)) return{label:"☀️",desc:"현재는 비교적 맑습니다."};
+  if([2,3,45,48].includes(code)) return{label:"☁️",desc:"구름이 많습니다."};
+  return{label:"🌤️",desc:"현재 날씨 기준으로 예측 흐름을 확인해보세요."};
 }
 
 async function fetchRegionWeather(lat,lon){
@@ -753,12 +437,6 @@ async function loadCurrentWeather(){
       const lat=pos.coords.latitude;
       const lon=pos.coords.longitude;
       userLocation={lat,lon};
-      const regionName = await reverseGeocode(lat, lon);
-
-document.getElementById("weatherRegion").textContent =
-  regionName
-    ? `📍 ${regionName}`
-    : "현재 위치";
 
       const w=await fetchRegionWeather(lat,lon);
       if(!w){setWeatherFallback();return;}
@@ -824,16 +502,6 @@ async function load(){
     document.getElementById("nickname").textContent=profile.nickname || "Player";
     document.getElementById("pointsEl").textContent=`${Number(profile.points||0).toLocaleString()}P`;
 
-    const todayKey=new Date().toLocaleDateString("sv-SE",{
-  timeZone:"Asia/Seoul"
-});
-const lastCheckin=localStorage.getItem("wetty_last_checkin");
-
-if(profile && lastCheckin!==todayKey){
-  localStorage.setItem("wetty_last_checkin",todayKey);
-  checkin(true);
-}
-
     updateStatsUI();
     renderHotList();
     renderNearList();
@@ -849,57 +517,11 @@ if(profile && lastCheckin!==todayKey){
 }
 
 function sortedPredictions(){
-
-  const now = Date.now();
-
   return [...predictions].sort((a,b)=>{
-
-    const aClosed =
-      a.status !== "open" ||
-      new Date(a.close_time).getTime() <= now;
-
-    const bClosed =
-      b.status !== "open" ||
-      new Date(b.close_time).getTime() <= now;
-
-    if(aClosed !== bClosed){
-      return aClosed ? 1 : -1;
-    }
-
-    let aDistance = 9999;
-    let bDistance = 9999;
-
-    if(userLocation){
-      aDistance = distanceKm(
-        userLocation.lat,
-        userLocation.lon,
-        a.lat,
-        a.lon
-      );
-
-      bDistance = distanceKm(
-        userLocation.lat,
-        userLocation.lon,
-        b.lat,
-        b.lon
-      );
-    }
-
-    const aHot = (a.totalStake || 0) + (a.priority || 0);
-    const bHot = (b.totalStake || 0) + (b.priority || 0);
-
-    if(aDistance !== bDistance){
-      return aDistance - bDistance;
-    }
-
-    if(bHot !== aHot){
-      return bHot - aHot;
-    }
-
-    return (
-      new Date(a.close_time).getTime() -
-      new Date(b.close_time).getTime()
-    );
+    const scoreA=(a.totalStake||0)+(a.priority||0);
+    const scoreB=(b.totalStake||0)+(b.priority||0);
+    if(scoreB!==scoreA) return scoreB-scoreA;
+    return new Date(a.close_time)-new Date(b.close_time);
   });
 }
 
@@ -945,15 +567,11 @@ function marketStatus(p){
 }
 
 function updateStatsUI(){
-  document.getElementById("pointsMini").textContent =
-  `${Number(profile?.points || 0).toLocaleString()}P`;
+  document.getElementById("hitRateMini").textContent=`${stats.hitRate||0}%`;
+  document.getElementById("picksMini").textContent=stats.totalPicks||0;
+  document.getElementById("winsMini").textContent=stats.wins||0;
+  document.getElementById("streakMini").textContent=stats.currentStreak||0;
 
-document.getElementById("streakMini").textContent =
-  `${stats.currentStreak || 0}🔥`;
-
-document.getElementById("rankMini").textContent =
-  leaderboard?.length ? "TOP" : "-";
-  
   document.getElementById("profileTitle").textContent=profile?.nickname||"PROFILE";
   document.getElementById("profileSub").textContent=`초대코드 ${profile?.referral_code||"-"}`;
   document.getElementById("modalCredit").textContent=Number(profile?.points||0).toLocaleString();
@@ -1049,64 +667,27 @@ function renderHotPick(){
 }
 
 function renderRanking(){
-
   const box=document.getElementById("rankList");
   if(!box) return;
 
-  const weeklyRankers = leaderboard
-    .filter(u => (u.totalPicks || u.total || 0) >= 10)
-    .sort((a,b)=>{
-
-      const hitDiff =
-        (b.hitRate || 0) - (a.hitRate || 0);
-
-      if(hitDiff !== 0){
-        return hitDiff;
-      }
-
-      return (
-        (b.totalPicks || b.total || 0) -
-        (a.totalPicks || a.total || 0)
-      );
-    })
-    .slice(0,3);
-
-  if(!weeklyRankers.length){
-    box.innerHTML=`
-      <div class="empty">
-        아직 주간 랭킹 데이터가 없습니다.
-      </div>
-    `;
+  if(!leaderboard.length){
+    box.innerHTML=`<div class="empty">아직 랭킹 데이터가 없습니다.</div>`;
     return;
   }
 
-  const medals=["🥇","🥈","🥉"];
-
   box.innerHTML="";
-
-  weeklyRankers.forEach((u,idx)=>{
-
+  leaderboard.slice(0,3).forEach((u,idx)=>{
     const div=document.createElement("div");
     div.className="boardItem";
 
     const left=document.createElement("div");
-
-    left.innerHTML=`
-      <div class="boardTitle">
-        ${medals[idx]} ${u.nickname || "Player"}
-      </div>
-
-      <div class="boardSub">
-        최근 7일 기준 상위 예측가
-      </div>
-    `;
+    left.innerHTML=`<div class="boardTitle">${idx+1}. ${u.nickname||"Player"}</div><div class="boardSub">적중 ${u.wins||0} · 참여 ${u.totalPicks||u.total||0}</div>`;
 
     const right=document.createElement("div");
     right.className="boardRight";
-    right.textContent=`${u.hitRate || 0}%`;
+    right.textContent=`${u.hitRate||0}%`;
 
     div.append(left,right);
-
     box.appendChild(div);
   });
 }
@@ -1262,33 +843,18 @@ function createMarketCard(p,isSmall){
   meta.append(settle,official);
 
   const odds=document.createElement("div");
-odds.className="odds";
+  odds.className="odds";
 
-const rain=document.createElement("button");
-rain.className="odd rain";
-rain.disabled=closed || !!p.myVote || Number(profile?.points||0)<selectedStake;
+  const rain=document.createElement("div");
+  rain.className="odd rain";
+  rain.innerHTML=`<label>${labels.yes}</label><strong>${p.rainPercent}%</strong><small>${p.rainStake||0}P</small>`;
 
-rain.innerHTML=`
-  <label>${labels.yes}</label>
-  <strong>${p.rainPercent}%</strong>
-  <small>${p.rainStake||0}P 참여</small>
-`;
+  const clear=document.createElement("div");
+  clear.className="odd clear";
+  clear.innerHTML=`<label>${labels.no}</label><strong>${p.clearPercent}%</strong><small>${p.clearStake||0}P</small>`;
 
-rain.onclick=()=>vote(p.id,"rain",rain);
+  odds.append(rain,clear);
 
-const clear=document.createElement("button");
-clear.className="odd clear";
-clear.disabled=closed || !!p.myVote || Number(profile?.points||0)<selectedStake;
-
-clear.innerHTML=`
-  <label>${labels.no}</label>
-  <strong>${p.clearPercent}%</strong>
-  <small>${p.clearStake||0}P 참여</small>
-`;
-
-clear.onclick=()=>vote(p.id,"clear",clear);
-
-odds.append(rain,clear);
   const bar=document.createElement("div");
   bar.className="bar";
   bar.innerHTML=`<div class="fill" style="width:${Math.max(0,Math.min(100,p.rainPercent||0))}%"></div>`;
@@ -1315,41 +881,32 @@ odds.append(rain,clear);
     const stakes=document.createElement("div");
     stakes.className="stakes";
 
-[50,100,300,500].forEach(s=>{
-  const b=document.createElement("button");
-
-  b.textContent=`${s}P`;
-  b.dataset.stake=s;
-
-  if(s===selectedStake){
-    b.classList.add("active");
-  }
-
-  if(Number(profile?.points||0)<s){
-    b.disabled=true;
-  }
-
-  b.onclick=()=>{
-
-    selectedStake=s;
-
-    card.querySelectorAll(".stakes button").forEach(btn=>{
-      btn.classList.toggle(
-        "active",
-        Number(btn.dataset.stake) === selectedStake
-      );
+    [50,100,300,500].forEach(s=>{
+      const b=document.createElement("button");
+      b.textContent=`${s}P`;
+      if(s===selectedStake)b.classList.add("active");
+      if(Number(profile?.points||0)<s)b.disabled=true;
+      b.onclick=()=>{selectedStake=s;render();};
+      stakes.appendChild(b);
     });
 
-    card.querySelectorAll(".odd").forEach(btn=>{
-      btn.disabled =
-        Number(profile?.points || 0) < selectedStake;
-    });
-  };
+    const pickBtns=document.createElement("div");
+    pickBtns.className="pickBtns";
 
-  stakes.appendChild(b);
-});
+    const rainBtn=document.createElement("button");
+    rainBtn.className="rain";
+    rainBtn.textContent=labels.yes;
+    rainBtn.disabled=Number(profile?.points||0)<selectedStake;
+    rainBtn.onclick=()=>vote(p.id,"rain");
 
-    entry.append(stakes);
+    const clearBtn=document.createElement("button");
+    clearBtn.className="clear";
+    clearBtn.textContent=labels.no;
+    clearBtn.disabled=Number(profile?.points||0)<selectedStake;
+    clearBtn.onclick=()=>vote(p.id,"clear");
+
+    pickBtns.append(rainBtn,clearBtn);
+    entry.append(stakes,pickBtns);
     card.appendChild(entry);
   }
 
@@ -1472,184 +1029,53 @@ function closeProfile(){
 }
 
 async function createProfile(){
-  const nickname=document.getElementById("nickInput").value.trim();
-  const pin=document.getElementById("pinInput").value.trim();
+  const input=document.getElementById("nickInput");
+  const nickname=input.value.trim();
 
   if(nickname.length<2){
     toast("닉네임은 2자 이상 입력해주세요.");
     return;
   }
 
-  if(!/^\d{4}$/.test(pin)){
-    toast("PIN 4자리를 입력해주세요.");
-    return;
-  }
-
-  const json=await post("create_profile",{nickname,pin});
+  const json=await post("create_profile",{nickname});
 
   if(!json.ok){
-    toast(json.message || "로그인 실패");
+    toast(json.message || "가입 실패");
     return;
   }
 
-  toast(json.message || "로그인 완료");
-
-  if(json.profile?.user_key){
-    userKey=json.profile.user_key;
-    localStorage.setItem("wetty_user_key",userKey);
-  }
-
+  toast(json.message || "가입 완료");
   await load();
 }
 
-async function checkin(silent=false){
+async function checkin(){
   if(!profile){
-    if(!silent) toast("먼저 닉네임을 만들어주세요.");
+    toast("먼저 닉네임을 만들어주세요.");
     return;
   }
 
   const btn=document.getElementById("checkinBtn");
-  if(btn) btn.disabled=true;
+  btn.disabled=true;
 
   try{
     const json=await post("checkin");
-
-    if(!silent){
-      toast(json.message || "출석 포인트 확인");
-    }
-
-    if(json.ok && json.profile){
-      profile=json.profile;
-      updateStatsUI();
-    }else if(!silent){
-      await load();
-    }
-
+    toast(json.message || "출석 포인트 확인");
+    await load();
   }finally{
-    if(btn) btn.disabled=false;
-  }
-}
-
-function vote(predictionId,choice,buttonEl){
-  const prediction=predictions.find(p=>p.id===predictionId);
-  if(!prediction) return;
-
-  const labels=pickLabels(prediction.category);
-  const picked=choice==="rain" ? labels.yes : labels.no;
-
-  pendingVote={
-    predictionId,
-    choice
-  };
-
-  if(buttonEl){
-
-  document.querySelectorAll(".odd").forEach(btn=>{
-    btn.disabled=true;
-  });
-
-  buttonEl.disabled=false;
-  buttonEl.classList.add("pickFlash");
-  buttonEl.classList.add("selected");
-
-  setTimeout(()=>{
-    buttonEl.classList.remove("pickFlash");
-  },260);
-
-  if(navigator.vibrate){
-    navigator.vibrate(12);
-  }
-}
-
-  document.getElementById("confirmTitle").textContent=prediction.title;
-  document.getElementById("confirmMeta").textContent=`${picked} 선택 · ${selectedStake}P 참여`;
-  document.body.style.overflow="hidden";
-  document.getElementById("confirmDim").classList.add("show");
-  document.getElementById("confirmSheet").classList.add("show");
-}
-
-function closeConfirm(){
-
-  pendingVote=null;
-
-  document.body.style.overflow="";
-
-  document.getElementById("confirmDim").classList.remove("show");
-  document.getElementById("confirmSheet").classList.remove("show");
-
-  document.querySelectorAll(".odd.selected").forEach(btn=>{
-    btn.classList.remove("selected");
-  });
-
-  document.querySelectorAll(".odd").forEach(btn=>{
     btn.disabled=false;
-  });
+  }
 }
 
-async function submitVote(){
-  if(!pendingVote || isVoting) return;
-  isVoting=true;
-
-  const submitBtn=document.getElementById("confirmSubmitBtn");
-  submitBtn.classList.add("loading");
-  submitBtn.textContent="처리중...";
-  submitBtn.disabled=true;
-
-  const { predictionId, choice } = pendingVote;
-
-  const json=await post("vote",{
-    predictionId,
-    choice,
-    stake:selectedStake
-  });
-
-  submitBtn.classList.remove("loading");
-  submitBtn.textContent="참여하기";
-  submitBtn.disabled=false;
+async function vote(predictionId,choice){
+  const json=await post("vote",{predictionId,choice,stake:selectedStake});
 
   if(!json.ok){
-    toast(json.message || "참여 실패");
+    toast(json.message||"참여 실패");
     return;
   }
 
-  if(navigator.vibrate){
-    navigator.vibrate([18,30,18]);
-  }
-
   toast(`${selectedStake}P · 선택 완료`);
-
-  closeConfirm();
-
-  profile.points=Math.max(0,Number(profile.points||0)-selectedStake);
-
-  const prediction=predictions.find(p=>p.id===predictionId);
-
-  if(prediction){
-    prediction.myVote={choice,stake:selectedStake};
-
-    prediction.rainStake=Number(prediction.rainStake||0);
-    prediction.clearStake=Number(prediction.clearStake||0);
-    prediction.totalStake=Number(prediction.totalStake||0);
-
-    if(choice==="rain"){
-      prediction.rainStake+=selectedStake;
-    }else{
-      prediction.clearStake+=selectedStake;
-    }
-
-    prediction.totalStake+=selectedStake;
-
-    const total=prediction.rainStake+prediction.clearStake;
-
-    prediction.rainPercent=total
-      ? Math.round((prediction.rainStake/total)*100)
-      : 50;
-
-    prediction.clearPercent=100-prediction.rainPercent;
-  }
-
-  updateStatsUI();
-  render();
+  await load();
 }
 
 async function submitComment(predictionId,input){
@@ -1674,15 +1100,14 @@ async function react(predictionId,type){
 }
 
 function scheduleLiveBuzz(){
-  if(liveBuzzTimer) return;
+  clearTimeout(liveBuzzTimer);
 
   const openTargets=predictions.filter(isOpenPrediction);
-  if(!openTargets.length) return;
+  if(!openTargets.length)return;
 
-  const delay=18000+Math.floor(Math.random()*24000);
+  const delay=14000+Math.floor(Math.random()*26000);
 
   liveBuzzTimer=setTimeout(()=>{
-    liveBuzzTimer=null;
     showLiveBuzz();
     scheduleLiveBuzz();
   },delay);
@@ -1761,13 +1186,6 @@ async function copyInvite(){
   }
 }
 
-function logout(){
-  localStorage.removeItem("wetty_user_key");
-  localStorage.removeItem("wetty_last_checkin");
-  window.location.reload();
-}
-
-
 document.addEventListener("visibilitychange",()=>{
   if(!document.hidden){
     load();
@@ -1785,7 +1203,6 @@ setInterval(()=>{
 setInterval(()=>{
   if(!document.hidden) loadCurrentWeather();
 },10*60*1000);
-document.getElementById("confirmSubmitBtn").onclick=submitVote;
 </script>
 </body>
 </html>
