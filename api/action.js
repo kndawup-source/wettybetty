@@ -45,6 +45,36 @@ export default async function handler(req, res) {
     const action = body.action;
     const userKey = cleanText(body.userKey, 80);
 
+    if (action === "give_bonus_10000") {
+      const ADMIN_KEY = process.env.ADMIN_KEY;
+
+      if (!ADMIN_KEY || body.adminKey !== ADMIN_KEY) {
+        return res.status(401).json({ ok:false, message:"관리자 인증 실패" });
+      }
+
+      const { data: profiles, error:getError } = await supabase
+        .from("profiles")
+        .select("user_key, points");
+
+      if (getError) {
+        return res.status(500).json({ ok:false, message:getError.message });
+      }
+
+      for (const p of profiles || []) {
+        await supabase
+          .from("profiles")
+          .update({ points: Number(p.points || 0) + 10000 })
+          .eq("user_key", p.user_key);
+
+        await logPoint(p.user_key, 10000, "ADMIN BONUS 10000");
+      }
+
+      return res.json({
+        ok:true,
+        message:`전체 ${profiles?.length || 0}명에게 10,000P 지급 완료`
+      });
+    }
+
     if (!userKey) {
       return res.status(400).json({ ok: false, message: "userKey required" });
     }
@@ -66,16 +96,16 @@ export default async function handler(req, res) {
         .insert({
           user_key: userKey,
           nickname,
-          points: 1000,
+          points: 10000,
           referral_code: referralCode
         })
         .select()
         .single();
 
       if (error) throw error;
-      await logPoint(userKey, 1000, "WELCOME BONUS");
+      await logPoint(userKey, 10000, "WELCOME BONUS");
 
-      return res.json({ ok: true, message: "가입 보너스 1,000P 지급", profile: data });
+      return res.json({ ok: true, message: "가입 보너스 10,000P 지급", profile: data });
     }
 
     const profile = await getProfile(userKey);
@@ -96,8 +126,8 @@ export default async function handler(req, res) {
       await supabase
         .from("profiles")
         .update({
-          points: profile.points + reward,
-          streak: profile.streak + 1,
+          points: Number(profile.points || 0) + reward,
+          streak: Number(profile.streak || 0) + 1,
           last_checkin_date: today
         })
         .eq("user_key", userKey);
@@ -120,7 +150,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ ok: false, message: "invalid stake" });
       }
 
-      if (profile.points < stake) {
+      if (Number(profile.points || 0) < stake) {
         return res.status(400).json({ ok: false, message: "포인트 부족" });
       }
 
@@ -149,7 +179,7 @@ export default async function handler(req, res) {
 
       await supabase
         .from("profiles")
-        .update({ points: profile.points - stake })
+        .update({ points: Number(profile.points || 0) - stake })
         .eq("user_key", userKey);
 
       await logPoint(userKey, -stake, "PICK ENTRY");
@@ -181,7 +211,7 @@ export default async function handler(req, res) {
 
       await supabase
         .from("profiles")
-        .update({ points: profile.points + reward })
+        .update({ points: Number(profile.points || 0) + reward })
         .eq("user_key", userKey);
 
       await logPoint(userKey, reward, "REACTION COMMENT");
