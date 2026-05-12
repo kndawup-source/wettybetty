@@ -19,7 +19,9 @@
 html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif}
 button,input{font-family:inherit}
 button{cursor:pointer;border:0;transition:.12s}
-button:active{transform:scale(.96);filter:brightness(1.12)}
+button:active{
+  filter:brightness(1.08);
+}
 button:disabled{opacity:.45;cursor:not-allowed}
 .app{
   width:100%;max-width:480px;margin:0 auto;min-height:100dvh;padding:16px 16px 56px;
@@ -314,29 +316,40 @@ button:disabled{opacity:.45;cursor:not-allowed}
   background:var(--accent);
   color:#07100d;
 }
+
 .odd{
+  position:relative;
+  overflow:hidden;
+  will-change:transform;
+  transform:translateZ(0);
   cursor:pointer;
-  text-align:left;
-  transition:
-    transform .08s ease,
-    filter .12s ease,
-    box-shadow .16s ease,
-    opacity .16s ease;
 }
 
 .odd:active{
-  transform:scale(.96);
-  filter:brightness(1.18);
+  transform:scale(.92);
+  filter:brightness(1.22);
+}
+
+.odd::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:rgba(255,255,255,.06);
+  opacity:0;
+  transition:.12s;
+  pointer-events:none;
+}
+
+.odd:active::after{
+  opacity:1;
 }
 
 .odd.selected{
+  transform:scale(.96);
+  filter:brightness(1.2);
   box-shadow:
-    0 0 0 1px rgba(255,255,255,.14),
-    0 0 26px rgba(255,255,255,.14);
-}
-
-.odd:disabled{
-  cursor:not-allowed;
+    0 0 0 1px rgba(255,255,255,.16),
+    0 0 28px rgba(255,255,255,.16);
 }
 </style>
 </head>
@@ -1464,17 +1477,23 @@ function vote(predictionId,choice,buttonEl){
   };
 
   if(buttonEl){
-    buttonEl.classList.add("pickFlash");
-    buttonEl.classList.add("selected");
 
-    setTimeout(()=>{
-      buttonEl.classList.remove("pickFlash");
-    },340);
+  document.querySelectorAll(".odd").forEach(btn=>{
+    btn.disabled=true;
+  });
 
-    if(navigator.vibrate){
-      navigator.vibrate(16);
-    }
+  buttonEl.disabled=false;
+  buttonEl.classList.add("pickFlash");
+  buttonEl.classList.add("selected");
+
+  setTimeout(()=>{
+    buttonEl.classList.remove("pickFlash");
+  },260);
+
+  if(navigator.vibrate){
+    navigator.vibrate(12);
   }
+}
 
   document.getElementById("confirmTitle").textContent=prediction.title;
   document.getElementById("confirmMeta").textContent=`${picked} 선택 · ${selectedStake}P 참여`;
@@ -1493,6 +1512,9 @@ function closeConfirm(){
 
   document.querySelectorAll(".odd.selected").forEach(btn=>{
   btn.classList.remove("selected");
+});
+document.querySelectorAll(".odd").forEach(btn=>{
+  btn.disabled=false;
 });
 }
 
