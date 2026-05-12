@@ -177,10 +177,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .stakes{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
 .stakes button{height:38px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--soft);border-radius:13px;font-size:12px;font-weight:900}
 .stakes button.active{background:var(--text);color:#050d16}
-.pickBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.pickBtns button{height:46px;border-radius:15px;font-size:14px;font-weight:900}
-.pickBtns .rain{background:rgba(130,199,255,.14);border:1px solid rgba(130,199,255,.27);color:var(--blue)}
-.pickBtns .clear{background:rgba(184,255,122,.12);border:1px solid rgba(184,255,122,.24);color:var(--green)}
+
 .myPick{margin-top:13px;padding:12px;border-radius:15px;background:rgba(223,245,106,.075);border:1px solid rgba(223,245,106,.17);color:var(--accent);font-size:12px;font-weight:900}
 .mood{margin-top:15px;border-top:1px solid var(--line);padding-top:13px}
 .moodTitle{display:flex;justify-content:space-between;gap:8px;color:var(--soft);font-size:11px;font-weight:900;margin-bottom:9px}
@@ -225,26 +222,6 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .empty{padding:20px 0;text-align:center;color:var(--muted);font-size:13px}
 .liveToast{position:fixed;left:50%;bottom:78px;width:calc(100% - 32px);max-width:448px;transform:translateX(-50%) translateY(12px);opacity:0;z-index:210;padding:13px 15px;border-radius:18px;background:rgba(11,22,32,.96);border:1px solid rgba(223,245,106,.18);color:var(--text);font-size:13px;font-weight:900;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:.22s ease;backdrop-filter:blur(10px)}
 .liveToast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.pickBtns button{
-  position:relative;
-  overflow:hidden;
-  transition:
-    transform .08s ease,
-    filter .12s ease,
-    box-shadow .16s ease,
-    opacity .16s ease;
-}
-
-.pickBtns button:active{
-  transform:scale(.93);
-  filter:brightness(1.18);
-}
-
-.pickBtns button.selected{
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.12),
-    0 0 24px rgba(255,255,255,.12);
-}
 
 .pickFlash{
   animation:pickFlash .34s ease;
@@ -337,27 +314,29 @@ button:disabled{opacity:.45;cursor:not-allowed}
   background:var(--accent);
   color:#07100d;
 }
-.pickBtns button{
-  height:58px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:3px;
+.odd{
+  cursor:pointer;
+  text-align:left;
+  transition:
+    transform .08s ease,
+    filter .12s ease,
+    box-shadow .16s ease,
+    opacity .16s ease;
 }
 
-.pickBtns button strong{
-  font-family:'Syne',sans-serif;
-  font-size:24px;
-  line-height:1;
-  font-weight:900;
+.odd:active{
+  transform:scale(.96);
+  filter:brightness(1.18);
 }
 
-.pickBtns button span{
-  font-size:10px;
-  font-weight:900;
-  color:inherit;
-  opacity:.78;
+.odd.selected{
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.14),
+    0 0 26px rgba(255,255,255,.14);
+}
+
+.odd:disabled{
+  cursor:not-allowed;
 }
 </style>
 </head>
@@ -1239,18 +1218,33 @@ function createMarketCard(p,isSmall){
   meta.append(settle,official);
 
   const odds=document.createElement("div");
-  odds.className="odds";
+odds.className="odds";
 
-  const rain=document.createElement("div");
-  rain.className="odd rain";
-  rain.innerHTML=`<label>${labels.yes}</label><strong>${p.rainPercent}%</strong><small>${p.rainStake||0}P</small>`;
+const rain=document.createElement("button");
+rain.className="odd rain";
+rain.disabled=closed || !!p.myVote || Number(profile?.points||0)<selectedStake;
 
-  const clear=document.createElement("div");
-  clear.className="odd clear";
-  clear.innerHTML=`<label>${labels.no}</label><strong>${p.clearPercent}%</strong><small>${p.clearStake||0}P</small>`;
+rain.innerHTML=`
+  <label>${labels.yes}</label>
+  <strong>${p.rainPercent}%</strong>
+  <small>${p.rainStake||0}P 참여</small>
+`;
 
-  odds.append(rain,clear);
+rain.onclick=()=>vote(p.id,"rain",rain);
 
+const clear=document.createElement("button");
+clear.className="odd clear";
+clear.disabled=closed || !!p.myVote || Number(profile?.points||0)<selectedStake;
+
+clear.innerHTML=`
+  <label>${labels.no}</label>
+  <strong>${p.clearPercent}%</strong>
+  <small>${p.clearStake||0}P 참여</small>
+`;
+
+clear.onclick=()=>vote(p.id,"clear",clear);
+
+odds.append(rain,clear);
   const bar=document.createElement("div");
   bar.className="bar";
   bar.innerHTML=`<div class="fill" style="width:${Math.max(0,Math.min(100,p.rainPercent||0))}%"></div>`;
@@ -1286,29 +1280,7 @@ function createMarketCard(p,isSmall){
       stakes.appendChild(b);
     });
 
-    const pickBtns=document.createElement("div");
-    pickBtns.className="pickBtns";
-
-    const rainBtn=document.createElement("button");
-    rainBtn.className="rain";
-    rainBtn.innerHTML=`
-  <strong>${p.rainPercent || 0}%</strong>
-  <span>${labels.yes}</span>
-`;
-    rainBtn.disabled=Number(profile?.points||0)<selectedStake;
-    rainBtn.onclick=()=>vote(p.id,"rain",rainBtn);
-
-    const clearBtn=document.createElement("button");
-    clearBtn.className="clear";
-    clearBtn.innerHTML=`
-  <strong>${p.clearPercent || 0}%</strong>
-  <span>${labels.no}</span>
-`;
-    clearBtn.disabled=Number(profile?.points||0)<selectedStake;
-    clearBtn.onclick=()=>vote(p.id,"clear",clearBtn);
-
-    pickBtns.append(rainBtn,clearBtn);
-    entry.append(stakes,pickBtns);
+    entry.append(stakes);
     card.appendChild(entry);
   }
 
@@ -1519,9 +1491,9 @@ function closeConfirm(){
   document.getElementById("confirmDim").classList.remove("show");
   document.getElementById("confirmSheet").classList.remove("show");
 
-  document.querySelectorAll(".pickBtns button.selected").forEach(btn=>{
-    btn.classList.remove("selected");
-  });
+  document.querySelectorAll(".odd.selected").forEach(btn=>{
+  btn.classList.remove("selected");
+});
 }
 
 async function submitVote(){
