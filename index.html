@@ -1497,19 +1497,29 @@ async function createProfile(){
 
 async function checkin(silent=false){
   if(!profile){
-    toast("먼저 닉네임을 만들어주세요.");
+    if(!silent) toast("먼저 닉네임을 만들어주세요.");
     return;
   }
 
   const btn=document.getElementById("checkinBtn");
-  btn.disabled=true;
+  if(btn) btn.disabled=true;
 
   try{
     const json=await post("checkin");
-    toast(json.message || "출석 포인트 확인");
-    await load();
+
+    if(!silent){
+      toast(json.message || "출석 포인트 확인");
+    }
+
+    if(json.ok && json.profile){
+      profile=json.profile;
+      updateStatsUI();
+    }else if(!silent){
+      await load();
+    }
+
   }finally{
-    btn.disabled=false;
+    if(btn) btn.disabled=false;
   }
 }
 
