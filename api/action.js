@@ -186,7 +186,7 @@ if (voteError) {
   });
 }
 
-await supabase.from("user_score_history").insert({
+await supabase.from("prediction_history").insert({
   user_key: userKey,
   prediction_id: predictionId,
   title: prediction.title,
@@ -221,7 +221,7 @@ const { error: updatePredictionError } = await supabase
 if (updatePredictionError) {
   return res.status(500).json({
     ok: false,
-    message: "예측 반영 실패"
+    message: updatePredictionError.message || "예측 반영 실패"
   });
 }
       await supabase
