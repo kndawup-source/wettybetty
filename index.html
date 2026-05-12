@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
@@ -89,6 +90,36 @@ button:active{transform:scale(.96);filter:brightness(1.12)}
 .bar{margin-top:13px;height:8px;border-radius:999px;background:rgba(184,255,122,.2);overflow:hidden}
 .fill{height:100%;background:linear-gradient(90deg,var(--blue),#b5e1ff)}
 
+/* ── 지역 날씨 인라인 배너 ── */
+.regionWeather{
+  display:flex;align-items:center;gap:10px;
+  margin-top:12px;
+  padding:10px 13px;
+  border-radius:16px;
+  background:rgba(130,199,255,.07);
+  border:1px solid rgba(130,199,255,.13);
+  animation:fadeIn .3s ease;
+}
+.regionWeather.loading{
+  background:rgba(255,255,255,.03);
+  border-color:var(--line);
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.rw-icon{font-size:22px;flex:0 0 auto}
+.rw-body{flex:1;min-width:0}
+.rw-temp{font-family:'Syne',sans-serif;font-size:20px;font-weight:900;line-height:1;color:var(--text)}
+.rw-desc{margin-top:3px;color:var(--muted);font-size:10px;font-weight:900}
+.rw-pills{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.rw-pill{
+  padding:4px 8px;border-radius:999px;
+  background:rgba(255,255,255,.055);border:1px solid var(--line);
+  color:var(--soft);font-size:10px;font-weight:900;white-space:nowrap;
+}
+.rw-pill.rain-hi{background:rgba(130,199,255,.14);border-color:rgba(130,199,255,.25);color:var(--blue)}
+.rw-pill.clear-hi{background:rgba(184,255,122,.12);border-color:rgba(184,255,122,.22);color:var(--green)}
+.rw-shimmer{height:14px;border-radius:8px;background:rgba(255,255,255,.06);width:60%;animation:shimmer 1.2s infinite alternate}
+@keyframes shimmer{from{opacity:.4}to{opacity:1}}
+
 .entry{margin-top:14px}
 .stakes{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
 .stakes button{height:38px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--soft);border-radius:13px;font-size:12px;font-weight:900}
@@ -138,33 +169,16 @@ button:active{transform:scale(.96);filter:brightness(1.12)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{padding:20px 0;text-align:center;color:var(--muted);font-size:13px}
 .liveToast{
-  position:fixed;
-  left:50%;
-  bottom:78px;
-  width:calc(100% - 32px);
-  max-width:448px;
-  transform:translateX(-50%) translateY(12px);
-  opacity:0;
-  z-index:210;
-  padding:13px 15px;
-  border-radius:18px;
-  background:rgba(11,22,32,.96);
-  border:1px solid rgba(223,245,106,.18);
-  color:var(--text);
-  font-size:13px;
-  font-weight:900;
-  box-shadow:0 18px 44px rgba(0,0,0,.42);
-  transition:.22s ease;
-  backdrop-filter:blur(10px);
+  position:fixed;left:50%;bottom:78px;width:calc(100% - 32px);max-width:448px;
+  transform:translateX(-50%) translateY(12px);opacity:0;z-index:210;
+  padding:13px 15px;border-radius:18px;background:rgba(11,22,32,.96);
+  border:1px solid rgba(223,245,106,.18);color:var(--text);font-size:13px;font-weight:900;
+  box-shadow:0 18px 44px rgba(0,0,0,.42);transition:.22s ease;backdrop-filter:blur(10px);
 }
-
-.liveToast.show{
-  opacity:1;
-  transform:translateX(-50%) translateY(0);
-}
+.liveToast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
-</head>
 
+</head>
 <body>
 <div class="app">
   <header class="header">
@@ -215,14 +229,11 @@ button:active{transform:scale(.96);filter:brightness(1.12)}
     <div class="boardHead"><h2>지금 몰리는 지역</h2><span>LIVE</span></div>
     <div id="hotList"></div>
   </section>
-  
+
   <section class="board" id="rankBoard">
-  <div class="boardHead">
-    <h2>오늘의 TOP 예측가</h2>
-    <span>RANKING</span>
-  </div>
-  <div id="rankList"></div>
-</section>
+    <div class="boardHead"><h2>오늘의 TOP 예측가</h2><span>RANKING</span></div>
+    <div id="rankList"></div>
+  </section>
 
   <div class="sectionHead">
     <h2>TOP 5 예측</h2>
@@ -285,7 +296,13 @@ let scoreHistory=[];
 let openComments={};
 let userLocation=null;
 let stats={totalPicks:0,wins:0,losses:0,pending:0,hitRate:0,currentStreak:0};
-let leaderboard = [];
+let leaderboard=[];
+
+// ── 지역 날씨 캐시 ──────────────────────────────────────────
+// key: "lat,lon" (소수점 2자리 반올림)  value: { data, ts }
+const regionWeatherCache = new Map();
+const REGION_WEATHER_TTL = 10 * 60 * 1000; // 10분
+
 if(!userKey){
   userKey=crypto.randomUUID();
   localStorage.setItem("wetty_user_key",userKey);
@@ -319,32 +336,20 @@ function fmtTime(v){
 
 function remaining(closeTime){
   if(!closeTime) return "마감 시간 없음";
-
-  const diff = new Date(closeTime).getTime() - Date.now();
-
+  const diff=new Date(closeTime).getTime()-Date.now();
   if(Number.isNaN(diff)) return "시간 확인 필요";
-
-  if(diff <= 0) return "마감";
-
-  const totalMinutes = Math.ceil(diff / 60000);
-
-  const days = Math.floor(totalMinutes / 1440);
-  const hours = Math.floor((totalMinutes % 1440) / 60);
-  const minutes = totalMinutes % 60;
-
-  if(days > 0){
-    return `${days}일 ${hours}시간 남음`;
-  }
-
-  if(hours > 0){
-    return `${hours}시간 ${minutes}분 남음`;
-  }
-
+  if(diff<=0) return "마감";
+  const totalMinutes=Math.ceil(diff/60000);
+  const days=Math.floor(totalMinutes/1440);
+  const hours=Math.floor((totalMinutes%1440)/60);
+  const minutes=totalMinutes%60;
+  if(days>0) return `${days}일 ${hours}시간 남음`;
+  if(hours>0) return `${hours}시간 ${minutes}분 남음`;
   return `${minutes}분 남음`;
 }
 
 function distanceKm(a,b,c,d){
-  if(a==null||b==null||c==null||d==null)return 99999;
+  if(a==null||b==null||c==null||d==null) return 99999;
   const R=6371;
   const dLat=(c-a)*Math.PI/180;
   const dLon=(d-b)*Math.PI/180;
@@ -352,55 +357,36 @@ function distanceKm(a,b,c,d){
   return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
 }
 
+// ── 날씨 코드 → 텍스트/아이콘 ───────────────────────────────
+function weatherText(code,rainProb,precipitation){
+  if((precipitation||0)>0) return{label:"🌧️",desc:"현재 비 감지됨"};
+  if(rainProb>=70) return{label:"☔",desc:"강수 가능성 높음"};
+  if(rainProb>=40) return{label:"🌦️",desc:"비 올 수도 있음"};
+  if([0,1].includes(code)) return{label:"☀️",desc:"맑음"};
+  if([2,3,45,48].includes(code)) return{label:"☁️",desc:"구름 많음"};
+  return{label:"🌤️",desc:"대체로 맑음"};
+}
+
+// ── 현재 위치 날씨 (상단 보드) ───────────────────────────────
 async function loadCurrentWeather(){
   try{
     if(!navigator.geolocation){setWeatherFallback();return;}
-
     navigator.geolocation.getCurrentPosition(async pos=>{
       const lat=pos.coords.latitude;
       const lon=pos.coords.longitude;
       userLocation={lat,lon};
-
-      const url=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`+
-      `&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m`+
-      `&hourly=precipitation_probability&timezone=Asia%2FSeoul`;
-
-      const data=await fetch(url).then(r=>r.json());
-      const current=data.current||{};
-      const hourly=data.hourly||{};
-      const times=hourly.time||[];
-      const probs=hourly.precipitation_probability||[];
-      const nowHour=new Date().getHours();
-
-      let rainProb=0;
-      for(let i=0;i<times.length;i++){
-        if(new Date(times[i]).getHours()===nowHour){
-          rainProb=probs[i]??0;
-          break;
-        }
-      }
-
-      document.getElementById("currentTemp").textContent=`${Math.round(current.temperature_2m??0)}°`;
-      document.getElementById("feelsLike").textContent=`${Math.round(current.apparent_temperature??0)}°`;
-      document.getElementById("rainChance").textContent=`${rainProb}%`;
-      document.getElementById("windSpeed").textContent=`${Number(current.wind_speed_10m??0).toFixed(1)}m/s`;
-
-      const info=weatherText(current.weather_code,rainProb,current.precipitation);
+      const w=await fetchRegionWeather(lat,lon);
+      if(!w){setWeatherFallback();return;}
+      document.getElementById("currentTemp").textContent=`${Math.round(w.temp)}°`;
+      document.getElementById("feelsLike").textContent=`${Math.round(w.feelsLike)}°`;
+      document.getElementById("rainChance").textContent=`${w.rainProb}%`;
+      document.getElementById("windSpeed").textContent=`${Number(w.wind).toFixed(1)}m/s`;
+      const info=weatherText(w.code,w.rainProb,w.precipitation);
       document.getElementById("currentDesc").textContent=info.desc;
       document.getElementById("weatherIcon").textContent=info.label;
-
       renderNearList();
     },()=>setWeatherFallback());
   }catch(e){setWeatherFallback();}
-}
-
-function weatherText(code,rainProb,precipitation){
-  if((precipitation||0)>0)return{label:"🌧️",desc:"지금 비가 감지되고 있습니다. 아래 예측 흐름을 확인해보세요."};
-  if(rainProb>=70)return{label:"☔",desc:"강수 가능성이 높습니다. 비 온다 쪽 선택이 몰릴 수 있어요."};
-  if(rainProb>=40)return{label:"🌦️",desc:"애매한 하늘입니다. 사람들의 선택이 갈릴 가능성이 높아요."};
-  if([0,1].includes(code))return{label:"☀️",desc:"현재는 비교적 맑습니다. 안 온다 쪽 흐름을 확인해보세요."};
-  if([2,3,45,48].includes(code))return{label:"☁️",desc:"구름이 많습니다. 갑작스러운 변화에 주의하세요."};
-  return{label:"🌤️",desc:"현재 날씨 기준으로 오늘의 예측을 확인해보세요."};
 }
 
 function setWeatherFallback(){
@@ -412,27 +398,89 @@ function setWeatherFallback(){
   document.getElementById("weatherIcon").textContent="🌤️";
 }
 
+// ── 핵심: 지역 날씨 fetch (캐시 포함) ───────────────────────
+async function fetchRegionWeather(lat,lon){
+  const key=`${parseFloat(lat).toFixed(2)},${parseFloat(lon).toFixed(2)}`;
+  const now=Date.now();
+  const cached=regionWeatherCache.get(key);
+  if(cached && now-cached.ts<REGION_WEATHER_TTL) return cached.data;
+
+  try{
+    const url=`https://api.open-meteo.com/v1/forecast`+
+      `?latitude=${lat}&longitude=${lon}`+
+      `&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m`+
+      `&hourly=precipitation_probability`+
+      `&timezone=Asia%2FSeoul&forecast_days=1`;
+    const res=await fetch(url);
+    if(!res.ok) return null;
+    const json=await res.json();
+    const c=json.current||{};
+    const hourly=json.hourly||{};
+    const times=hourly.time||[];
+    const probs=hourly.precipitation_probability||[];
+    const nowHour=new Date().getHours();
+    let rainProb=0;
+    for(let i=0;i<times.length;i++){
+      if(new Date(times[i]).getHours()===nowHour){rainProb=probs[i]??0;break;}
+    }
+    const data={
+      temp:c.temperature_2m??null,
+      feelsLike:c.apparent_temperature??null,
+      precipitation:c.precipitation??0,
+      code:c.weather_code??0,
+      wind:c.wind_speed_10m??0,
+      rainProb
+    };
+    regionWeatherCache.set(key,{data,ts:now});
+    return data;
+  }catch(e){
+    return null;
+  }
+}
+
+// ── 예측 카드에 날씨 배너 주입 ───────────────────────────────
+async function injectRegionWeather(predictionId, lat, lon){
+  const el=document.getElementById(`rw-${predictionId}`);
+  if(!el) return;
+  if(lat==null||lon==null){
+    el.remove();
+    return;
+  }
+  const w=await fetchRegionWeather(lat,lon);
+  if(!w){el.remove();return;}
+  const info=weatherText(w.code,w.rainProb,w.precipitation);
+  const rainClass=w.rainProb>=60?"rain-hi":w.rainProb>=30?"":"clear-hi";
+  el.classList.remove("loading");
+  el.innerHTML=`
+    <div class="rw-icon">${info.label}</div>
+    <div class="rw-body">
+      <div class="rw-temp">${w.temp!=null?Math.round(w.temp)+"°":"--°"}</div>
+      <div class="rw-desc">${info.desc}</div>
+      <div class="rw-pills">
+        <span class="rw-pill ${rainClass}">강수 ${w.rainProb}%</span>
+        <span class="rw-pill">체감 ${w.feelsLike!=null?Math.round(w.feelsLike)+"°":"--°"}</span>
+        <span class="rw-pill">바람 ${Number(w.wind).toFixed(1)}m/s</span>
+      </div>
+    </div>
+  `;
+}
+
 async function load(){
   const res=await fetch(`${API_GAME}?userKey=${encodeURIComponent(userKey)}`);
   const json=await res.json();
-
   if(!json.ok){toast(json.message||"불러오기 실패");return;}
-
   profile=json.profile;
   predictions=json.predictions||[];
   scoreHistory=json.scoreHistory||[];
   stats=json.stats||stats;
   leaderboard=json.leaderboard||[];
-
   if(!profile){
     document.getElementById("joinModal").classList.add("show");
     return;
   }
-
   document.getElementById("joinModal").classList.remove("show");
   document.getElementById("nickname").textContent=profile.nickname;
   document.getElementById("pointsEl").textContent=`${profile.points}P`;
-
   updateStatsUI();
   renderHotList();
   renderNearList();
@@ -444,7 +492,7 @@ function sortedPredictions(){
   return [...predictions].sort((a,b)=>{
     const scoreA=(a.totalStake||0)+(a.priority||0);
     const scoreB=(b.totalStake||0)+(b.priority||0);
-    if(scoreB!==scoreA)return scoreB-scoreA;
+    if(scoreB!==scoreA) return scoreB-scoreA;
     return new Date(a.close_time)-new Date(b.close_time);
   });
 }
@@ -454,7 +502,6 @@ function updateStatsUI(){
   document.getElementById("picksMini").textContent=stats.totalPicks||0;
   document.getElementById("winsMini").textContent=stats.wins||0;
   document.getElementById("streakMini").textContent=stats.currentStreak||0;
-
   document.getElementById("profileTitle").textContent=profile?.nickname||"PROFILE";
   document.getElementById("profileSub").textContent=`초대코드 ${profile?.referral_code||"-"}`;
   document.getElementById("modalCredit").textContent=profile?.points||0;
@@ -481,10 +528,7 @@ function renderBoardItem(box,p,idx,rightText){
 function renderHotList(){
   const box=document.getElementById("hotList");
   const hot=sortedPredictions().slice(0,3);
-  if(!hot.length){
-    box.innerHTML=`<div class="empty">아직 몰리는 지역이 없습니다.</div>`;
-    return;
-  }
+  if(!hot.length){box.innerHTML=`<div class="empty">아직 몰리는 지역이 없습니다.</div>`;return;}
   box.innerHTML="";
   hot.forEach((p,idx)=>renderBoardItem(box,p,idx+1,`${p.totalStake||0}P`));
 }
@@ -492,22 +536,13 @@ function renderHotList(){
 function renderNearList(){
   const board=document.getElementById("nearBoard");
   const box=document.getElementById("nearList");
-  if(!userLocation||!predictions.length){
-    board.style.display="none";
-    return;
-  }
-
+  if(!userLocation||!predictions.length){board.style.display="none";return;}
   const near=predictions
     .map(p=>({...p,distance:distanceKm(userLocation.lat,userLocation.lon,p.lat,p.lon)}))
     .filter(p=>p.distance<=8)
     .sort((a,b)=>a.distance-b.distance)
     .slice(0,3);
-
-  if(!near.length){
-    board.style.display="none";
-    return;
-  }
-
+  if(!near.length){board.style.display="none";return;}
   board.style.display="block";
   box.innerHTML="";
   near.forEach((p,idx)=>renderBoardItem(box,p,idx+1,`${p.distance.toFixed(1)}km`));
@@ -515,10 +550,7 @@ function renderNearList(){
 
 function renderHistory(){
   const box=document.getElementById("historyList");
-  if(!scoreHistory.length){
-    box.innerHTML=`<div class="historyItem"><span>아직 참여 기록이 없습니다.</span></div>`;
-    return;
-  }
+  if(!scoreHistory.length){box.innerHTML=`<div class="historyItem"><span>아직 참여 기록이 없습니다.</span></div>`;return;}
   box.innerHTML="";
   scoreHistory.forEach(item=>{
     const settled=item.status==="settled"||item.result;
@@ -539,23 +571,15 @@ function renderHistory(){
 function render(){
   const topList=document.getElementById("topList");
   const otherList=document.getElementById("otherList");
-
   document.querySelectorAll("[data-comment-input]").forEach(input=>{
     drafts[input.dataset.pid]=input.value;
   });
-
   const sorted=sortedPredictions();
   const topMarkets=sorted.slice(0,5);
   const otherMarkets=sorted.slice(5);
-
   topList.innerHTML="";
   otherList.innerHTML="";
-
-  if(!topMarkets.length){
-    topList.innerHTML=`<div class="empty">진행 중인 예측이 없습니다.</div>`;
-    return;
-  }
-
+  if(!topMarkets.length){topList.innerHTML=`<div class="empty">진행 중인 예측이 없습니다.</div>`;return;}
   topMarkets.forEach(p=>topList.appendChild(createMarketCard(p,false)));
   if(!otherMarkets.length){
     otherList.innerHTML=`<div class="empty">그 외 예측이 없습니다.</div>`;
@@ -573,6 +597,7 @@ function createMarketCard(p,isSmall){
   const card=document.createElement("section");
   card.className=isSmall?"card small":"card";
 
+  // 상단: 지역 뱃지 + 타이머
   const top=document.createElement("div");
   top.className="marketTop";
   const badge=document.createElement("div");
@@ -589,6 +614,19 @@ function createMarketCard(p,isSmall){
 
   card.append(top,title);
 
+  // ── 지역 실시간 날씨 배너 ──────────────────────────────────
+  // small 카드도 접혀 있을 때는 날씨 미노출, 펼쳐지면 noSmall 조건 제거 가능
+  if(!isSmall && p.lat!=null && p.lon!=null){
+    const rwEl=document.createElement("div");
+    rwEl.className="regionWeather loading";
+    rwEl.id=`rw-${p.id}`;
+    // 로딩 shimmer
+    rwEl.innerHTML=`<div class="rw-shimmer" style="width:100%"></div>`;
+    card.appendChild(rwEl);
+    // 비동기로 날씨 주입
+    injectRegionWeather(p.id, p.lat, p.lon);
+  }
+
   if(isSmall){
     const row=document.createElement("div");
     row.className="smallRow";
@@ -596,12 +634,13 @@ function createMarketCard(p,isSmall){
     const btn=document.createElement("button");
     btn.className="smallBtn";
     btn.textContent="열기";
-    btn.onclick=()=>{ openComments[p.id]=true; card.replaceWith(createMarketCard(p,false)); };
+    btn.onclick=()=>{openComments[p.id]=true;card.replaceWith(createMarketCard(p,false));};
     row.appendChild(btn);
     card.appendChild(row);
     return card;
   }
 
+  // 메타 + 오즈 + 바
   const meta=document.createElement("div");
   meta.className="marketMeta";
   const settle=document.createElement("span");
@@ -627,6 +666,7 @@ function createMarketCard(p,isSmall){
 
   card.append(meta,odds,bar);
 
+  // 내 선택 or 픽 버튼
   if(p.myVote){
     const my=document.createElement("div");
     my.className="myPick";
@@ -635,18 +675,16 @@ function createMarketCard(p,isSmall){
   }else if(!closed){
     const entry=document.createElement("div");
     entry.className="entry";
-
     const stakes=document.createElement("div");
     stakes.className="stakes";
-[50,100,300,500].forEach(s=>{
+    [50,100,300,500].forEach(s=>{
       const b=document.createElement("button");
       b.textContent=`${s}P`;
-      if(s===selectedStake)b.classList.add("active");
-      if(profile.points<s)b.disabled=true;
+      if(s===selectedStake) b.classList.add("active");
+      if(profile.points<s) b.disabled=true;
       b.onclick=()=>{selectedStake=s;render();};
       stakes.appendChild(b);
     });
-
     const pickBtns=document.createElement("div");
     pickBtns.className="pickBtns";
     const rainBtn=document.createElement("button");
@@ -664,6 +702,7 @@ function createMarketCard(p,isSmall){
     card.appendChild(entry);
   }
 
+  // 반응 + 댓글
   const mood=document.createElement("div");
   mood.className="mood";
   const moodTitle=document.createElement("div");
@@ -671,16 +710,13 @@ function createMarketCard(p,isSmall){
   moodTitle.innerHTML=`<span>실시간 반응</span><span>${p.totalStake||0}P 참여</span>`;
   const reactions=document.createElement("div");
   reactions.className="reactions";
-
   [["angry","예보 틀림"],["laugh","웃김"],["agree","인정"]].forEach(([type,label])=>{
     const b=document.createElement("button");
     b.textContent=`${label} ${p.reactionCount?.[type]||0}`;
     b.onclick=()=>react(p.id,type);
     reactions.appendChild(b);
   });
-
   mood.append(moodTitle,reactions);
-
   previewComments.forEach(c=>{
     const div=document.createElement("div");
     div.className=isOpen?"comment":"commentPreview";
@@ -691,13 +727,11 @@ function createMarketCard(p,isSmall){
     div.append(nick,body);
     mood.appendChild(div);
   });
-
   const toggleBtn=document.createElement("button");
   toggleBtn.className="commentToggle";
   toggleBtn.textContent=isOpen?"반응 접기":`반응 ${comments.length}개 보기`;
   toggleBtn.onclick=()=>{openComments[p.id]=!openComments[p.id];render();};
   mood.appendChild(toggleBtn);
-
   if(isOpen){
     const form=document.createElement("div");
     form.className="commentForm";
@@ -714,19 +748,18 @@ function createMarketCard(p,isSmall){
     form.append(input,submit);
     mood.appendChild(form);
   }
-
   card.appendChild(mood);
   return card;
 }
 
+// ── 액션 ────────────────────────────────────────────────────
 function openProfile(){
-  if(!profile)return;
+  if(!profile) return;
   updateStatsUI();
   document.getElementById("profileModal").classList.add("show");
 }
-function closeProfile(){
-  document.getElementById("profileModal").classList.remove("show");
-}
+function closeProfile(){document.getElementById("profileModal").classList.remove("show");}
+
 async function createProfile(){
   const nickname=document.getElementById("nickInput").value.trim()||"Player";
   const json=await post("create_profile",{nickname});
@@ -742,23 +775,9 @@ async function checkin(){
   btn.disabled=false;
 }
 async function vote(predictionId,choice){
-  const json = await post("vote",{
-    predictionId,
-    choice,
-    stake:selectedStake
-  });
-
-  if(!json.ok){
-    toast(json.message || "참여 실패");
-    return;
-  }
-
-  toast(
-    choice === "rain"
-      ? `${selectedStake}P · 비 온다 선택`
-      : `${selectedStake}P · 안 온다 선택`
-  );
-
+  const json=await post("vote",{predictionId,choice,stake:selectedStake});
+  if(!json.ok){toast(json.message||"참여 실패");return;}
+  toast(choice==="rain"?`${selectedStake}P · 비 온다 선택`:`${selectedStake}P · 안 온다 선택`);
   await load();
 }
 async function submitComment(predictionId,input){
@@ -775,92 +794,62 @@ async function react(predictionId,type){
   toast(json.message||"반응 완료");
   await load();
 }
-let liveBuzzTimer = null;
-let lastBuzzKey = "";
+
+// ── 라이브 버즈 ─────────────────────────────────────────────
+let liveBuzzTimer=null;
+let lastBuzzKey="";
 
 function scheduleLiveBuzz(){
   clearTimeout(liveBuzzTimer);
-
   if(!predictions.length) return;
-
-  const delay = 14000 + Math.floor(Math.random() * 26000);
-
-  liveBuzzTimer = setTimeout(()=>{
-    showLiveBuzz();
-    scheduleLiveBuzz();
-  }, delay);
+  const delay=14000+Math.floor(Math.random()*26000);
+  liveBuzzTimer=setTimeout(()=>{showLiveBuzz();scheduleLiveBuzz();},delay);
 }
 
 function showLiveBuzz(){
-
-  const targets = [...predictions]
-    .filter(p => p.status === "open")
-    .sort((a,b)=>(b.totalStake || 0) - (a.totalStake || 0))
-    .slice(0,8);
-
+  const targets=[...predictions].filter(p=>p.status==="open")
+    .sort((a,b)=>(b.totalStake||0)-(a.totalStake||0)).slice(0,8);
   if(!targets.length) return;
-
-  const p = targets[Math.floor(Math.random() * targets.length)];
-
-  const side =
-    Math.random() > 0.45
-      ? "비 온다"
-      : "안 온다";
-
-  const amount =
-    [300,500,800,1200,2000,3500,5000]
-    [Math.floor(Math.random() * 7)];
-
-  const messages = [
+  const p=targets[Math.floor(Math.random()*targets.length)];
+  const side=Math.random()>0.45?"비 온다":"안 온다";
+  const amount=[300,500,800,1200,2000,3500,5000][Math.floor(Math.random()*7)];
+  const messages=[
     `${p.region} ${side}에 ${amount.toLocaleString()}P 유입`,
     `${p.region} 예측 참여 급증 중`,
     `${p.region} 마감 직전 몰리는 중`,
     `${p.region} 흐름이 크게 흔들리는 중`,
     `${p.region} 현재 가장 뜨거운 예측 중 하나`
   ];
-
-  const msg =
-    messages[Math.floor(Math.random() * messages.length)];
-
-  if(msg === lastBuzzKey) return;
-
-  lastBuzzKey = msg;
-
+  const msg=messages[Math.floor(Math.random()*messages.length)];
+  if(msg===lastBuzzKey) return;
+  lastBuzzKey=msg;
   liveToast(msg);
 }
 
 function liveToast(message){
-
-  const el = document.createElement("div");
-
-  el.className = "liveToast";
-  el.textContent = message;
-
+  const el=document.createElement("div");
+  el.className="liveToast";
+  el.textContent=message;
   document.body.appendChild(el);
-
-  requestAnimationFrame(()=>{
-    el.classList.add("show");
-  });
-
+  requestAnimationFrame(()=>el.classList.add("show"));
   setTimeout(()=>{
     el.classList.remove("show");
-
-    setTimeout(()=>{
-      el.remove();
-    },250);
-
+    setTimeout(()=>el.remove(),250);
   },2400);
 }
+
 function copyInvite(){
   const code=profile?.referral_code||"";
   navigator.clipboard.writeText(`WETTY BETTY 초대코드: ${code}`);
   toast("초대코드 복사 완료");
 }
 
+// ── 초기화 ──────────────────────────────────────────────────
 loadCurrentWeather();
 load();
 setInterval(()=>load(),POLL_MS);
 setInterval(loadCurrentWeather,10*60*1000);
 </script>
+
 </body>
 </html>
