@@ -358,15 +358,21 @@ function remaining(closeTime){
 
 function distanceKm(a,b,c,d){
   if(a==null||b==null||c==null||d==null) return 99999;
+
   const R=6371;
   const dLat=(c-a)*Math.PI/180;
   const dLon=(d-b)*Math.PI/180;
-  const x=Math.sin(dLat/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dLon/2)**2;
-  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+
+  const x =
+    Math.sin(dLat/2)**2 +
+    Math.cos(a*Math.PI/180) *
+    Math.cos(c*Math.PI/180) *
+    Math.sin(dLon/2)**2;
+
+  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
 }
 
-function weatherText(code,rainProb,precipitation){
-  async function reverseGeocode(lat, lon){
+async function reverseGeocode(lat, lon){
   try{
     const url =
       `https://nominatim.openstreetmap.org/reverse` +
@@ -375,19 +381,20 @@ function weatherText(code,rainProb,precipitation){
     const res = await fetch(url,{
       headers:{
         "Accept":"application/json"
-      }
+      },
+      cache:"no-store"
     });
 
     if(!res.ok) return null;
 
     const json = await res.json();
-
     const addr = json.address || {};
 
     return (
       addr.suburb ||
       addr.borough ||
       addr.city_district ||
+      addr.quarter ||
       addr.town ||
       addr.county ||
       addr.city ||
@@ -398,12 +405,29 @@ function weatherText(code,rainProb,precipitation){
     return null;
   }
 }
-  if((precipitation||0)>0) return{label:"🌧️",desc:"현재 비가 감지되고 있습니다."};
-  if(rainProb>=70) return{label:"☔",desc:"강수 가능성이 높습니다."};
-  if(rainProb>=40) return{label:"🌦️",desc:"비 가능성이 애매하게 걸려 있습니다."};
-  if([0,1].includes(code)) return{label:"☀️",desc:"현재는 비교적 맑습니다."};
-  if([2,3,45,48].includes(code)) return{label:"☁️",desc:"구름이 많습니다."};
-  return{label:"🌤️",desc:"현재 날씨 기준으로 예측 흐름을 확인해보세요."};
+
+function weatherText(code,rainProb,precipitation){
+  if((precipitation||0)>0){
+    return {label:"🌧️",desc:"현재 비가 감지되고 있습니다."};
+  }
+
+  if(rainProb>=70){
+    return {label:"☔",desc:"강수 가능성이 높습니다."};
+  }
+
+  if(rainProb>=40){
+    return {label:"🌦️",desc:"비 가능성이 애매하게 걸려 있습니다."};
+  }
+
+  if([0,1].includes(code)){
+    return {label:"☀️",desc:"현재는 비교적 맑습니다."};
+  }
+
+  if([2,3,45,48].includes(code)){
+    return {label:"☁️",desc:"구름이 많습니다."};
+  }
+
+  return {label:"🌤️",desc:"현재 날씨 기준으로 예측 흐름을 확인해보세요."};
 }
 
 async function fetchRegionWeather(lat,lon){
