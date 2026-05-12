@@ -823,7 +823,9 @@ async function load(){
     document.getElementById("nickname").textContent=profile.nickname || "Player";
     document.getElementById("pointsEl").textContent=`${Number(profile.points||0).toLocaleString()}P`;
 
-    const todayKey=new Date().toISOString().slice(0,10);
+    const todayKey=new Date().toLocaleDateString("sv-SE",{
+  timeZone:"Asia/Seoul"
+});
 const lastCheckin=localStorage.getItem("wetty_last_checkin");
 
 if(profile && lastCheckin!==todayKey){
@@ -1762,27 +1764,6 @@ function logout(){
   window.location.reload();
 }
 
-  const text=`WETTY BETTY 초대코드: ${code}`;
-
-  try{
-    if(navigator.clipboard && window.isSecureContext){
-      await navigator.clipboard.writeText(text);
-    }else{
-      const textarea=document.createElement("textarea");
-      textarea.value=text;
-      textarea.style.position="fixed";
-      textarea.style.opacity="0";
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      textarea.remove();
-    }
-
-    toast("초대코드 복사 완료");
-  }catch(e){
-    toast("복사에 실패했습니다.");
-  }
-}
 
 document.addEventListener("visibilitychange",()=>{
   if(!document.hidden){
