@@ -305,7 +305,23 @@ export default async function handler(req, res){
 
     for(const item of targets){
       const { region, market } = item;
+      for(const item of targets){
+  const { region, market } = item;
 
+  const { data: alreadyExists } = await supabase
+    .from("predictions")
+    .select("id")
+    .eq("region", region.name)
+    .eq("time_slot", slot.key)
+    .eq("target_time", slot.target_time)
+    .maybeSingle();
+
+  if(alreadyExists){
+    skipped.push(region.name);
+    continue;
+  }
+
+  // 기존 insert 코드 계속
       const { data: exists } = await supabase
         .from("predictions")
         .select("id")
