@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/sync-holidays?adminKey=YOUR_ADMIN_KEY",
+      "path": "/api/sync-holidays?adminKey=ADMIN_KEY",
       "schedule": "0 3 1 * *"
     }
   ]
