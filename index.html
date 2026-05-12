@@ -322,6 +322,8 @@ let liveBuzzTimer=null;
 let lastBuzzKey="";
 let toastTimer=null;
 
+let isLoading=false;
+
 const regionWeatherCache=new Map();
 const REGION_WEATHER_TTL=10*60*1000;
 
@@ -345,9 +347,22 @@ async function post(action,data={}){
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({action,userKey,...data})
     });
-    return await res.json();
+
+    let json=null;
+
+    try{
+      json=await res.json();
+    }catch(e){
+      return {ok:false,message:"서버 응답 형식 오류"};
+    }
+
+    if(!res.ok){
+      return {ok:false,message:json?.message||"요청 처리 실패"};
+    }
+
+    return json;
   }catch(e){
-    return {ok:false,message:"요청 실패"};
+    return {ok:false,message:"네트워크 연결 실패"};
   }
 }
 
