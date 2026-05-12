@@ -337,6 +337,28 @@ button:disabled{opacity:.45;cursor:not-allowed}
   background:var(--accent);
   color:#07100d;
 }
+.pickBtns button{
+  height:58px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+}
+
+.pickBtns button strong{
+  font-family:'Syne',sans-serif;
+  font-size:24px;
+  line-height:1;
+  font-weight:900;
+}
+
+.pickBtns button span{
+  font-size:10px;
+  font-weight:900;
+  color:inherit;
+  opacity:.78;
+}
 </style>
 </head>
 
@@ -1269,13 +1291,19 @@ function createMarketCard(p,isSmall){
 
     const rainBtn=document.createElement("button");
     rainBtn.className="rain";
-    rainBtn.textContent=labels.yes;
+    rainBtn.innerHTML=`
+  <strong>${p.rainPercent || 0}%</strong>
+  <span>${labels.yes}</span>
+`;
     rainBtn.disabled=Number(profile?.points||0)<selectedStake;
     rainBtn.onclick=()=>vote(p.id,"rain",rainBtn);
 
     const clearBtn=document.createElement("button");
     clearBtn.className="clear";
-    clearBtn.textContent=labels.no;
+    clearBtn.innerHTML=`
+  <strong>${p.clearPercent || 0}%</strong>
+  <span>${labels.no}</span>
+`;
     clearBtn.disabled=Number(profile?.points||0)<selectedStake;
     clearBtn.onclick=()=>vote(p.id,"clear",clearBtn);
 
