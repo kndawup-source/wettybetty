@@ -168,15 +168,35 @@ export default async function handler(req, res) {
         return res.status(400).json({ ok: false, message: "마감된 예측입니다." });
       }
 
-      const { error } = await supabase.from("votes").insert({
-        prediction_id: predictionId,
-        user_key: userKey,
-        choice,
-        stake
-      });
+      const { data: voteData, error: voteError } = await supabase
+  .from("votes")
+  .insert({
+    prediction_id: predictionId,
+    user_key: userKey,
+    choice,
+    stake
+  })
+  .select()
+  .single();
 
-      if (error) return res.status(400).json({ ok: false, message: "이미 선택했습니다." });
-      const nextRainStake =
+if (voteError) {
+  return res.status(400).json({
+    ok: false,
+    message: voteError.message || "선택 저장 실패"
+  });
+}
+
+await supabase.from("user_score_history").insert({
+  user_key: userKey,
+  prediction_id: predictionId,
+  title: prediction.title,
+  choice,
+  stake,
+  status: "pending",
+  result: null,
+  is_correct: null
+});
+const nextRainStake =
   choice === "rain"
     ? Number(prediction.rain_stake || 0) + stake
     : Number(prediction.rain_stake || 0);
