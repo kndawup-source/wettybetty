@@ -199,6 +199,72 @@ button:active{transform:scale(.96);filter:brightness(1.12)}
   box-shadow:0 18px 44px rgba(0,0,0,.42);transition:.22s ease;backdrop-filter:blur(10px);
 }
 .liveToast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.hotPickBox{
+  position:relative;
+  z-index:2;
+  margin-top:16px;
+  padding:14px;
+  border-radius:20px;
+  background:rgba(223,245,106,.08);
+  border:1px solid rgba(223,245,106,.18);
+}
+.hotPickTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  color:var(--accent);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.8px;
+}
+.hotPickTitle{
+  margin-top:8px;
+  font-size:17px;
+  line-height:1.28;
+  font-weight:900;
+}
+.hotPickMeta{
+  margin-top:8px;
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:900;
+}
+.marketStatus{
+  display:inline-flex;
+  margin-top:10px;
+  padding:6px 9px;
+  border-radius:999px;
+  background:rgba(255,255,255,.055);
+  border:1px solid var(--line);
+  color:var(--soft);
+  font-size:10px;
+  font-weight:900;
+}
+.marketStatus.hot{
+  color:#ffda6a;
+  border-color:rgba(255,218,106,.22);
+  background:rgba(255,218,106,.09);
+}
+.marketStatus.debate{
+  color:var(--blue);
+  border-color:rgba(130,199,255,.2);
+  background:rgba(130,199,255,.08);
+}
+.marketStatus.calm{
+  color:var(--muted);
+}
+.timer.urgent{
+  color:#ff8d8d;
+  animation:pulse 1s infinite;
+}
+@keyframes pulse{
+  0%{opacity:1}
+  50%{opacity:.45}
+  100%{opacity:1}
+}
 </style>
 
 </head>
@@ -236,6 +302,17 @@ button:active{transform:scale(.96);filter:brightness(1.12)}
       <div><span>1H 강수</span><b id="rainChance">--%</b></div>
       <div><span>바람</span><b id="windSpeed">--</b></div>
     </div>
+    <div class="hotPickBox" id="hotPickBox" style="display:none">
+  <div class="hotPickTop">
+    <span>🔥 HOT PICK</span>
+    <span id="hotPickTimer">--</span>
+  </div>
+  <div class="hotPickTitle" id="hotPickTitle">오늘 가장 뜨거운 예측</div>
+  <div class="hotPickMeta">
+    <span id="hotPickRatio">비 --% / 안 옴 --%</span>
+    <span id="hotPickStake">0P 참여</span>
+  </div>
+</div>
   </section>
 
   <div class="actions">
@@ -506,9 +583,10 @@ async function load(){
   document.getElementById("pointsEl").textContent=`${profile.points}P`;
   updateStatsUI();
   renderHotList();
-  renderNearList();
-  render();
-  scheduleLiveBuzz();
+renderNearList();
+renderHotPick();
+render();
+scheduleLiveBuzz();
 }
 
 function sortedPredictions(){
@@ -555,7 +633,34 @@ function renderHotList(){
   box.innerHTML="";
   hot.forEach((p,idx)=>renderBoardItem(box,p,idx+1,`${p.totalStake||0}P`));
 }
+function marketStatus(p){
+  const total = p.totalStake || 0;
+  const gap = Math.abs((p.rainPercent || 0) - (p.clearPercent || 0));
 
+  if(total >= 3000) return { text:"🔥 과열", cls:"hot" };
+  if(total >= 1000 && gap <= 15) return { text:"🌧 논쟁중", cls:"debate" };
+  if(total <= 100) return { text:"🧊 한산", cls:"calm" };
+
+  return { text:"⚡ 상승중", cls:"hot" };
+}
+
+function renderHotPick(){
+  const box=document.getElementById("hotPickBox");
+  if(!box) return;
+
+  const hot=sortedPredictions()[0];
+
+  if(!hot){
+    box.style.display="none";
+    return;
+  }
+
+  box.style.display="block";
+  document.getElementById("hotPickTitle").textContent=hot.title;
+  document.getElementById("hotPickTimer").textContent=remaining(hot.close_time);
+  document.getElementById("hotPickRatio").textContent=`비 ${hot.rainPercent}% / 안 옴 ${hot.clearPercent}%`;
+  document.getElementById("hotPickStake").textContent=`${hot.totalStake || 0}P 참여`;
+}
 function renderNearList(){
   const board=document.getElementById("nearBoard");
   const box=document.getElementById("nearList");
@@ -629,6 +734,9 @@ function createMarketCard(p,isSmall){
   const timer=document.createElement("div");
   timer.className="timer";
   timer.textContent=remaining(p.close_time);
+  if(new Date(p.close_time).getTime() - Date.now() <= 30 * 60 * 1000){
+  timer.classList.add("urgent");
+}
   top.append(badge,timer);
 
   const title=document.createElement("div");
@@ -687,7 +795,12 @@ function createMarketCard(p,isSmall){
   bar.className="bar";
   bar.innerHTML=`<div class="fill" style="width:${Math.max(0,Math.min(100,p.rainPercent))}%"></div>`;
 
-  card.append(meta,odds,bar);
+const status = marketStatus(p);
+const statusEl = document.createElement("div");
+statusEl.className = `marketStatus ${status.cls}`;
+statusEl.textContent = status.text;
+
+card.append(statusEl, meta, odds, bar);
 
   // 내 선택 or 픽 버튼
   if(p.myVote){
