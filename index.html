@@ -107,20 +107,15 @@ button:disabled{opacity:.45;cursor:not-allowed}
   width:76px;
   height:76px;
   flex:0 0 76px;
-
   border-radius:24px;
-
   display:flex;
   align-items:center;
   justify-content:center;
-
   background:rgba(255,255,255,.055);
   border:1px solid var(--line);
-
   font-size:34px;
   line-height:1;
-
-  padding-top:2px;
+  transform:translateY(1px);
 }
 .weatherGrid{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
 .weatherGrid div{padding:12px 8px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
@@ -339,7 +334,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
   background:var(--accent);
   color:#07100d;
 }
-
+.confirmSubmit.loading{
+  opacity:.7;
+  pointer-events:none;
+}
 .odd{
   position:relative;
   overflow:hidden;
@@ -514,6 +512,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <div><span>대기</span><b id="modalPending">0</b></div>
     </div>
     <button class="btn dark" onclick="copyInvite()">초대코드 복사</button>
+    <button class="btn dark" onclick="logout()" style="margin-top:8px">
+  로그아웃
+</button>
     <div class="historyTitle">최근 기록</div>
     <div id="historyList"></div>
   </div>
@@ -822,8 +823,11 @@ async function load(){
     document.getElementById("nickname").textContent=profile.nickname || "Player";
     document.getElementById("pointsEl").textContent=`${Number(profile.points||0).toLocaleString()}P`;
 
-    if(profile && !window.__checkedToday){
-  window.__checkedToday=true;
+    const todayKey=new Date().toISOString().slice(0,10);
+const lastCheckin=localStorage.getItem("wetty_last_checkin");
+
+if(profile && lastCheckin!==todayKey){
+  localStorage.setItem("wetty_last_checkin",todayKey);
   checkin(true);
 }
 
@@ -1582,6 +1586,11 @@ function closeConfirm(){
 async function submitVote(){
   if(!pendingVote) return;
 
+  const submitBtn=document.getElementById("confirmSubmitBtn");
+  submitBtn.classList.add("loading");
+  submitBtn.textContent="처리중...";
+  submitBtn.disabled=true;
+
   const { predictionId, choice } = pendingVote;
 
   const json=await post("vote",{
@@ -1589,6 +1598,10 @@ async function submitVote(){
     choice,
     stake:selectedStake
   });
+
+  submitBtn.classList.remove("loading");
+  submitBtn.textContent="참여하기";
+  submitBtn.disabled=false;
 
   if(!json.ok){
     toast(json.message || "참여 실패");
@@ -1602,40 +1615,37 @@ async function submitVote(){
   toast(`${selectedStake}P · 선택 완료`);
 
   closeConfirm();
-profile.points -= selectedStake;
 
-const prediction=predictions.find(
-  p=>p.id===predictionId
-);
+  profile.points=Math.max(0,Number(profile.points||0)-selectedStake);
 
-if(prediction){
+  const prediction=predictions.find(p=>p.id===predictionId);
 
-  prediction.myVote={
-    choice,
-    stake:selectedStake
-  };
+  if(prediction){
+    prediction.myVote={choice,stake:selectedStake};
 
-  if(choice==="rain"){
-    prediction.rainStake += selectedStake;
-  }else{
-    prediction.clearStake += selectedStake;
+    prediction.rainStake=Number(prediction.rainStake||0);
+    prediction.clearStake=Number(prediction.clearStake||0);
+    prediction.totalStake=Number(prediction.totalStake||0);
+
+    if(choice==="rain"){
+      prediction.rainStake+=selectedStake;
+    }else{
+      prediction.clearStake+=selectedStake;
+    }
+
+    prediction.totalStake+=selectedStake;
+
+    const total=prediction.rainStake+prediction.clearStake;
+
+    prediction.rainPercent=total
+      ? Math.round((prediction.rainStake/total)*100)
+      : 50;
+
+    prediction.clearPercent=100-prediction.rainPercent;
   }
 
-  prediction.totalStake += selectedStake;
-
-  const total =
-    prediction.rainStake +
-    prediction.clearStake;
-
-  prediction.rainPercent =
-    Math.round((prediction.rainStake/total)*100);
-
-  prediction.clearPercent =
-    100 - prediction.rainPercent;
-}
-
-updateStatsUI();
-render();
+  updateStatsUI();
+  render();
 }
 
 async function submitComment(predictionId,input){
