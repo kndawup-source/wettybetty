@@ -441,11 +441,6 @@ button:disabled{opacity:.45;cursor:not-allowed}
     </div>
   </section>
 
-<div class="actions single">
-  <button class="btn" id="checkinBtn" onclick="checkin()">
-    출석 포인트 받기
-  </button>
-</div>
 
   <section class="board" id="nearBoard" style="display:none">
     <div class="boardHead"><h2>지금 근처 예측</h2><span>NEARBY</span></div>
@@ -826,6 +821,11 @@ async function load(){
     document.getElementById("joinModal").classList.remove("show");
     document.getElementById("nickname").textContent=profile.nickname || "Player";
     document.getElementById("pointsEl").textContent=`${Number(profile.points||0).toLocaleString()}P`;
+
+    if(profile && !window.__checkedToday){
+  window.__checkedToday=true;
+  checkin(true);
+}
 
     updateStatsUI();
     renderHotList();
@@ -1495,7 +1495,7 @@ async function createProfile(){
   await load();
 }
 
-async function checkin(){
+async function checkin(silent=false){
   if(!profile){
     toast("먼저 닉네임을 만들어주세요.");
     return;
