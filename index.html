@@ -1,1208 +1,1440 @@
 <!DOCTYPE html>
+
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
 <title>WETTY BETTY</title>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Noto+Sans+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
-
 <style>
+/* ── TOKENS ─────────────────────────────────── */
 :root{
-  --bg:#050d16;--panel:#0b1620;--line:rgba(255,255,255,.08);
-  --text:#edf4fa;--muted:#8193a0;--soft:#b8c8c8;
-  --accent:#dff56a;--blue:#82c7ff;--green:#b8ff7a;--red:#ff6f6f;
-  --shadow:0 22px 64px rgba(0,0,0,.34);
+  --bg:#050d16;--panel:#0b1620;--panel2:#0f1d2a;
+  --line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.04);
+  --text:#edf4fa;--muted:#6e8494;--soft:#a8bcc8;
+  --accent:#dff56a;--blue:#82c7ff;--green:#b8ff7a;
+  --red:#ff6f6f;--orange:#ffb060;--gold:#ffd84a;
+  --shadow:0 24px 64px rgba(0,0,0,.38);
+  --r-sm:14px;--r-md:18px;--r-lg:24px;--r-xl:28px;--r-2xl:32px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
-html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif}
-button,input{font-family:inherit}
-button{cursor:pointer;border:0;transition:.12s}
-button:active{transform:scale(.96);filter:brightness(1.12)}
-button:disabled{opacity:.45;cursor:not-allowed}
-.app{
-  width:100%;max-width:480px;margin:0 auto;min-height:100dvh;padding:16px 16px 56px;
-  background:
-    radial-gradient(circle at 50% -10%,rgba(223,245,106,.10),transparent 34%),
-    radial-gradient(circle at 100% 12%,rgba(130,199,255,.08),transparent 32%),
-    linear-gradient(180deg,#07121c 0%,#050d16 46%,#050d16 100%);
-}
-.header{height:58px;display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
-.logo{font-family:'Syne',sans-serif;font-size:23px;font-weight:900;letter-spacing:-1px}
-.logo span{color:var(--accent)}
-.sub{margin-top:5px;color:var(--muted);font-size:10px;font-weight:900;letter-spacing:1px}
-.profileChip{width:138px;padding:9px 10px;border-radius:18px;background:rgba(255,255,255,.045);border:1px solid var(--line);text-align:right}
-.profileName{color:var(--soft);font-size:11px;font-weight:900;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.points{margin-top:3px;color:var(--accent);font-size:12px;font-weight:900;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.scoreBar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
-.scoreBar button,.scoreBar div{min-height:52px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid var(--line);padding:9px 8px;text-align:left}
-.scoreBar span{display:block;color:var(--muted);font-size:9px;font-weight:900;letter-spacing:.7px}
-.scoreBar b{display:block;margin-top:5px;color:var(--text);font-size:15px;font-weight:900}
-.scoreBar button b{color:var(--accent)}
-.weatherBoard{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.07);background:#0d1823;border-radius:30px;padding:20px;margin-bottom:12px;box-shadow:var(--shadow)}
-.weatherBoard:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,0));pointer-events:none}
-.weatherTop{position:relative;z-index:1;display:flex;justify-content:space-between;gap:14px}
-.kicker{display:inline-flex;padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.055);border:1px solid var(--line);color:var(--soft);font-size:10px;font-weight:900}
-.weatherTemp{margin-top:10px;font-family:'Syne',sans-serif;font-size:74px;line-height:.82;letter-spacing:-4px;font-weight:900}
-.weatherTemp span{font-size:.42em;vertical-align:top;position:relative;top:10px;margin-left:2px}
-.weatherDesc{margin-top:12px;color:var(--muted);font-size:13px;line-height:1.55;max-width:260px}
-.weatherIcon{width:76px;height:76px;flex:0 0 76px;border-radius:24px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.055);border:1px solid var(--line);font-size:34px;line-height:1}
-.weatherGrid{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
-.weatherGrid div{padding:12px 8px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
-.weatherGrid span{display:block;color:var(--muted);font-size:9px;font-weight:900;white-space:nowrap}
-.weatherGrid b{display:block;margin-top:5px;color:var(--text);font-size:14px;font-weight:900}
-.hotPickBox{position:relative;z-index:2;margin-top:16px;padding:14px;border-radius:20px;background:rgba(223,245,106,.08);border:1px solid rgba(223,245,106,.18)}
-.hotPickTop{display:flex;justify-content:space-between;align-items:center;color:var(--accent);font-size:10px;font-weight:900;letter-spacing:.8px}
-.hotPickTitle{margin-top:8px;font-size:17px;line-height:1.28;font-weight:900}
-.hotPickMeta{margin-top:8px;display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px;font-weight:900}
-.actions{position:relative;z-index:3;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-.btn{position:relative;z-index:2;height:44px;border-radius:15px;font-size:12px;font-weight:900;background:#dff56a;color:#07100d;box-shadow:none;overflow:hidden}
-.btn.dark{background:#111d27;color:var(--text);border:1px solid var(--line)}
-.board{border:1px solid var(--line);background:rgba(255,255,255,.035);border-radius:22px;padding:14px;margin:12px 0 16px}
-.boardHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-.boardHead h2{font-size:14px;font-weight:900}
-.boardHead span{color:var(--accent);font-size:10px;font-weight:900}
-.boardItem{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--line)}
-.boardItem:first-child{border-top:0}
-.boardTitle{font-size:13px;font-weight:900}
-.boardSub{margin-top:3px;color:var(--muted);font-size:11px}
-.boardRight{color:var(--accent);font-size:13px;font-weight:900;white-space:nowrap}
-.sectionHead{display:flex;justify-content:space-between;align-items:center;margin:18px 2px 10px}
-.sectionHead h2{font-size:15px;font-weight:900}
-.sectionHead span{color:var(--muted);font-size:11px;font-weight:900}
-.card{border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.052),rgba(255,255,255,.02)),var(--panel);border-radius:25px;padding:16px;margin:10px 0;box-shadow:0 16px 42px rgba(0,0,0,.23)}
-.card.small{padding:13px;border-radius:20px;box-shadow:none}
-.marketTop{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.badge{display:inline-flex;padding:6px 10px;border-radius:999px;background:rgba(130,199,255,.095);border:1px solid rgba(130,199,255,.14);color:var(--blue);font-size:10px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.timer{color:var(--muted);font-size:10px;font-weight:900}
-.timer.urgent{color:#ff8d8d;animation:pulse 1s infinite}
-@keyframes pulse{0%{opacity:1}50%{opacity:.45}100%{opacity:1}}
-.card-title{margin-top:12px;font-size:22px;line-height:1.25;letter-spacing:-.8px;font-weight:900}
-.card.small .card-title{font-size:15px;margin-top:9px}
-.marketStatus{display:inline-flex;margin-top:10px;padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.055);border:1px solid var(--line);color:var(--soft);font-size:10px;font-weight:900}
-.marketStatus.hot{color:#ffda6a;border-color:rgba(255,218,106,.22);background:rgba(255,218,106,.09)}
-.marketStatus.debate{color:var(--blue);border-color:rgba(130,199,255,.2);background:rgba(130,199,255,.08)}
-.marketStatus.calm{color:var(--muted)}
-.marketMeta{display:flex;justify-content:space-between;gap:8px;margin-top:9px;color:var(--muted);font-size:11px;line-height:1.45}
-.official{color:var(--soft);font-weight:900;white-space:nowrap}
-.odds{margin-top:15px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.odd{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:18px;padding:14px}
-.odd label{display:block;color:var(--muted);font-size:10px;font-weight:900}
-.odd strong{display:block;margin-top:7px;font-family:'Syne',sans-serif;font-size:32px;line-height:1}
-.odd small{display:block;margin-top:7px;color:var(--muted);font-size:10px;font-weight:800}
-.odd.rain strong{color:var(--blue)}
-.odd.clear strong{color:var(--green)}
-.bar{margin-top:13px;height:8px;border-radius:999px;background:rgba(184,255,122,.2);overflow:hidden}
-.fill{height:100%;background:linear-gradient(90deg,var(--blue),#b5e1ff)}
-.reasonBox{margin-top:12px;padding:12px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
-.reasonTitle{color:var(--accent);font-size:10px;font-weight:900;letter-spacing:.7px}
-.reasonText{margin-top:6px;color:#d9e6ef;font-size:12px;line-height:1.5;font-weight:700}
-.reasonSource{margin-top:8px;color:var(--muted);font-size:10px;font-weight:900}
-.entry{margin-top:14px}
-.stakes{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
-.stakes button{height:38px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--soft);border-radius:13px;font-size:12px;font-weight:900}
-.stakes button.active{background:var(--text);color:#050d16}
-.pickBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.pickBtns button{height:46px;border-radius:15px;font-size:14px;font-weight:900}
-.pickBtns .rain{background:rgba(130,199,255,.14);border:1px solid rgba(130,199,255,.27);color:var(--blue)}
-.pickBtns .clear{background:rgba(184,255,122,.12);border:1px solid rgba(184,255,122,.24);color:var(--green)}
-.myPick{margin-top:13px;padding:12px;border-radius:15px;background:rgba(223,245,106,.075);border:1px solid rgba(223,245,106,.17);color:var(--accent);font-size:12px;font-weight:900}
-.mood{margin-top:15px;border-top:1px solid var(--line);padding-top:13px}
-.moodTitle{display:flex;justify-content:space-between;gap:8px;color:var(--soft);font-size:11px;font-weight:900;margin-bottom:9px}
-.moodTitle span:last-child{color:var(--muted);white-space:nowrap}
-.reactions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
-.reactions button{height:38px;border-radius:13px;background:rgba(255,255,255,.04);color:var(--soft);border:1px solid var(--line);font-size:11px;font-weight:900}
-.commentPreview,.comment{margin-top:8px;padding:10px 11px;border-radius:14px;background:rgba(255,255,255,.032);border:1px solid rgba(255,255,255,.055)}
-.commentPreview b,.comment b{color:var(--accent);font-size:10px;font-weight:900}
-.commentPreview p,.comment p{margin-top:4px;color:#dce7ee;font-size:12px;line-height:1.45}
-.commentToggle{width:100%;height:38px;margin-top:9px;border-radius:13px;background:rgba(255,255,255,.045);border:1px solid var(--line);color:var(--soft);font-size:12px;font-weight:900}
-.commentForm{display:flex;gap:7px;margin-top:10px}
-.commentForm input{flex:1;min-width:0;height:42px;background:rgba(0,0,0,.18);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:0 12px;font-size:12px;outline:none}
-.commentForm button{width:58px;border-radius:14px;background:rgba(255,255,255,.075);color:var(--text);font-size:12px;font-weight:900}
-.smallRow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px}
-.smallPercent{color:var(--soft);font-size:12px;font-weight:900}
-.smallBtn{height:34px;padding:0 12px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--text);font-size:11px;font-weight:900}
-.closedCard{opacity:.72}
-.closedCard .card-title{font-size:16px}
-.closedBadge{display:inline-flex;margin-top:10px;padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.055);border:1px solid var(--line);color:var(--muted);font-size:10px;font-weight:900}
-.closedBadge.settled{color:var(--accent);border-color:rgba(223,245,106,.2);background:rgba(223,245,106,.08)}
-.closedBadge.pending{color:var(--blue);border-color:rgba(130,199,255,.18);background:rgba(130,199,255,.07)}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:20px;z-index:100;backdrop-filter:blur(8px)}
-.modal.show{display:flex}
-.modalCard{width:100%;max-width:390px;max-height:86dvh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:28px;padding:24px;box-shadow:var(--shadow)}
-.modalTop{display:flex;justify-content:space-between;gap:12px}
-.modalCard h2{font-size:24px;font-weight:900}
-.closeBtn{width:34px;height:34px;border-radius:12px;background:rgba(255,255,255,.06);color:var(--text);font-weight:900}
-.modalCard p{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.5}
-.modalCard input{width:100%;height:48px;margin-top:14px;border:1px solid var(--line);background:rgba(0,0,0,.2);color:var(--text);border-radius:16px;padding:0 14px;font-size:15px;outline:none}
-.modalCard .btn{width:100%;margin-top:12px}
-.profileStats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px}
-.profileStats div{border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:17px;padding:12px 10px}
-.profileStats span{display:block;color:var(--muted);font-size:10px;font-weight:900}
-.profileStats b{display:block;margin-top:5px;color:var(--text);font-size:17px;font-weight:900}
-.historyTitle{margin-top:20px;font-size:13px;font-weight:900;color:var(--soft)}
-.historyItem{margin-top:9px;border:1px solid var(--line);background:rgba(255,255,255,.035);border-radius:16px;padding:12px}
-.historyItem strong{display:block;font-size:13px;line-height:1.35}
-.historyItem span{display:block;margin-top:5px;color:var(--muted);font-size:11px;font-weight:800}
-.resultWin{color:var(--accent)}.resultLose{color:var(--red)}.resultPending{color:var(--blue)}
-.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(8px);opacity:0;pointer-events:none;background:var(--text);color:#050d16;padding:12px 18px;border-radius:999px;font-size:13px;font-weight:900;transition:.2s;z-index:200}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.empty{padding:20px 0;text-align:center;color:var(--muted);font-size:13px}
-.liveToast{position:fixed;left:50%;bottom:78px;width:calc(100% - 32px);max-width:448px;transform:translateX(-50%) translateY(12px);opacity:0;z-index:210;padding:13px 15px;border-radius:18px;background:rgba(11,22,32,.96);border:1px solid rgba(223,245,106,.18);color:var(--text);font-size:13px;font-weight:900;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:.22s ease;backdrop-filter:blur(10px)}
-.liveToast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-</style>
-</head>
+html,body{min-height:100%;background:var(--bg);color:var(--text);
+  font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;
+  -webkit-font-smoothing:antialiased}
+button,input,textarea{font-family:inherit}
+button{cursor:pointer;border:0;background:none;transition:transform .1s,filter .1s,opacity .1s,background .12s,border-color .12s,color .12s}
+button:active:not(:disabled){transform:scale(.95);filter:brightness(1.1)}
+button:disabled{opacity:.38;cursor:not-allowed;transform:none!important}
+input{outline:none}
 
+/* ── APP SHELL ──────────────────────────────── */
+.app{
+width:100%;max-width:480px;margin:0 auto;min-height:100dvh;
+padding:0 0 68px;
+background:
+radial-gradient(ellipse 80% 40% at 50% -8%,rgba(223,245,106,.11),transparent),
+radial-gradient(ellipse 60% 50% at 102% 10%,rgba(130,199,255,.09),transparent),
+linear-gradient(180deg,#07121c 0%,var(–bg) 50%);
+}
+.inner{padding:0 16px}
+
+/* ── HEADER ─────────────────────────────────── */
+.header{
+display:flex;justify-content:space-between;align-items:center;
+padding:14px 16px 10px;gap:10px;
+position:sticky;top:0;z-index:50;
+background:linear-gradient(180deg,rgba(5,13,22,.98) 80%,transparent);
+backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.logo-wrap .logo{font-family:‘Syne’,sans-serif;font-size:22px;font-weight:900;letter-spacing:-1px;line-height:1}
+.logo-wrap .logo em{color:var(–accent);font-style:normal}
+.logo-wrap .sub{color:var(–muted);font-size:9px;font-weight:900;letter-spacing:1.4px;margin-top:3px}
+.header-right{display:flex;align-items:center;gap:7px}
+.profile-chip{
+display:flex;flex-direction:column;align-items:flex-end;
+padding:8px 11px;border-radius:var(–r-md);
+background:rgba(255,255,255,.04);border:1px solid var(–line);
+min-width:100px;max-width:148px;transition:.15s;
+}
+.profile-chip:hover{border-color:rgba(223,245,106,.28);background:rgba(223,245,106,.05)}
+.profile-chip .pname{color:var(–soft);font-size:11px;font-weight:900;
+overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:100%}
+.profile-chip .ppts{color:var(–accent);font-size:12px;font-weight:900;margin-top:2px}
+.icon-btn{
+width:36px;height:36px;border-radius:12px;flex-shrink:0;
+display:flex;align-items:center;justify-content:center;font-size:16px;
+background:rgba(255,255,255,.05);border:1px solid var(–line);
+color:var(–soft);transition:.15s;
+}
+.icon-btn:hover{background:rgba(255,255,255,.1);color:var(–text)}
+.icon-btn.danger{color:var(–red);background:rgba(255,111,111,.08);border-color:rgba(255,111,111,.18)}
+.icon-btn.danger:hover{background:rgba(255,111,111,.18)}
+
+/* ── SCORE BAR ──────────────────────────────── */
+.score-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:0 16px;margin-bottom:14px}
+.score-cell{
+padding:9px 8px;border-radius:var(–r-md);
+background:rgba(255,255,255,.04);border:1px solid var(–line);
+text-align:left;transition:.15s;
+}
+button.score-cell:hover{border-color:rgba(223,245,106,.3)}
+.score-cell .sc-label{display:block;color:var(–muted);font-size:8.5px;font-weight:900;letter-spacing:.8px;margin-bottom:5px}
+.score-cell .sc-val{display:block;color:var(–text);font-size:14px;font-weight:900;line-height:1}
+button.score-cell .sc-val{color:var(–accent)}
+
+/* ── WEATHER BOARD ──────────────────────────── */
+.weather-board{
+position:relative;overflow:hidden;
+margin:0 16px 14px;border-radius:var(–r-2xl);
+background:linear-gradient(145deg,#0e1f30,#091520);
+border:1px solid rgba(255,255,255,.07);
+padding:20px;box-shadow:var(–shadow);
+}
+.weather-board::before{
+content:””;position:absolute;inset:0;pointer-events:none;
+background:linear-gradient(180deg,rgba(255,255,255,.04) 0%,transparent 60%);
+}
+.weather-top{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.weather-left{flex:1;min-width:0}
+.w-kicker{
+display:inline-flex;align-items:center;gap:5px;
+padding:5px 9px;border-radius:999px;
+background:rgba(255,255,255,.055);border:1px solid var(–line);
+color:var(–soft);font-size:10px;font-weight:900;letter-spacing:.4px;
+}
+.w-temp{
+margin-top:10px;font-family:‘Syne’,sans-serif;
+font-size:72px;line-height:.85;letter-spacing:-4px;font-weight:900;
+}
+.w-temp sup{font-size:.38em;vertical-align:top;position:relative;top:12px;margin-left:1px}
+.w-desc{margin-top:10px;color:var(–muted);font-size:12.5px;line-height:1.55;max-width:230px}
+.w-icon{
+width:74px;height:74px;flex-shrink:0;border-radius:22px;
+display:flex;align-items:center;justify-content:center;font-size:32px;
+background:rgba(255,255,255,.055);border:1px solid var(–line);
+}
+.w-refresh{
+position:absolute;top:14px;right:14px;z-index:3;
+width:28px;height:28px;border-radius:10px;font-size:14px;
+background:rgba(255,255,255,.05);border:1px solid var(–line);
+color:var(–muted);display:flex;align-items:center;justify-content:center;
+}
+.w-refresh:hover{color:var(–accent);border-color:rgba(223,245,106,.3)}
+.w-refresh.spin{animation:spin .65s linear}
+@keyframes spin{to{transform:rotate(360deg)}}
+.w-grid{
+position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);
+gap:7px;margin-top:16px;
+}
+.w-cell{padding:10px 7px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(–line)}
+.w-cell .wc-label{display:block;color:var(–muted);font-size:8.5px;font-weight:900;white-space:nowrap}
+.w-cell .wc-val{display:block;margin-top:4px;color:var(–text);font-size:13px;font-weight:900}
+
+/* ── HOT PICK BOX ───────────────────────────── */
+.hot-pick{
+position:relative;z-index:2;margin-top:14px;padding:13px;
+border-radius:18px;background:rgba(223,245,106,.07);
+border:1px solid rgba(223,245,106,.18);
+}
+.hp-top{display:flex;justify-content:space-between;align-items:center;color:var(–accent);font-size:10px;font-weight:900;letter-spacing:.8px}
+.hp-title{margin-top:7px;font-size:16px;font-weight:900;line-height:1.3}
+.hp-meta{margin-top:7px;display:flex;justify-content:space-between;gap:8px;color:var(–muted);font-size:11px;font-weight:900}
+
+/* ── ACTIONS BAR ────────────────────────────── */
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px;margin-bottom:14px}
+.btn{
+height:44px;border-radius:var(–r-sm);font-size:12.5px;font-weight:900;
+background:var(–accent);color:#06100c;transition:.12s;
+}
+.btn:hover{filter:brightness(1.07)}
+.btn.secondary{background:rgba(255,255,255,.06);color:var(–text);border:1px solid var(–line)}
+.btn.secondary:hover{background:rgba(255,255,255,.1)}
+.btn.danger-soft{background:rgba(255,111,111,.12);color:var(–red);border:1px solid rgba(255,111,111,.22)}
+.btn.danger-soft:hover{background:rgba(255,111,111,.2)}
+.btn.full{width:100%;height:50px;font-size:14px;border-radius:var(–r-md);margin-top:10px}
+
+/* ── BOARD ──────────────────────────────────── */
+.board{
+margin:0 16px 14px;padding:14px;
+border-radius:var(–r-xl);border:1px solid var(–line);
+background:rgba(255,255,255,.03);
+}
+.board-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.board-head h2{font-size:13.5px;font-weight:900}
+.board-head .tag{color:var(–accent);font-size:10px;font-weight:900;letter-spacing:.5px}
+.board-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(–line)}
+.board-item:first-of-type{border-top:0;padding-top:4px}
+.bi-title{font-size:13px;font-weight:900}
+.bi-sub{margin-top:2px;color:var(–muted);font-size:11px}
+.bi-right{color:var(–accent);font-size:13px;font-weight:900;white-space:nowrap;flex-shrink:0}
+
+/* ── SECTION HEAD ───────────────────────────── */
+.section-head{display:flex;justify-content:space-between;align-items:center;padding:0 16px;margin:16px 0 8px}
+.section-head h2{font-size:15px;font-weight:900}
+.section-head span{color:var(–muted);font-size:11px;font-weight:900}
+
+/* ── MARKET CARD ────────────────────────────── */
+.card{
+margin:0 16px 10px;padding:16px;
+border-radius:var(–r-xl);border:1px solid var(–line);
+background:linear-gradient(170deg,rgba(255,255,255,.05),rgba(255,255,255,.015)),var(–panel);
+box-shadow:0 14px 40px rgba(0,0,0,.22);
+}
+.card.compact{padding:13px;border-radius:var(–r-lg);box-shadow:none;background:rgba(255,255,255,.03)}
+.card-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.badge{
+display:inline-flex;padding:5px 10px;border-radius:999px;
+background:rgba(130,199,255,.09);border:1px solid rgba(130,199,255,.16);
+color:var(–blue);font-size:10px;font-weight:900;
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;
+}
+.timer-tag{color:var(–muted);font-size:10px;font-weight:900;white-space:nowrap}
+.timer-tag.warn{color:var(–orange);animation:blink 1.6s infinite}
+.timer-tag.urgent{color:var(–red);animation:blink .9s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.card-title{margin-top:11px;font-size:20px;line-height:1.25;letter-spacing:-.7px;font-weight:900}
+.card.compact .card-title{font-size:14.5px;margin-top:8px}
+.mkt-status{
+display:inline-flex;align-items:center;gap:5px;
+margin-top:10px;padding:5px 9px;border-radius:999px;
+background:rgba(255,255,255,.05);border:1px solid var(–line);
+color:var(–soft);font-size:10px;font-weight:900;
+}
+.mkt-status.hot{color:#ffd060;border-color:rgba(255,200,80,.22);background:rgba(255,200,80,.08)}
+.mkt-status.debate{color:var(–blue);border-color:rgba(130,199,255,.2);background:rgba(130,199,255,.07)}
+.mkt-status.calm{color:var(–muted)}
+.mkt-meta{display:flex;justify-content:space-between;gap:8px;margin-top:8px;color:var(–muted);font-size:11px;line-height:1.5}
+.mkt-meta .official{color:var(–soft);font-weight:900;white-space:nowrap;flex-shrink:0}
+.odds-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.odd-cell{padding:13px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(–line)}
+.odd-cell label{display:block;color:var(–muted);font-size:10px;font-weight:900}
+.odd-cell strong{display:block;margin-top:6px;font-family:‘Syne’,sans-serif;font-size:30px;line-height:1}
+.odd-cell small{display:block;margin-top:6px;color:var(–muted);font-size:10px;font-weight:800}
+.odd-cell.rain strong{color:var(–blue)}
+.odd-cell.clear strong{color:var(–green)}
+.prob-bar{margin-top:12px;height:7px;border-radius:999px;background:rgba(130,199,255,.12);overflow:hidden}
+.prob-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(–blue),#b0deff);transition:width .5s ease}
+.signal-box{
+margin-top:11px;padding:11px 12px;border-radius:14px;
+background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.055);
+}
+.signal-label{color:var(–accent);font-size:9.5px;font-weight:900;letter-spacing:.8px}
+.signal-text{margin-top:5px;color:#cfe0ea;font-size:12px;line-height:1.5;font-weight:700}
+.signal-src{margin-top:7px;color:var(–muted);font-size:10px;font-weight:900}
+
+/* ── ENTRY / BETTING ────────────────────────── */
+.entry{margin-top:13px}
+.stake-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.stake-btn{
+height:36px;border-radius:12px;font-size:12px;font-weight:900;
+border:1px solid var(–line);background:rgba(255,255,255,.04);color:var(–soft);
+}
+.stake-btn.active{background:var(–text);color:#050d16;border-color:transparent}
+.stake-btn:hover:not(.active):not(:disabled){background:rgba(255,255,255,.08);color:var(–text)}
+.pick-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}
+.pick-btn{height:46px;border-radius:14px;font-size:14px;font-weight:900}
+.pick-btn.rain{background:rgba(130,199,255,.13);border:1px solid rgba(130,199,255,.28);color:var(–blue)}
+.pick-btn.clear{background:rgba(184,255,122,.1);border:1px solid rgba(184,255,122,.25);color:var(–green)}
+.pick-btn.rain:hover:not(:disabled){background:rgba(130,199,255,.22)}
+.pick-btn.clear:hover:not(:disabled){background:rgba(184,255,122,.2)}
+.my-pick{
+margin-top:12px;padding:11px 13px;border-radius:13px;
+background:rgba(223,245,106,.07);border:1px solid rgba(223,245,106,.18);
+color:var(–accent);font-size:12px;font-weight:900;display:flex;align-items:center;gap:6px;
+}
+.my-pick::before{content:“✓”;font-size:14px}
+
+/* ── MOOD / COMMENTS ────────────────────────── */
+.mood{margin-top:14px;padding-top:13px;border-top:1px solid var(–line)}
+.mood-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.mood-head span{font-size:11px;font-weight:900;color:var(–soft)}
+.mood-head small{font-size:11px;font-weight:900;color:var(–muted)}
+.react-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:9px}
+.react-btn{
+height:36px;border-radius:12px;font-size:11px;font-weight:900;
+background:rgba(255,255,255,.04);border:1px solid var(–line);color:var(–soft);
+}
+.react-btn:hover{background:rgba(255,255,255,.08);color:var(–text)}
+.comment,.comment-preview{
+margin-top:7px;padding:9px 11px;border-radius:13px;
+background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);
+}
+.comment b,.comment-preview b{display:block;color:var(–accent);font-size:10px;font-weight:900}
+.comment p,.comment-preview p{margin-top:3px;color:#cee0ea;font-size:12px;line-height:1.45}
+.comment-toggle{
+width:100%;height:36px;margin-top:8px;border-radius:12px;
+background:rgba(255,255,255,.04);border:1px solid var(–line);
+color:var(–soft);font-size:11.5px;font-weight:900;
+}
+.comment-toggle:hover{background:rgba(255,255,255,.07)}
+.comment-form{display:flex;gap:6px;margin-top:9px}
+.comment-form input{
+flex:1;min-width:0;height:40px;
+background:rgba(0,0,0,.2);color:var(–text);
+border:1px solid var(–line);border-radius:13px;
+padding:0 12px;font-size:12px;transition:.15s;
+}
+.comment-form input:focus{border-color:rgba(223,245,106,.38)}
+.comment-form button{
+width:54px;border-radius:13px;font-size:12px;font-weight:900;
+background:rgba(255,255,255,.07);color:var(–text);border:1px solid var(–line);
+}
+.comment-form button:hover{background:rgba(255,255,255,.13)}
+
+/* ── COMPACT ROW ────────────────────────────── */
+.compact-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:9px}
+.compact-pct{color:var(–soft);font-size:12px;font-weight:900}
+.expand-btn{
+height:32px;padding:0 11px;border-radius:11px;
+background:rgba(255,255,255,.06);border:1px solid var(–line);
+color:var(–text);font-size:11px;font-weight:900;
+}
+.expand-btn:hover{background:rgba(255,255,255,.1)}
+
+/* ── CLOSED CARDS ───────────────────────────── */
+.card.closed{opacity:.65}
+.closed-badge{
+display:inline-flex;margin-top:9px;padding:5px 9px;border-radius:999px;
+background:rgba(255,255,255,.05);border:1px solid var(–line);
+color:var(–muted);font-size:10px;font-weight:900;
+}
+.closed-badge.settled{color:var(–accent);border-color:rgba(223,245,106,.2);background:rgba(223,245,106,.07)}
+.closed-badge.pending{color:var(–blue);border-color:rgba(130,199,255,.18);background:rgba(130,199,255,.06)}
+
+/* ── BOTTOM NAV ─────────────────────────────── */
+.bottom-nav{
+position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+width:100%;max-width:480px;height:60px;z-index:60;
+background:rgba(5,13,22,.96);border-top:1px solid var(–line);
+display:flex;align-items:center;justify-content:space-around;
+padding:0 8px;
+backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+}
+.nav-btn{
+flex:1;height:48px;display:flex;flex-direction:column;
+align-items:center;justify-content:center;gap:2px;
+border-radius:13px;color:var(–muted);font-size:9px;font-weight:900;letter-spacing:.4px;
+transition:.15s;
+}
+.nav-btn .ni{font-size:18px;line-height:1;display:block;transition:.15s}
+.nav-btn.active{color:var(–accent);background:rgba(223,245,106,.07)}
+.nav-btn:hover:not(.active){color:var(–soft)}
+
+/* ── TAB SECTIONS ───────────────────────────── */
+.tab-section{display:none;animation:fadeUp .18s ease}
+.tab-section.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── LEADERBOARD ────────────────────────────── */
+.lb-item{display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(–line)}
+.lb-item:first-of-type{border-top:0;padding-top:2px}
+.lb-rank{width:26px;text-align:center;font-family:‘Syne’,sans-serif;font-size:15px;font-weight:900;color:var(–muted);flex-shrink:0}
+.lb-rank.g1{color:var(–gold)}.lb-rank.g2{color:#c8c8c8}.lb-rank.g3{color:#cd7f32}
+.lb-avatar{width:36px;height:36px;border-radius:12px;flex-shrink:0;
+display:flex;align-items:center;justify-content:center;font-size:16px;
+background:rgba(130,199,255,.08);border:1px solid rgba(130,199,255,.14)}
+.lb-info{flex:1;min-width:0}
+.lb-name{font-size:13px;font-weight:900;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.lb-sub{color:var(–muted);font-size:11px;margin-top:2px}
+.lb-stat{color:var(–accent);font-size:14px;font-weight:900;flex-shrink:0}
+.me-badge{display:inline-flex;padding:2px 6px;border-radius:6px;
+background:rgba(223,245,106,.14);color:var(–accent);font-size:9px;font-weight:900;
+vertical-align:middle;margin-left:5px}
+
+/* ── MY PAGE ────────────────────────────────── */
+.my-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px}
+.my-stat-cell{padding:12px 10px;border-radius:var(–r-md);background:rgba(255,255,255,.04);border:1px solid var(–line)}
+.my-stat-cell .msc-label{display:block;color:var(–muted);font-size:9px;font-weight:900;margin-bottom:4px}
+.my-stat-cell .msc-val{display:block;color:var(–text);font-size:17px;font-weight:900}
+.history-item{margin-top:8px;padding:11px 13px;border-radius:var(–r-md);
+background:rgba(255,255,255,.035);border:1px solid var(–line)}
+.history-item strong{display:block;font-size:13px;line-height:1.35}
+.history-item span{display:block;margin-top:4px;color:var(–muted);font-size:11px;font-weight:800}
+.win{color:var(–accent)}.lose{color:var(–red)}.pending{color:var(–blue)}
+
+/* ── MODALS ─────────────────────────────────── */
+.overlay{
+position:fixed;inset:0;z-index:100;
+background:rgba(0,0,0,.82);
+display:none;align-items:flex-end;justify-content:center;
+backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.overlay.center{align-items:center;padding:20px}
+.overlay.show{display:flex;animation:fadeIn .15s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.sheet{
+width:100%;max-width:480px;max-height:90dvh;overflow-y:auto;
+background:var(–panel);border:1px solid var(–line);
+border-radius:var(–r-2xl) var(–r-2xl) 0 0;
+padding:0 22px 48px;
+box-shadow:0 -8px 48px rgba(0,0,0,.4);
+animation:slideUp .22s cubic-bezier(.22,.68,0,1.1);
+}
+.sheet.dialog{border-radius:var(–r-2xl);padding:24px;max-width:340px;animation:popIn .18s ease}
+@keyframes slideUp{from{transform:translateY(56px);opacity:0}to{transform:none;opacity:1}}
+@keyframes popIn{from{transform:scale(.94);opacity:0}to{transform:none;opacity:1}}
+.sheet-handle{width:38px;height:4px;border-radius:999px;background:rgba(255,255,255,.1);margin:14px auto 20px}
+.sheet-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.sheet-head h2{font-family:‘Syne’,sans-serif;font-size:22px;font-weight:900;letter-spacing:-.5px}
+.close-btn{width:32px;height:32px;border-radius:11px;background:rgba(255,255,255,.06);
+color:var(–text);font-size:18px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.close-btn:hover{background:rgba(255,255,255,.12)}
+.sheet p.desc{color:var(–muted);font-size:13px;line-height:1.5;margin-bottom:14px}
+.field{
+width:100%;height:48px;margin-top:11px;
+background:rgba(0,0,0,.22);color:var(–text);
+border:1px solid var(–line);border-radius:var(–r-md);
+padding:0 14px;font-size:14.5px;transition:.15s;
+}
+.field:focus{border-color:rgba(223,245,106,.42)}
+.field::placeholder{color:var(–muted)}
+
+/* Auth tabs */
+.auth-tabs{display:flex;gap:7px;margin-bottom:18px}
+.auth-tab{
+flex:1;height:38px;border-radius:12px;font-size:13px;font-weight:900;
+background:transparent;color:var(–muted);border:1px solid transparent;transition:.15s;
+}
+.auth-tab.active{background:rgba(223,245,106,.09);color:var(–accent);border-color:rgba(223,245,106,.26)}
+.bonus-tag{
+display:flex;align-items:center;justify-content:center;gap:6px;
+margin-top:13px;padding:9px;border-radius:13px;
+background:rgba(223,245,106,.07);border:1px solid rgba(223,245,106,.18);
+color:var(–accent);font-size:12px;font-weight:900;
+}
+
+/* Profile stats in modal */
+.modal-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:16px}
+.modal-stat{padding:11px 10px;border-radius:var(–r-md);background:rgba(255,255,255,.04);border:1px solid var(–line)}
+.modal-stat span{display:block;color:var(–muted);font-size:9px;font-weight:900;margin-bottom:4px}
+.modal-stat b{display:block;color:var(–text);font-size:16px;font-weight:900}
+
+/* Dialog */
+.dialog-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px}
+.dialog-btns button{height:44px;border-radius:14px;font-size:13px;font-weight:900}
+.dialog-btns .cancel{background:rgba(255,255,255,.06);color:var(–text);border:1px solid var(–line)}
+.dialog-btns .confirm-danger{background:rgba(255,111,111,.14);color:var(–red);border:1px solid rgba(255,111,111,.24)}
+
+/* ── TOAST ──────────────────────────────────── */
+.toast{
+position:fixed;left:50%;bottom:24px;z-index:300;
+transform:translateX(-50%) translateY(10px);opacity:0;pointer-events:none;
+background:var(–text);color:#050d16;
+padding:11px 18px;border-radius:999px;
+font-size:13px;font-weight:900;white-space:nowrap;
+transition:.2s cubic-bezier(.22,.68,0,1.2);
+box-shadow:0 8px 28px rgba(0,0,0,.35);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── LIVE BUZZ ──────────────────────────────── */
+.live-toast{
+position:fixed;left:50%;bottom:74px;
+width:calc(100% - 28px);max-width:452px;
+transform:translateX(-50%) translateY(14px);
+opacity:0;z-index:210;pointer-events:none;
+padding:12px 15px;border-radius:18px;
+background:rgba(9,19,28,.96);border:1px solid rgba(223,245,106,.16);
+color:var(–text);font-size:13px;font-weight:900;
+box-shadow:0 16px 40px rgba(0,0,0,.4);
+transition:.22s ease;backdrop-filter:blur(12px);
+}
+.live-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.live-toast::before{content:“⚡ “;color:var(–accent)}
+
+/* ── EMPTY ──────────────────────────────────── */
+.empty{padding:22px 0;text-align:center;color:var(–muted);font-size:13px}
+.login-gate{padding:40px 0;text-align:center}
+.login-gate .gate-icon{font-size:44px;margin-bottom:14px}
+.login-gate h3{font-size:17px;font-weight:900;margin-bottom:6px}
+.login-gate p{color:var(–muted);font-size:13px;line-height:1.5;margin-bottom:20px}
+</style>
+
+</head>
 <body>
+
 <div class="app">
+
+  <!-- ── HEADER ─────────────────────────── -->
+
   <header class="header">
-    <div>
-      <div class="logo">WETTY <span>BETTY</span></div>
+    <div class="logo-wrap">
+      <div class="logo">WETTY <em>BETTY</em></div>
       <div class="sub">WEATHER PICK CLUB</div>
     </div>
-    <button class="profileChip" onclick="openProfile()">
-      <div class="profileName" id="nickname">GUEST</div>
-      <div class="points" id="pointsEl">0P</div>
-    </button>
+    <div class="header-right">
+      <button class="profile-chip" id="profileChipBtn" onclick="onProfileChipClick()">
+        <span class="pname" id="nickname">GUEST</span>
+        <span class="ppts" id="pointsEl">--P</span>
+      </button>
+      <button class="icon-btn danger" id="logoutBtn" style="display:none" onclick="openConfirm()" title="로그아웃">↩</button>
+    </div>
   </header>
 
-  <section class="scoreBar">
-    <button onclick="openProfile()"><span>적중률</span><b id="hitRateMini">0%</b></button>
-    <div><span>참여</span><b id="picksMini">0</b></div>
-    <div><span>적중</span><b id="winsMini">0</b></div>
-    <div><span>연승</span><b id="streakMini">0</b></div>
-  </section>
+  <!-- ── SCORE BAR ──────────────────────── -->
 
-  <section class="weatherBoard">
-    <div class="weatherTop">
-      <div>
-        <div class="kicker">현재 날씨</div>
-        <h1 class="weatherTemp" id="currentTemp">--°</h1>
-        <p class="weatherDesc" id="currentDesc">위치 권한을 허용하면 현재 날씨가 표시됩니다.</p>
-      </div>
-      <div class="weatherIcon" id="weatherIcon">🌤️</div>
+  <div class="score-bar">
+    <button class="score-cell" onclick="onProfileChipClick()">
+      <span class="sc-label">적중률</span><span class="sc-val" id="hitRateMini">0%</span>
+    </button>
+    <div class="score-cell"><span class="sc-label">참여</span><span class="sc-val" id="picksMini">0</span></div>
+    <div class="score-cell"><span class="sc-label">적중</span><span class="sc-val" id="winsMini">0</span></div>
+    <div class="score-cell"><span class="sc-label">연승</span><span class="sc-val" id="streakMini">0</span></div>
+  </div>
+
+  <!-- ── TAB: HOME ─────────────────────── -->
+
+  <div class="tab-section active" id="tab-home">
+
+```
+<section class="weather-board">
+  <button class="w-refresh" id="wRefreshBtn" onclick="refreshWeather()" title="새로고침">↻</button>
+  <div class="weather-top">
+    <div class="weather-left">
+      <div class="w-kicker">📍 현재 날씨</div>
+      <div class="w-temp" id="currentTemp">--<sup>°</sup></div>
+      <p class="w-desc" id="currentDesc">위치 권한을 허용하면 현재 날씨가 표시됩니다.</p>
     </div>
-
-    <div class="weatherGrid">
-      <div><span>체감</span><b id="feelsLike">--°</b></div>
-      <div><span>1H 강수</span><b id="rainChance">--%</b></div>
-      <div><span>바람</span><b id="windSpeed">--</b></div>
-      <div><span>어제 대비</span><b id="tempDiff">--°</b></div>
+    <div class="w-icon" id="weatherIcon">🌤️</div>
+  </div>
+  <div class="w-grid">
+    <div class="w-cell"><span class="wc-label">체감</span><span class="wc-val" id="feelsLike">--°</span></div>
+    <div class="w-cell"><span class="wc-label">1H 강수</span><span class="wc-val" id="rainChance">--%</span></div>
+    <div class="w-cell"><span class="wc-label">바람</span><span class="wc-val" id="windSpeed">--</span></div>
+    <div class="w-cell"><span class="wc-label">어제 대비</span><span class="wc-val" id="tempDiff">--°</span></div>
+  </div>
+  <div class="hot-pick" id="hotPickBox" style="display:none">
+    <div class="hp-top"><span>🔥 HOT PICK</span><span id="hotPickTimer">--</span></div>
+    <div class="hp-title" id="hotPickTitle">오늘 가장 뜨거운 예측</div>
+    <div class="hp-meta">
+      <span id="hotPickRatio">온다 --% / 안 온다 --%</span>
+      <span id="hotPickStake">0P 참여</span>
     </div>
-
-    <div class="hotPickBox" id="hotPickBox" style="display:none">
-      <div class="hotPickTop">
-        <span>🔥 HOT PICK</span>
-        <span id="hotPickTimer">--</span>
-      </div>
-      <div class="hotPickTitle" id="hotPickTitle">오늘 가장 뜨거운 예측</div>
-      <div class="hotPickMeta">
-        <span id="hotPickRatio">온다 --% / 안 온다 --%</span>
-        <span id="hotPickStake">0P 참여</span>
-      </div>
-    </div>
-  </section>
-
-  <div class="actions">
-    <button class="btn" id="checkinBtn" onclick="checkin()">출석 포인트 받기</button>
-    <button class="btn dark" onclick="copyInvite()">친구 초대</button>
   </div>
+</section>
 
-  <section class="board" id="nearBoard" style="display:none">
-    <div class="boardHead"><h2>지금 근처 예측</h2><span>NEARBY</span></div>
-    <div id="nearList"></div>
-  </section>
-
-  <section class="board">
-    <div class="boardHead"><h2>지금 몰리는 지역</h2><span>LIVE</span></div>
-    <div id="hotList"></div>
-  </section>
-
-  <section class="board" id="rankBoard">
-    <div class="boardHead"><h2>오늘의 TOP 예측가</h2><span>RANKING</span></div>
-    <div id="rankList"></div>
-  </section>
-
-  <div class="sectionHead">
-    <h2>TOP 5 예측</h2>
-    <span>지금 참여 가능</span>
-  </div>
-  <main id="topList"></main>
-
-  <div class="sectionHead">
-    <h2>그 외 예측</h2>
-    <span>작게 보기</span>
-  </div>
-  <main id="otherList"></main>
-
-  <div class="sectionHead" id="closedSectionHead" style="display:none">
-    <h2>마감된 예측</h2>
-    <span>결과 대기 / 정산 완료</span>
-  </div>
-  <main id="closedList"></main>
+<div class="actions inner" style="padding:0 16px;margin-bottom:14px">
+  <button class="btn" id="checkinBtn" onclick="checkin()">출석 포인트 받기</button>
+  <button class="btn secondary" onclick="copyInvite()">친구 초대 🎁</button>
 </div>
 
-<div class="modal" id="joinModal">
-  <div class="modalCard">
-    <h2>닉네임 만들기</h2>
-    <p>첫 접속 보너스로 10,000 포인트를 지급합니다.</p>
-    <input id="nickInput" placeholder="닉네임 입력" maxlength="12" onkeydown="if(event.key==='Enter')createProfile()" />
-    <button class="btn" onclick="createProfile()">시작하기</button>
+<div class="board" id="nearBoard" style="display:none">
+  <div class="board-head"><h2>지금 근처 예측</h2><span class="tag">NEARBY</span></div>
+  <div id="nearList"></div>
+</div>
+
+<div class="board">
+  <div class="board-head"><h2>지금 몰리는 지역</h2><span class="tag">LIVE</span></div>
+  <div id="hotList"></div>
+</div>
+
+<div class="board" id="rankBoard">
+  <div class="board-head"><h2>오늘의 TOP 예측가</h2><span class="tag">RANKING</span></div>
+  <div id="rankList"></div>
+</div>
+```
+
+  </div><!-- /tab-home -->
+
+  <!-- ── TAB: PICKS ─────────────────────── -->
+
+  <div class="tab-section" id="tab-picks">
+    <div class="section-head"><h2>TOP 5 예측</h2><span>지금 참여 가능</span></div>
+    <div id="topList"></div>
+    <div class="section-head"><h2>그 외 예측</h2><span>작게 보기</span></div>
+    <div id="otherList"></div>
+    <div class="section-head" id="closedSectionHead" style="display:none"><h2>마감된 예측</h2><span>결과 / 정산</span></div>
+    <div id="closedList"></div>
+  </div>
+
+  <!-- ── TAB: RANK ──────────────────────── -->
+
+  <div class="tab-section" id="tab-rank">
+    <div class="section-head"><h2>전체 랭킹</h2><span>LEADERBOARD</span></div>
+    <div class="board" style="margin-top:0">
+      <div id="fullLb"></div>
+    </div>
+  </div>
+
+  <!-- ── TAB: MY ────────────────────────── -->
+
+  <div class="tab-section" id="tab-my">
+    <div id="myContent"></div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- ── BOTTOM NAV ─────────────────────────── -->
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-home" onclick="switchTab('home')"><span class="ni">🏠</span>HOME</button>
+  <button class="nav-btn" id="nav-picks" onclick="switchTab('picks')"><span class="ni">⚡</span>PICKS</button>
+  <button class="nav-btn" id="nav-rank" onclick="switchTab('rank')"><span class="ni">🏆</span>RANK</button>
+  <button class="nav-btn" id="nav-my" onclick="switchTab('my')"><span class="ni">👤</span>MY</button>
+</nav>
+
+<!-- ── AUTH MODAL ─────────────────────────── -->
+
+<div class="overlay" id="authModal">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="authTabLogin" onclick="switchAuthTab('login')">로그인</button>
+      <button class="auth-tab" id="authTabSignup" onclick="switchAuthTab('signup')">회원가입</button>
+    </div>
+
+```
+<!-- LOGIN -->
+<div id="loginPane">
+  <div class="sheet-head">
+    <div><h2>다시 오셨군요 👋</h2></div>
+  </div>
+  <p class="desc">닉네임으로 내 기록을 이어갑니다.</p>
+  <input class="field" id="loginNick" placeholder="닉네임 (2~12자)" maxlength="12"
+    onkeydown="if(event.key==='Enter')document.getElementById('loginPin').focus()"/>
+  <input class="field" id="loginPin" type="password" placeholder="PIN 4자리" maxlength="4" inputmode="numeric"
+    onkeydown="if(event.key==='Enter')doLogin()"/>
+  <button class="btn full" onclick="doLogin()">로그인</button>
+</div>
+
+<!-- SIGNUP -->
+<div id="signupPane" style="display:none">
+  <div class="sheet-head">
+    <div><h2>닉네임 만들기</h2></div>
+  </div>
+  <p class="desc">처음 오셨군요! 가입 보너스를 드립니다.</p>
+  <input class="field" id="signupNick" placeholder="닉네임 (2~12자)" maxlength="12"
+    onkeydown="if(event.key==='Enter')document.getElementById('signupPin').focus()"/>
+  <input class="field" id="signupPin" type="password" placeholder="PIN 4자리 설정" maxlength="4" inputmode="numeric"
+    onkeydown="if(event.key==='Enter')document.getElementById('signupRef').focus()"/>
+  <input class="field" id="signupRef" placeholder="초대코드 (선택사항)" maxlength="20"
+    onkeydown="if(event.key==='Enter')doSignup()"/>
+  <div class="bonus-tag">🎁 가입 보너스 10,000P 지급</div>
+  <button class="btn full" onclick="doSignup()">시작하기</button>
+</div>
+```
+
   </div>
 </div>
 
-<div class="modal" id="profileModal">
-  <div class="modalCard">
-    <div class="modalTop">
+<!-- ── PROFILE MODAL ──────────────────────── -->
+
+<div class="overlay" id="profileModal">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
       <div>
         <h2 id="profileTitle">PROFILE</h2>
-        <p id="profileSub">내 예측 기록과 스코어를 확인하세요.</p>
+        <p style="color:var(--muted);font-size:12px;margin-top:3px" id="profileSub">초대코드 --</p>
       </div>
-      <button class="closeBtn" onclick="closeProfile()">×</button>
+      <button class="close-btn" onclick="closeModal('profileModal')">×</button>
     </div>
-    <div class="profileStats">
-      <div><span>포인트</span><b id="modalCredit">0</b></div>
-      <div><span>적중률</span><b id="modalHitRate">0%</b></div>
-      <div><span>연승</span><b id="modalStreak">0</b></div>
-      <div><span>참여</span><b id="modalPicks">0</b></div>
-      <div><span>적중</span><b id="modalWins">0</b></div>
-      <div><span>대기</span><b id="modalPending">0</b></div>
+    <div class="modal-stats">
+      <div class="modal-stat"><span>포인트</span><b id="mCredit">0</b></div>
+      <div class="modal-stat"><span>적중률</span><b id="mHitRate">0%</b></div>
+      <div class="modal-stat"><span>연승</span><b id="mStreak">0</b></div>
+      <div class="modal-stat"><span>참여</span><b id="mPicks">0</b></div>
+      <div class="modal-stat"><span>적중</span><b id="mWins">0</b></div>
+      <div class="modal-stat"><span>대기</span><b id="mPending">0</b></div>
     </div>
-    <button class="btn dark" onclick="copyInvite()">초대코드 복사</button>
-    <div class="historyTitle">최근 기록</div>
+    <button class="btn full secondary" onclick="copyInvite()">초대코드 복사 🎁</button>
+    <button class="btn full danger-soft" onclick="openConfirm()" style="margin-top:7px">로그아웃</button>
+    <div style="margin-top:18px;font-size:13px;font-weight:900;color:var(--soft);margin-bottom:4px">최근 기록</div>
     <div id="historyList"></div>
+  </div>
+</div>
+
+<!-- ── LOGOUT CONFIRM ─────────────────────── -->
+
+<div class="overlay center" id="confirmModal">
+  <div class="sheet dialog">
+    <h2 style="font-size:20px;font-weight:900;margin-bottom:8px">로그아웃</h2>
+    <p style="color:var(--muted);font-size:13px;line-height:1.55">닉네임과 PIN을 기억해두세요.<br>다시 로그인하면 기록이 이어집니다.</p>
+    <div class="dialog-btns">
+      <button class="cancel" onclick="closeModal('confirmModal')">취소</button>
+      <button class="confirm-danger" onclick="doLogout()">로그아웃</button>
+    </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const API_GAME="/api/game";
-const API_ACTION="/api/action";
-const POLL_MS=15000;
+/* ═══════════════════════════════════════════
+   CONSTANTS & STATE
+═══════════════════════════════════════════ */
+const API_GAME   = "/api/game";
+const API_ACTION = "/api/action";
+const POLL_MS    = 15000;
 
-let userKey=localStorage.getItem("wetty_user_key");
-let selectedStake=100;
-let profile=null;
-let predictions=[];
-let drafts={};
-let scoreHistory=[];
-let openComments={};
-let userLocation=null;
-let stats={totalPicks:0,wins:0,losses:0,pending:0,hitRate:0,currentStreak:0};
-let leaderboard=[];
-let liveBuzzTimer=null;
-let lastBuzzKey="";
-let toastTimer=null;
-let isLoading=false;
+let userKey      = localStorage.getItem("wetty_user_key");
+let isLoggedIn   = !!localStorage.getItem("wetty_logged_in");
+let selectedStake = 100;
+let profile      = null;
+let predictions  = [];
+let drafts       = {};
+let scoreHistory = [];
+let openComments = {};
+let userLocation = null;
+let stats        = {totalPicks:0,wins:0,losses:0,pending:0,hitRate:0,currentStreak:0};
+let leaderboard  = [];
+let liveBuzzTimer= null;
+let lastBuzzKey  = "";
+let toastTimer   = null;
+let isLoading    = false;
+let currentTab   = "home";
 
-const regionWeatherCache=new Map();
-const REGION_WEATHER_TTL=10*60*1000;
+const wxCache = new Map();
+const WX_TTL  = 10 * 60 * 1000;
 
-if(!userKey){
-  userKey=crypto.randomUUID();
-  localStorage.setItem("wetty_user_key",userKey);
+if (!userKey) {
+  userKey = crypto.randomUUID();
+  localStorage.setItem("wetty_user_key", userKey);
 }
 
-function toast(msg){
-  const el=document.getElementById("toast");
-  el.textContent=msg;
+/* ═══════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════ */
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
   el.classList.add("show");
   clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>el.classList.remove("show"),1900);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2000);
 }
 
-async function post(action,data={}){
-  try{
-    const res=await fetch(API_ACTION,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({action,userKey,...data})
-    });
-
-    let json=null;
-    try{json=await res.json();}
-    catch(e){return {ok:false,message:"서버 응답 형식 오류"};}
-
-    if(!res.ok){
-      return {ok:false,message:json?.message||"요청 처리 실패"};
-    }
-
-    return json;
-  }catch(e){
-    return {ok:false,message:"네트워크 연결 실패"};
-  }
+function closeModal(id) {
+  document.getElementById(id).classList.remove("show");
 }
 
-function fmtTime(v){
-  if(!v) return "-";
+function openModal(id) {
+  document.getElementById(id).classList.add("show");
+}
+
+/* close on backdrop click */
+document.querySelectorAll(".overlay").forEach(o => {
+  o.addEventListener("click", e => {
+    if (e.target !== o) return;
+    if (o.id === "authModal") return; // can't dismiss without login
+    o.classList.remove("show");
+  });
+});
+
+function fmtTime(v) {
+  if (!v) return "-";
   return new Date(v).toLocaleString("ko-KR",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
 }
 
-function remaining(closeTime){
-  if(!closeTime) return "마감 시간 없음";
-  const diff=new Date(closeTime).getTime()-Date.now();
-  if(Number.isNaN(diff)) return "시간 확인 필요";
-  if(diff<=0) return "마감";
-  const totalMinutes=Math.ceil(diff/60000);
-  const days=Math.floor(totalMinutes/1440);
-  const hours=Math.floor((totalMinutes%1440)/60);
-  const minutes=totalMinutes%60;
-  if(days>0) return `${days}일 ${hours}시간 남음`;
-  if(hours>0) return `${hours}시간 ${minutes}분 남음`;
-  return `${minutes}분 남음`;
+function remaining(t) {
+  if (!t) return "마감 시간 없음";
+  const d = new Date(t).getTime() - Date.now();
+  if (isNaN(d) || d <= 0) return "마감";
+  const m = Math.ceil(d / 60000);
+  const days = Math.floor(m / 1440), hrs = Math.floor((m % 1440) / 60), mins = m % 60;
+  if (days > 0) return `${days}일 ${hrs}시간 남음`;
+  if (hrs  > 0) return `${hrs}시간 ${mins}분 남음`;
+  return `${mins}분 남음`;
 }
 
-function distanceKm(a,b,c,d){
-  if(a==null||b==null||c==null||d==null) return 99999;
-  const R=6371;
-  const dLat=(c-a)*Math.PI/180;
-  const dLon=(d-b)*Math.PI/180;
-  const x=Math.sin(dLat/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dLon/2)**2;
-  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+function distKm(la, lo, lb, lob) {
+  if ([la,lo,lb,lob].some(x => x == null)) return 99999;
+  const R = 6371, dLa = (lb-la)*Math.PI/180, dLo = (lob-lo)*Math.PI/180;
+  const a = Math.sin(dLa/2)**2 + Math.cos(la*Math.PI/180)*Math.cos(lb*Math.PI/180)*Math.sin(dLo/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-function weatherText(code,rainProb,precipitation){
-  if((precipitation||0)>0) return{label:"🌧️",desc:"현재 비가 감지되고 있습니다."};
-  if(rainProb>=70) return{label:"☔",desc:"강수 가능성이 높습니다."};
-  if(rainProb>=40) return{label:"🌦️",desc:"비 가능성이 애매하게 걸려 있습니다."};
-  if([0,1].includes(code)) return{label:"☀️",desc:"현재는 비교적 맑습니다."};
-  if([2,3,45,48].includes(code)) return{label:"☁️",desc:"구름이 많습니다."};
-  return{label:"🌤️",desc:"현재 날씨 기준으로 예측 흐름을 확인해보세요."};
+function wxText(code, prob, precip) {
+  if ((precip||0) > 0) return {icon:"🌧️", desc:"현재 비가 내리고 있습니다."};
+  if (prob >= 70)       return {icon:"☔",  desc:"강수 가능성이 높습니다."};
+  if (prob >= 40)       return {icon:"🌦️", desc:"비 가능성이 걸려 있습니다."};
+  if ([0,1].includes(code))    return {icon:"☀️",  desc:"현재는 맑습니다."};
+  if ([2,3,45,48].includes(code)) return {icon:"☁️", desc:"구름이 많습니다."};
+  return {icon:"🌤️", desc:"날씨 기준으로 예측 흐름을 확인해보세요."};
 }
 
-async function fetchRegionWeather(lat,lon){
-  const key=`${parseFloat(lat).toFixed(2)},${parseFloat(lon).toFixed(2)}`;
-  const now=Date.now();
-  const cached=regionWeatherCache.get(key);
-  if(cached&&now-cached.ts<REGION_WEATHER_TTL) return cached.data;
-
-  try{
-    const url=`https://api.open-meteo.com/v1/forecast`+
-      `?latitude=${lat}&longitude=${lon}`+
-      `&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m`+
-      `&hourly=precipitation_probability,temperature_2m`+
-      `&past_days=1&forecast_days=1&timezone=Asia%2FSeoul`;
-
-    const res=await fetch(url,{cache:"no-store"});
-    if(!res.ok) return null;
-
-    const json=await res.json();
-    const c=json.current||{};
-    const hourly=json.hourly||{};
-    const times=hourly.time||[];
-    const probs=hourly.precipitation_probability||[];
-    const temps=hourly.temperature_2m||[];
-    const nowTime=new Date();
-
-    let bestIndex=0,bestDiff=Infinity;
-    for(let i=0;i<times.length;i++){
-      const diff=Math.abs(new Date(times[i]).getTime()-nowTime.getTime());
-      if(diff<bestDiff){bestDiff=diff;bestIndex=i;}
-    }
-
-    const yesterdayTime=new Date(nowTime.getTime()-24*60*60*1000);
-    let yIndex=0,yDiff=Infinity;
-    for(let i=0;i<times.length;i++){
-      const diff=Math.abs(new Date(times[i]).getTime()-yesterdayTime.getTime());
-      if(diff<yDiff){yDiff=diff;yIndex=i;}
-    }
-
-    const temp=Number(c.temperature_2m??temps[bestIndex]??0);
-    const yesterdayTemp=Number(temps[yIndex]??temp);
-
-    const data={
-      temp,
-      feelsLike:Number(c.apparent_temperature??temp),
-      precipitation:Number(c.precipitation??0),
-      code:Number(c.weather_code??0),
-      wind:Number(c.wind_speed_10m??0),
-      rainProb:Number(probs[bestIndex]??0),
-      tempDiff:Math.round(temp-yesterdayTemp)
-    };
-
-    regionWeatherCache.set(key,{data,ts:now});
-    return data;
-  }catch(e){
-    return null;
-  }
+function pickLabels(cat) {
+  const map = {wind:{yes:"세다",no:"약하다"},dust:{yes:"나쁘다",no:"좋다"},
+    heat:{yes:"덥다",no:"선선하다"},cold:{yes:"춥다",no:"안 춥다"},
+    humidity:{yes:"습하다",no:"쾌적하다"},typhoon:{yes:"위험하다",no:"잠잠하다"}};
+  return map[cat] || {yes:"온다",no:"안 온다"};
 }
 
-async function loadCurrentWeather(){
-  try{
-    if(!navigator.geolocation){setWeatherFallback();return;}
-
-    navigator.geolocation.getCurrentPosition(async pos=>{
-      const lat=pos.coords.latitude;
-      const lon=pos.coords.longitude;
-      userLocation={lat,lon};
-
-      const w=await fetchRegionWeather(lat,lon);
-      if(!w){setWeatherFallback();return;}
-
-      document.getElementById("currentTemp").innerHTML=`${Math.round(w.temp)}<span>°</span>`;
-      document.getElementById("feelsLike").textContent=`${Math.round(w.feelsLike)}°`;
-      document.getElementById("rainChance").textContent=`${w.rainProb}%`;
-      document.getElementById("windSpeed").textContent=`${w.wind.toFixed(1)}m/s`;
-      document.getElementById("tempDiff").textContent=`${w.tempDiff>=0?"+":""}${w.tempDiff}°`;
-
-      const info=weatherText(w.code,w.rainProb,w.precipitation);
-      document.getElementById("currentDesc").textContent=info.desc;
-      document.getElementById("weatherIcon").textContent=info.label;
-
-      renderNearList();
-    },()=>setWeatherFallback());
-  }catch(e){
-    setWeatherFallback();
-  }
+function choiceText(cat, choice) {
+  return choice === "rain" ? pickLabels(cat).yes : pickLabels(cat).no;
 }
 
-function setWeatherFallback(){
-  document.getElementById("currentTemp").textContent="--°";
-  document.getElementById("currentDesc").textContent="위치 권한을 허용하면 현재 날씨가 표시됩니다.";
-  document.getElementById("feelsLike").textContent="--°";
-  document.getElementById("rainChance").textContent="--%";
-  document.getElementById("windSpeed").textContent="--";
-  document.getElementById("tempDiff").textContent="--°";
-  document.getElementById("weatherIcon").textContent="🌤️";
+function buildSignal(p) {
+  const r = p.rainPercent || 0;
+  const map = {wind:"풍속 상승 감지 · 순간 돌풍 가능",dust:"미세먼지 상승 흐름 · 외부 활동 주의",
+    heat:"체감온도 상승 중 · 오후 더위 가능",cold:"기온 하락 흐름 · 쌀쌀할 가능성",
+    humidity:"습도 증가 흐름 · 불쾌지수 상승",typhoon:"강풍권 접근 가능 · 기압 변화 감지"};
+  if (map[p.category]) return map[p.category];
+  if (r >= 70) return `강수확률 ${r}% · 비구름 접근 중`;
+  if (r >= 40) return "강수 가능성 상승 흐름 감지";
+  return "현재 대기 흐름 안정적";
 }
 
-async function load(){
-  if(isLoading) return;
-  isLoading=true;
-
-  try{
-    const res=await fetch(
-      `${API_GAME}?userKey=${encodeURIComponent(userKey)}&_=${Date.now()}`,
-      {cache:"no-store"}
-    );
-
-    let json=null;
-    try{json=await res.json();}
-    catch(e){toast("서버 응답을 읽지 못했습니다.");return;}
-
-    if(!res.ok || !json.ok){
-      toast(json?.message || "불러오기 실패");
-      return;
-    }
-
-    profile=json.profile || null;
-    predictions=Array.isArray(json.predictions) ? json.predictions : [];
-    scoreHistory=Array.isArray(json.scoreHistory) ? json.scoreHistory : [];
-    stats=json.stats || {totalPicks:0,wins:0,losses:0,pending:0,hitRate:0,currentStreak:0};
-    leaderboard=Array.isArray(json.leaderboard) ? json.leaderboard : [];
-
-    if(!profile){
-      document.getElementById("joinModal").classList.add("show");
-      return;
-    }
-
-    document.getElementById("joinModal").classList.remove("show");
-    document.getElementById("nickname").textContent=profile.nickname || "Player";
-    document.getElementById("pointsEl").textContent=`${Number(profile.points||0).toLocaleString()}P`;
-
-    updateStatsUI();
-    renderHotList();
-    renderNearList();
-    renderHotPick();
-    renderRanking();
-    render();
-    scheduleLiveBuzz();
-  }catch(e){
-    toast("데이터를 불러오지 못했습니다.");
-  }finally{
-    isLoading=false;
-  }
-}
-
-function sortedPredictions(){
-  return [...predictions].sort((a,b)=>{
-    const scoreA=(a.totalStake||0)+(a.priority||0);
-    const scoreB=(b.totalStake||0)+(b.priority||0);
-    if(scoreB!==scoreA) return scoreB-scoreA;
-    return new Date(a.close_time)-new Date(b.close_time);
-  });
-}
-
-function isOpenPrediction(p){
-  return p.status==="open" && new Date(p.close_time).getTime()>Date.now();
-}
-
-function pickLabels(category){
-  if(category==="wind") return {yes:"세다",no:"약하다"};
-  if(category==="dust") return {yes:"나쁘다",no:"좋다"};
-  if(category==="heat") return {yes:"덥다",no:"선선하다"};
-  if(category==="cold") return {yes:"춥다",no:"안 춥다"};
-  if(category==="humidity") return {yes:"습하다",no:"쾌적하다"};
-  if(category==="typhoon") return {yes:"위험하다",no:"잠잠하다"};
-  return {yes:"온다",no:"안 온다"};
-}
-
-function choiceText(category,choice){
-  const labels=pickLabels(category);
-  return choice==="rain"?labels.yes:labels.no;
-}
-
-function buildReason(p){
-  const rain=p.rainPercent||0;
-  if(p.category==="wind") return `현재 풍속 상승 흐름 감지 · 순간 돌풍 가능성`;
-  if(p.category==="dust") return `미세먼지 농도 상승 흐름 · 외부 활동 주의`;
-  if(p.category==="heat") return `체감온도 상승 중 · 오후 더위 가능성`;
-  if(p.category==="cold") return `기온 하락 흐름 감지 · 쌀쌀할 가능성`;
-  if(p.category==="humidity") return `습도 증가 흐름 · 불쾌지수 상승 가능성`;
-  if(p.category==="typhoon") return `강풍권 접근 가능성 · 기압 변화 감지`;
-  if(rain>=70) return `강수확률 ${rain}% · 비구름 접근 중`;
-  if(rain>=40) return `강수 가능성 상승 흐름 감지`;
-  return `현재 대기 흐름 안정적`;
-}
-
-function marketStatus(p){
-  const total=p.totalStake||0;
-  const gap=Math.abs((p.rainPercent||0)-(p.clearPercent||0));
-  if(total>=3000) return {text:"🔥 과열",cls:"hot"};
-  if(total>=1000&&gap<=15) return {text:"🌧 논쟁중",cls:"debate"};
-  if(total<=100) return {text:"🧊 한산",cls:"calm"};
+function mktStatus(p) {
+  const total = p.totalStake||0, gap = Math.abs((p.rainPercent||0)-(p.clearPercent||0));
+  if (total >= 3000)             return {text:"🔥 과열",cls:"hot"};
+  if (total >= 1000 && gap<=15)  return {text:"🌧 논쟁중",cls:"debate"};
+  if (total <= 100)              return {text:"🧊 한산",cls:"calm"};
   return {text:"⚡ 상승중",cls:"hot"};
 }
 
-function updateStatsUI(){
-  document.getElementById("hitRateMini").textContent=`${stats.hitRate||0}%`;
-  document.getElementById("picksMini").textContent=stats.totalPicks||0;
-  document.getElementById("winsMini").textContent=stats.wins||0;
-  document.getElementById("streakMini").textContent=stats.currentStreak||0;
+function isOpen(p) {
+  return p.status === "open" && new Date(p.close_time).getTime() > Date.now();
+}
 
-  document.getElementById("profileTitle").textContent=profile?.nickname||"PROFILE";
-  document.getElementById("profileSub").textContent=`초대코드 ${profile?.referral_code||"-"}`;
-  document.getElementById("modalCredit").textContent=Number(profile?.points||0).toLocaleString();
-  document.getElementById("modalHitRate").textContent=`${stats.hitRate||0}%`;
-  document.getElementById("modalStreak").textContent=stats.currentStreak||0;
-  document.getElementById("modalPicks").textContent=stats.totalPicks||0;
-  document.getElementById("modalWins").textContent=stats.wins||0;
-  document.getElementById("modalPending").textContent=stats.pending||0;
+function sorted() {
+  return [...predictions].sort((a,b) => {
+    const sa = (a.totalStake||0)+(a.priority||0), sb = (b.totalStake||0)+(b.priority||0);
+    return sb !== sa ? sb - sa : new Date(a.close_time) - new Date(b.close_time);
+  });
+}
 
+/* ═══════════════════════════════════════════
+   API
+═══════════════════════════════════════════ */
+async function post(action, data = {}) {
+  try {
+    const r = await fetch(API_ACTION, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({action, userKey, ...data})
+    });
+    let j; try { j = await r.json(); } catch { return {ok:false, message:"서버 응답 형식 오류"}; }
+    if (!r.ok) return {ok:false, message:j?.message||"요청 실패"};
+    return j;
+  } catch { return {ok:false, message:"네트워크 연결 실패"}; }
+}
+
+/* ═══════════════════════════════════════════
+   AUTH
+═══════════════════════════════════════════ */
+function switchAuthTab(tab) {
+  document.getElementById("loginPane").style.display   = tab==="login"  ? "block" : "none";
+  document.getElementById("signupPane").style.display  = tab==="signup" ? "block" : "none";
+  document.getElementById("authTabLogin").classList.toggle("active",  tab==="login");
+  document.getElementById("authTabSignup").classList.toggle("active", tab==="signup");
+}
+
+async function doLogin() {
+  const nick = document.getElementById("loginNick").value.trim();
+  const pin  = document.getElementById("loginPin").value.trim();
+  if (nick.length < 2) { toast("닉네임을 입력해주세요."); return; }
+  if (pin.length !== 4) { toast("PIN 4자리를 입력해주세요."); return; }
+  const j = await post("login", {nickname:nick, pin});
+  if (!j.ok) { toast(j.message||"로그인 실패"); return; }
+  if (j.userKey) { userKey = j.userKey; localStorage.setItem("wetty_user_key", userKey); }
+  localStorage.setItem("wetty_logged_in","1");
+  isLoggedIn = true;
+  toast(j.message || "로그인 완료 👋");
+  closeModal("authModal");
+  await load();
+}
+
+async function doSignup() {
+  const nick = document.getElementById("signupNick").value.trim();
+  const pin  = document.getElementById("signupPin").value.trim();
+  const ref  = document.getElementById("signupRef").value.trim();
+  if (nick.length < 2)  { toast("닉네임은 2자 이상 입력해주세요."); return; }
+  if (pin.length !== 4) { toast("PIN 4자리를 설정해주세요."); return; }
+  const j = await post("create_profile", {nickname:nick, pin, referral:ref});
+  if (!j.ok) { toast(j.message||"가입 실패"); return; }
+  if (j.userKey) { userKey = j.userKey; localStorage.setItem("wetty_user_key", userKey); }
+  localStorage.setItem("wetty_logged_in","1");
+  isLoggedIn = true;
+  toast(j.message || "가입 완료 🎉");
+  closeModal("authModal");
+  await load();
+}
+
+function openConfirm() {
+  closeModal("profileModal");
+  openModal("confirmModal");
+}
+
+function doLogout() {
+  localStorage.removeItem("wetty_logged_in");
+  isLoggedIn  = false;
+  profile     = null;
+  predictions = [];
+  scoreHistory= [];
+  leaderboard = [];
+  stats       = {totalPicks:0,wins:0,losses:0,pending:0,hitRate:0,currentStreak:0};
+  closeModal("confirmModal");
+  resetUI();
+  toast("로그아웃 완료");
+  switchAuthTab("login");
+  openModal("authModal");
+}
+
+function resetUI() {
+  document.getElementById("nickname").textContent  = "GUEST";
+  document.getElementById("pointsEl").textContent  = "--P";
+  document.getElementById("logoutBtn").style.display = "none";
+  ["hitRateMini","picksMini","winsMini","streakMini"].forEach(id =>
+    document.getElementById(id).textContent = id==="hitRateMini" ? "0%" : "0");
+  ["topList","otherList","closedList","hotList","rankList","fullLb"]
+    .forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=`<div class="empty">로그인 후 이용하세요.</div>`; });
+  renderMyTab();
+}
+
+/* ═══════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════ */
+function switchTab(tab) {
+  currentTab = tab;
+  ["home","picks","rank","my"].forEach(t => {
+    document.getElementById(`tab-${t}`).classList.toggle("active", t===tab);
+    document.getElementById(`nav-${t}`).classList.toggle("active", t===tab);
+  });
+  if (tab==="rank") renderFullLb();
+  if (tab==="my")   renderMyTab();
+}
+
+function onProfileChipClick() {
+  if (!profile) { openModal("authModal"); return; }
+  syncProfileModal();
+  openModal("profileModal");
+}
+
+/* ═══════════════════════════════════════════
+   WEATHER
+═══════════════════════════════════════════ */
+async function fetchWx(lat, lon) {
+  const key = `${parseFloat(lat).toFixed(2)},${parseFloat(lon).toFixed(2)}`;
+  const now = Date.now();
+  const c = wxCache.get(key);
+  if (c && now - c.ts < WX_TTL) return c.data;
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast`
+      +`?latitude=${lat}&longitude=${lon}`
+      +`&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m`
+      +`&hourly=precipitation_probability,temperature_2m`
+      +`&past_days=1&forecast_days=1&timezone=Asia%2FSeoul`;
+    const r = await fetch(url,{cache:"no-store"});
+    if (!r.ok) return null;
+    const j = await r.json();
+    const cur = j.current||{}, h = j.hourly||{};
+    const times=h.time||[], probs=h.precipitation_probability||[], temps=h.temperature_2m||[];
+    const nowMs = Date.now();
+    let bi=0, bd=Infinity;
+    times.forEach((t,i)=>{ const d=Math.abs(new Date(t)-nowMs); if(d<bd){bd=d;bi=i;} });
+    const yMs = nowMs - 86400000;
+    let yi=0, yd=Infinity;
+    times.forEach((t,i)=>{ const d=Math.abs(new Date(t)-yMs); if(d<yd){yd=d;yi=i;} });
+    const temp = Number(cur.temperature_2m ?? temps[bi] ?? 0);
+    const yTemp = Number(temps[yi] ?? temp);
+    const data = {
+      temp, feelsLike:Number(cur.apparent_temperature??temp),
+      precipitation:Number(cur.precipitation??0), code:Number(cur.weather_code??0),
+      wind:Number(cur.wind_speed_10m??0), rainProb:Number(probs[bi]??0),
+      tempDiff:Math.round(temp - yTemp)
+    };
+    wxCache.set(key, {data, ts:now});
+    return data;
+  } catch { return null; }
+}
+
+async function loadWeather() {
+  if (!navigator.geolocation) { setWxFallback(); return; }
+  navigator.geolocation.getCurrentPosition(async pos => {
+    userLocation = {lat: pos.coords.latitude, lon: pos.coords.longitude};
+    const w = await fetchWx(userLocation.lat, userLocation.lon);
+    if (!w) { setWxFallback(); return; }
+    document.getElementById("currentTemp").innerHTML = `${Math.round(w.temp)}<sup>°</sup>`;
+    document.getElementById("feelsLike").textContent  = `${Math.round(w.feelsLike)}°`;
+    document.getElementById("rainChance").textContent = `${w.rainProb}%`;
+    document.getElementById("windSpeed").textContent  = `${w.wind.toFixed(1)}m/s`;
+    document.getElementById("tempDiff").textContent   = `${w.tempDiff>=0?"+":""}${w.tempDiff}°`;
+    const wx = wxText(w.code, w.rainProb, w.precipitation);
+    document.getElementById("currentDesc").textContent = wx.desc;
+    document.getElementById("weatherIcon").textContent = wx.icon;
+    renderNearList();
+  }, () => setWxFallback());
+}
+
+function setWxFallback() {
+  document.getElementById("currentTemp").innerHTML = "--<sup>°</sup>";
+  document.getElementById("currentDesc").textContent = "위치 권한을 허용하면 현재 날씨가 표시됩니다.";
+  ["feelsLike","windSpeed"].forEach(id => document.getElementById(id).textContent = "--");
+  document.getElementById("rainChance").textContent = "--%";
+  document.getElementById("tempDiff").textContent   = "--°";
+  document.getElementById("weatherIcon").textContent= "🌤️";
+}
+
+async function refreshWeather() {
+  const btn = document.getElementById("wRefreshBtn");
+  btn.classList.add("spin");
+  wxCache.clear();
+  await loadWeather();
+  setTimeout(() => btn.classList.remove("spin"), 700);
+  toast("날씨 새로고침 완료");
+}
+
+/* ═══════════════════════════════════════════
+   DATA LOAD
+═══════════════════════════════════════════ */
+async function load() {
+  if (isLoading) return;
+  isLoading = true;
+  try {
+    const r = await fetch(`${API_GAME}?userKey=${encodeURIComponent(userKey)}&_=${Date.now()}`,{cache:"no-store"});
+    let j; try { j = await r.json(); } catch { toast("서버 응답 오류"); return; }
+    if (!r.ok || !j.ok) {
+      if (!isLoggedIn) openModal("authModal");
+      toast(j?.message || "불러오기 실패");
+      return;
+    }
+    profile      = j.profile      || null;
+    predictions  = Array.isArray(j.predictions)  ? j.predictions  : [];
+    scoreHistory = Array.isArray(j.scoreHistory)  ? j.scoreHistory : [];
+    stats        = j.stats        || stats;
+    leaderboard  = Array.isArray(j.leaderboard)   ? j.leaderboard  : [];
+
+    if (!profile) { openModal("authModal"); return; }
+
+    closeModal("authModal");
+    document.getElementById("nickname").textContent  = profile.nickname || "Player";
+    document.getElementById("pointsEl").textContent  = `${Number(profile.points||0).toLocaleString()}P`;
+    document.getElementById("logoutBtn").style.display = "flex";
+
+    syncScoreBar();
+    renderHotList();
+    renderNearList();
+    renderHotPick();
+    renderRankingPreview();
+    renderMarkets();
+    if (currentTab==="rank") renderFullLb();
+    if (currentTab==="my")   renderMyTab();
+    scheduleBuzz();
+  } catch { toast("데이터를 불러오지 못했습니다."); }
+  finally   { isLoading = false; }
+}
+
+/* ═══════════════════════════════════════════
+   RENDER: SCORE BAR
+═══════════════════════════════════════════ */
+function syncScoreBar() {
+  document.getElementById("hitRateMini").textContent = `${stats.hitRate||0}%`;
+  document.getElementById("picksMini").textContent   = stats.totalPicks||0;
+  document.getElementById("winsMini").textContent    = stats.wins||0;
+  document.getElementById("streakMini").textContent  = stats.currentStreak||0;
+}
+
+/* ═══════════════════════════════════════════
+   RENDER: BOARDS
+═══════════════════════════════════════════ */
+function mkBoardItem(p, idx, right) {
+  const L = pickLabels(p.category);
+  const d = document.createElement("div");
+  d.className = "board-item";
+  d.innerHTML = `
+    <div>
+      <div class="bi-title">${idx}. ${p.region||"지역"}</div>
+      <div class="bi-sub">${p.title} · ${L.yes} ${p.rainPercent}% / ${L.no} ${p.clearPercent}%</div>
+    </div>
+    <div class="bi-right">${right}</div>`;
+  return d;
+}
+
+function renderHotList() {
+  const box = document.getElementById("hotList");
+  const hot = sorted().filter(isOpen).slice(0,3);
+  if (!hot.length) { box.innerHTML=`<div class="empty">현재 열린 예측이 없습니다.</div>`; return; }
+  box.innerHTML="";
+  hot.forEach((p,i) => box.appendChild(mkBoardItem(p, i+1, `${p.totalStake||0}P`)));
+}
+
+function renderNearList() {
+  const board = document.getElementById("nearBoard");
+  const box   = document.getElementById("nearList");
+  if (!userLocation || !predictions.length) { board.style.display="none"; return; }
+  const near = predictions.filter(isOpen)
+    .map(p => ({...p, dist: distKm(userLocation.lat, userLocation.lon, p.lat, p.lon)}))
+    .filter(p => p.dist <= 8).sort((a,b)=>a.dist-b.dist).slice(0,3);
+  if (!near.length) { board.style.display="none"; return; }
+  board.style.display="block"; box.innerHTML="";
+  near.forEach((p,i) => box.appendChild(mkBoardItem(p, i+1, `${p.dist.toFixed(1)}km`)));
+}
+
+function renderHotPick() {
+  const box = document.getElementById("hotPickBox");
+  const hot = sorted().filter(isOpen)[0];
+  if (!hot) { box.style.display="none"; return; }
+  const L = pickLabels(hot.category);
+  box.style.display="block";
+  document.getElementById("hotPickTitle").textContent = hot.title;
+  document.getElementById("hotPickTimer").textContent = remaining(hot.close_time);
+  document.getElementById("hotPickRatio").textContent = `${L.yes} ${hot.rainPercent}% / ${L.no} ${hot.clearPercent}%`;
+  document.getElementById("hotPickStake").textContent = `${hot.totalStake||0}P 참여`;
+}
+
+function renderRankingPreview() {
+  const box = document.getElementById("rankList");
+  if (!leaderboard.length) { box.innerHTML=`<div class="empty">랭킹 데이터가 없습니다.</div>`; return; }
+  box.innerHTML="";
+  leaderboard.slice(0,3).forEach((u,i) => {
+    const isMe = u.userKey === userKey;
+    const d = document.createElement("div"); d.className="board-item";
+    d.innerHTML = `
+      <div>
+        <div class="bi-title">${i+1}. ${u.nickname||"Player"}${isMe?'<span class="me-badge">ME</span>':''}</div>
+        <div class="bi-sub">적중 ${u.wins||0} · 참여 ${u.totalPicks||u.total||0}</div>
+      </div>
+      <div class="bi-right">${u.hitRate||0}%</div>`;
+    box.appendChild(d);
+  });
+}
+
+function renderFullLb() {
+  const box = document.getElementById("fullLb");
+  if (!leaderboard.length) { box.innerHTML=`<div class="empty">랭킹 데이터가 없습니다.</div>`; return; }
+  const avt = ["🏄","🌊","⛵","🌧️","☀️","🌈","❄️","🌪️","🌩️","🔥"];
+  const ranks = [["g1","🥇"],["g2","🥈"],["g3","🥉"]];
+  box.innerHTML="";
+  leaderboard.forEach((u,i) => {
+    const isMe = u.userKey===userKey;
+    const [rc, ri] = ranks[i] || ["",""+( i+1)];
+    const d = document.createElement("div"); d.className="lb-item";
+    d.innerHTML = `
+      <div class="lb-rank ${rc}">${ri}</div>
+      <div class="lb-avatar">${avt[i%avt.length]}</div>
+      <div class="lb-info">
+        <div class="lb-name">${u.nickname||"Player"}${isMe?'<span class="me-badge">ME</span>':''}</div>
+        <div class="lb-sub">적중 ${u.wins||0} · 참여 ${u.totalPicks||u.total||0} · ${Number(u.points||0).toLocaleString()}P</div>
+      </div>
+      <div class="lb-stat">${u.hitRate||0}%</div>`;
+    box.appendChild(d);
+  });
+}
+
+function syncProfileModal() {
+  document.getElementById("profileTitle").textContent = profile?.nickname||"PROFILE";
+  document.getElementById("profileSub").textContent   = `초대코드 ${profile?.referral_code||"-"}`;
+  document.getElementById("mCredit").textContent   = Number(profile?.points||0).toLocaleString();
+  document.getElementById("mHitRate").textContent  = `${stats.hitRate||0}%`;
+  document.getElementById("mStreak").textContent   = stats.currentStreak||0;
+  document.getElementById("mPicks").textContent    = stats.totalPicks||0;
+  document.getElementById("mWins").textContent     = stats.wins||0;
+  document.getElementById("mPending").textContent  = stats.pending||0;
   renderHistory();
 }
 
-function renderBoardItem(box,p,idx,rightText){
-  const labels=pickLabels(p.category);
-  const div=document.createElement("div");
-  div.className="boardItem";
-
-  const left=document.createElement("div");
-  const title=document.createElement("div");
-  title.className="boardTitle";
-  title.textContent=`${idx}. ${p.region}`;
-
-  const sub=document.createElement("div");
-  sub.className="boardSub";
-  sub.textContent=`${p.title} · ${labels.yes} ${p.rainPercent}% / ${labels.no} ${p.clearPercent}%`;
-
-  const right=document.createElement("div");
-  right.className="boardRight";
-  right.textContent=rightText;
-
-  left.append(title,sub);
-  div.append(left,right);
-  box.appendChild(div);
-}
-
-function renderHotList(){
-  const box=document.getElementById("hotList");
-  const hot=sortedPredictions().filter(isOpenPrediction).slice(0,3);
-
-  if(!hot.length){
-    box.innerHTML=`<div class="empty">현재 열린 예측이 없습니다.</div>`;
-    return;
-  }
-
+function renderHistory() {
+  const box = document.getElementById("historyList");
+  if (!scoreHistory.length) { box.innerHTML=`<div class="history-item"><span>아직 참여 기록이 없습니다.</span></div>`; return; }
   box.innerHTML="";
-  hot.forEach((p,idx)=>renderBoardItem(box,p,idx+1,`${p.totalStake||0}P`));
-}
-
-function renderNearList(){
-  const board=document.getElementById("nearBoard");
-  const box=document.getElementById("nearList");
-
-  if(!userLocation||!predictions.length){
-    board.style.display="none";
-    return;
-  }
-
-  const near=predictions
-    .filter(isOpenPrediction)
-    .map(p=>({...p,distance:distanceKm(userLocation.lat,userLocation.lon,p.lat,p.lon)}))
-    .filter(p=>p.distance<=8)
-    .sort((a,b)=>a.distance-b.distance)
-    .slice(0,3);
-
-  if(!near.length){
-    board.style.display="none";
-    return;
-  }
-
-  board.style.display="block";
-  box.innerHTML="";
-  near.forEach((p,idx)=>renderBoardItem(box,p,idx+1,`${p.distance.toFixed(1)}km`));
-}
-
-function renderHotPick(){
-  const box=document.getElementById("hotPickBox");
-  if(!box) return;
-
-  const hot=sortedPredictions().filter(isOpenPrediction)[0];
-
-  if(!hot){
-    box.style.display="none";
-    return;
-  }
-
-  const labels=pickLabels(hot.category);
-
-  box.style.display="block";
-  document.getElementById("hotPickTitle").textContent=hot.title;
-  document.getElementById("hotPickTimer").textContent=remaining(hot.close_time);
-  document.getElementById("hotPickRatio").textContent=`${labels.yes} ${hot.rainPercent}% / ${labels.no} ${hot.clearPercent}%`;
-  document.getElementById("hotPickStake").textContent=`${hot.totalStake||0}P 참여`;
-}
-
-function renderRanking(){
-  const box=document.getElementById("rankList");
-  if(!box) return;
-
-  if(!leaderboard.length){
-    box.innerHTML=`<div class="empty">아직 랭킹 데이터가 없습니다.</div>`;
-    return;
-  }
-
-  box.innerHTML="";
-  leaderboard.slice(0,3).forEach((u,idx)=>{
-    const div=document.createElement("div");
-    div.className="boardItem";
-
-    const left=document.createElement("div");
-    left.innerHTML=`<div class="boardTitle">${idx+1}. ${u.nickname||"Player"}</div><div class="boardSub">적중 ${u.wins||0} · 참여 ${u.totalPicks||u.total||0}</div>`;
-
-    const right=document.createElement("div");
-    right.className="boardRight";
-    right.textContent=`${u.hitRate||0}%`;
-
-    div.append(left,right);
-    box.appendChild(div);
+  scoreHistory.forEach(item => {
+    const done = item.status==="settled"||item.result;
+    let txt="대기", cls="pending";
+    if (done && item.is_correct===true)  { txt="적중"; cls="win"; }
+    if (done && item.is_correct===false) { txt="실패"; cls="lose"; }
+    const d = document.createElement("div"); d.className="history-item";
+    d.innerHTML = `<strong>${item.title||"예측"}</strong>
+      <span>선택 ${item.choice==="rain"?"온다":"안 온다"} · ${item.stake}P · <b class="${cls}">${txt}</b></span>`;
+    box.appendChild(d);
   });
 }
 
-function renderHistory(){
-  const box=document.getElementById("historyList");
-
-  if(!scoreHistory.length){
-    box.innerHTML=`<div class="historyItem"><span>아직 참여 기록이 없습니다.</span></div>`;
+/* ═══════════════════════════════════════════
+   RENDER: MY TAB
+═══════════════════════════════════════════ */
+function renderMyTab() {
+  const box = document.getElementById("myContent");
+  if (!profile) {
+    box.innerHTML = `
+      <div class="login-gate">
+        <div class="gate-icon">👤</div>
+        <h3>로그인이 필요합니다</h3>
+        <p>로그인하면 내 예측 기록을<br>확인할 수 있습니다.</p>
+        <button class="btn" style="width:160px;margin:0 auto;display:block"
+          onclick="switchAuthTab('login');openModal('authModal')">로그인하기</button>
+      </div>`;
     return;
   }
+  box.innerHTML = `
+    <div class="section-head"><h2>${profile.nickname||"MY"} 스탯</h2><span>내 기록</span></div>
+    <div style="padding:0 16px">
+      <div class="my-stats">
+        <div class="my-stat-cell"><span class="msc-label">포인트</span><span class="msc-val">${Number(profile.points||0).toLocaleString()}</span></div>
+        <div class="my-stat-cell"><span class="msc-label">적중률</span><span class="msc-val">${stats.hitRate||0}%</span></div>
+        <div class="my-stat-cell"><span class="msc-label">연승</span><span class="msc-val">${stats.currentStreak||0}</span></div>
+        <div class="my-stat-cell"><span class="msc-label">참여</span><span class="msc-val">${stats.totalPicks||0}</span></div>
+        <div class="my-stat-cell"><span class="msc-label">적중</span><span class="msc-val">${stats.wins||0}</span></div>
+        <div class="my-stat-cell"><span class="msc-label">대기</span><span class="msc-val">${stats.pending||0}</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+        <button class="btn secondary" onclick="copyInvite()">초대코드 복사 🎁</button>
+        <button class="btn danger-soft" onclick="openConfirm()">로그아웃</button>
+      </div>
+    </div>
+    <div class="section-head"><h2>최근 기록</h2><span>HISTORY</span></div>
+    <div style="padding:0 16px" id="myHistoryList"></div>`;
 
-  box.innerHTML="";
-
-  scoreHistory.forEach(item=>{
-    const settled=item.status==="settled"||item.result;
-    let resultText="대기",cls="resultPending";
-
-    if(settled&&item.is_correct===true){resultText="적중";cls="resultWin";}
-    else if(settled&&item.is_correct===false){resultText="실패";cls="resultLose";}
-
-    const div=document.createElement("div");
-    div.className="historyItem";
-
-    const title=document.createElement("strong");
-    title.textContent=item.title || "예측";
-
-    const meta=document.createElement("span");
-    meta.innerHTML=`선택 ${item.choice==="rain"?"온다":"안 온다"} · ${item.stake}P · <b class="${cls}">${resultText}</b>`;
-
-    div.append(title,meta);
-    box.appendChild(div);
-  });
+  const hBox = document.getElementById("myHistoryList");
+  if (!scoreHistory.length) {
+    hBox.innerHTML = `<div class="history-item"><span>아직 참여 기록이 없습니다.</span></div>`;
+  } else {
+    scoreHistory.forEach(item => {
+      const done = item.status==="settled"||item.result;
+      let txt="대기", cls="pending";
+      if (done && item.is_correct===true)  { txt="적중"; cls="win"; }
+      if (done && item.is_correct===false) { txt="실패"; cls="lose"; }
+      const d = document.createElement("div"); d.className="history-item";
+      d.innerHTML = `<strong>${item.title||"예측"}</strong>
+        <span>선택 ${item.choice==="rain"?"온다":"안 온다"} · ${item.stake}P · <b class="${cls}">${txt}</b></span>`;
+      hBox.appendChild(d);
+    });
+  }
 }
 
-function render(){
-  const topList=document.getElementById("topList");
-  const otherList=document.getElementById("otherList");
-  const closedList=document.getElementById("closedList");
-  const closedHead=document.getElementById("closedSectionHead");
+/* ═══════════════════════════════════════════
+   RENDER: MARKETS
+═══════════════════════════════════════════ */
+function renderMarkets() {
+  // save draft comment values
+  document.querySelectorAll("[data-cid]").forEach(el => { drafts[el.dataset.cid] = el.value; });
 
-  document.querySelectorAll("[data-comment-input]").forEach(input=>{
-    drafts[input.dataset.pid]=input.value;
+  const now = Date.now(), dayAgo = now - 86400000;
+  const s = sorted();
+  const openMkts   = s.filter(p => p.status==="open" && new Date(p.close_time)>now);
+  const closedMkts = s.filter(p => {
+    const ct = new Date(p.close_time).getTime();
+    const tt = new Date(p.target_time||p.close_time).getTime();
+    return (p.status!=="open"||ct<=now) && tt>=dayAgo;
   });
 
-  const now=Date.now();
-  const oneDayAgo=now-24*60*60*1000;
-  const sorted=sortedPredictions();
+  const topList   = document.getElementById("topList");
+  const otherList = document.getElementById("otherList");
+  const closedList= document.getElementById("closedList");
+  const closedHead= document.getElementById("closedSectionHead");
 
-  const openMarkets=sorted.filter(p=>{
-    const closeTime=new Date(p.close_time).getTime();
-    return p.status==="open" && closeTime>now;
-  });
+  topList.innerHTML=""; otherList.innerHTML=""; closedList.innerHTML="";
 
-  const closedMarkets=sorted.filter(p=>{
-    const closeTime=new Date(p.close_time).getTime();
-    const targetTime=new Date(p.target_time || p.close_time).getTime();
-    const isClosed=p.status!=="open" || closeTime<=now;
-    const isRecent=targetTime>=oneDayAgo;
-    return isClosed && isRecent;
-  });
+  const top5 = openMkts.slice(0,5), rest = openMkts.slice(5);
 
-  const topMarkets=openMarkets.slice(0,5);
-  const otherMarkets=openMarkets.slice(5);
+  if (!top5.length) topList.innerHTML=`<div class="empty">지금 열린 예측이 없습니다.</div>`;
+  else top5.forEach(p => topList.appendChild(mkCard(p, false)));
 
-  topList.innerHTML="";
-  otherList.innerHTML="";
-  closedList.innerHTML="";
+  if (!rest.length) otherList.innerHTML=`<div class="empty">그 외 열린 예측이 없습니다.</div>`;
+  else rest.forEach(p => otherList.appendChild(mkCard(p, true)));
 
-  if(!topMarkets.length){
-    topList.innerHTML=`<div class="empty">지금 열린 예측이 없습니다.</div>`;
-  }else{
-    topMarkets.forEach(p=>topList.appendChild(createMarketCard(p,false)));
-  }
-
-  if(!otherMarkets.length){
-    otherList.innerHTML=`<div class="empty">그 외 열린 예측이 없습니다.</div>`;
-  }else{
-    otherMarkets.forEach(p=>otherList.appendChild(createMarketCard(p,true)));
-  }
-
-  if(!closedMarkets.length){
-    closedHead.style.display="none";
-  }else{
+  if (!closedMkts.length) closedHead.style.display="none";
+  else {
     closedHead.style.display="flex";
-    closedMarkets.slice(0,8).forEach(p=>closedList.appendChild(createClosedCard(p)));
+    closedMkts.slice(0,8).forEach(p => closedList.appendChild(mkClosedCard(p)));
   }
 }
 
-function createMarketCard(p,isSmall){
-  const closed=!isOpenPrediction(p);
-  const isOpen=!!openComments[p.id];
-  const comments=p.comments||[];
-  const previewComments=isOpen?comments:comments.slice(0,1);
-  const labels=pickLabels(p.category);
+function mkCard(p, compact) {
+  const closed = !isOpen(p);
+  const showComments = !!openComments[p.id];
+  const cmts = p.comments||[];
+  const L = pickLabels(p.category);
 
-  const card=document.createElement("section");
-  card.className=isSmall?"card small":"card";
+  const card = document.createElement("section");
+  card.className = compact ? "card compact" : "card";
 
-  const top=document.createElement("div");
-  top.className="marketTop";
+  const diffMs = new Date(p.close_time) - Date.now();
+  const timerCls = diffMs<=10*60000 ? "timer-tag urgent" : diffMs<=30*60000 ? "timer-tag warn" : "timer-tag";
 
-  const badge=document.createElement("div");
-  badge.className="badge";
-  badge.textContent=p.region || "지역";
+  card.innerHTML = `
+    <div class="card-top">
+      <div class="badge">${p.region||"지역"}</div>
+      <div class="${timerCls}">${remaining(p.close_time)}</div>
+    </div>
+    <div class="card-title">${p.title||"예측"}</div>`;
 
-  const timer=document.createElement("div");
-  timer.className="timer";
-  timer.textContent=remaining(p.close_time);
-
-  if(new Date(p.close_time).getTime()-Date.now()<=30*60*1000){
-    timer.classList.add("urgent");
-  }
-
-  top.append(badge,timer);
-
-  const title=document.createElement("div");
-  title.className="card-title";
-  title.textContent=p.title || "예측";
-
-  card.append(top,title);
-
-  if(isSmall){
-    const row=document.createElement("div");
-    row.className="smallRow";
-    row.innerHTML=`<div class="smallPercent">${labels.yes} ${p.rainPercent}% · ${labels.no} ${p.clearPercent}%</div>`;
-
-    const btn=document.createElement("button");
-    btn.className="smallBtn";
-    btn.textContent="열기";
-    btn.onclick=()=>{openComments[p.id]=true;card.replaceWith(createMarketCard(p,false));};
-
-    row.appendChild(btn);
-    card.appendChild(row);
+  if (compact) {
+    const row = document.createElement("div");
+    row.className="compact-row";
+    row.innerHTML=`<div class="compact-pct">${L.yes} ${p.rainPercent}% · ${L.no} ${p.clearPercent}%</div>`;
+    const btn = document.createElement("button");
+    btn.className="expand-btn"; btn.textContent="열기";
+    btn.onclick=()=>{ openComments[p.id]=true; card.replaceWith(mkCard(p,false)); };
+    row.appendChild(btn); card.appendChild(row);
     return card;
   }
 
-  const status=marketStatus(p);
-  const statusEl=document.createElement("div");
-  statusEl.className=`marketStatus ${status.cls}`;
-  statusEl.textContent=status.text;
+  // full card
+  const st = mktStatus(p);
+  card.insertAdjacentHTML("beforeend",`
+    <div class="mkt-status ${st.cls}">${st.text}</div>
+    <div class="mkt-meta">
+      <span>결과 ${fmtTime(p.target_time)} · ${p.rain_threshold_mm||0}mm+</span>
+      <span class="official">예보 ${p.official_forecast||"UNKNOWN"}</span>
+    </div>
+    <div class="odds-grid">
+      <div class="odd-cell rain"><label>${L.yes}</label><strong>${p.rainPercent}%</strong><small>${p.rainStake||0}P</small></div>
+      <div class="odd-cell clear"><label>${L.no}</label><strong>${p.clearPercent}%</strong><small>${p.clearStake||0}P</small></div>
+    </div>
+    <div class="prob-bar"><div class="prob-fill" style="width:${Math.max(0,Math.min(100,p.rainPercent||0))}%"></div></div>
+    <div class="signal-box">
+      <div class="signal-label">LIVE WEATHER SIGNAL</div>
+      <div class="signal-text">${buildSignal(p)}</div>
+      <div class="signal-src">KMA · ECMWF · OPEN METEO 기반</div>
+    </div>`);
 
-  const meta=document.createElement("div");
-  meta.className="marketMeta";
-
-  const settle=document.createElement("span");
-  settle.textContent=`결과 발표 ${fmtTime(p.target_time)} · ${p.rain_threshold_mm||0}mm+`;
-
-  const official=document.createElement("span");
-  official.className="official";
-  official.textContent=`예보 ${p.official_forecast||"UNKNOWN"}`;
-
-  meta.append(settle,official);
-
-  const odds=document.createElement("div");
-  odds.className="odds";
-
-  const rain=document.createElement("div");
-  rain.className="odd rain";
-  rain.innerHTML=`<label>${labels.yes}</label><strong>${p.rainPercent}%</strong><small>${p.rainStake||0}P</small>`;
-
-  const clear=document.createElement("div");
-  clear.className="odd clear";
-  clear.innerHTML=`<label>${labels.no}</label><strong>${p.clearPercent}%</strong><small>${p.clearStake||0}P</small>`;
-
-  odds.append(rain,clear);
-
-  const bar=document.createElement("div");
-  bar.className="bar";
-  bar.innerHTML=`<div class="fill" style="width:${Math.max(0,Math.min(100,p.rainPercent||0))}%"></div>`;
-
-  const reason=document.createElement("div");
-  reason.className="reasonBox";
-  reason.innerHTML=`
-    <div class="reasonTitle">LIVE WEATHER SIGNAL</div>
-    <div class="reasonText">${buildReason(p)}</div>
-    <div class="reasonSource">KMA · ECMWF · OPEN METEO 기반</div>
-  `;
-
-  card.append(statusEl,meta,odds,bar,reason);
-
-  if(p.myVote){
-    const my=document.createElement("div");
-    my.className="myPick";
-    my.textContent=`내 선택 · ${choiceText(p.category,p.myVote.choice)} · ${p.myVote.stake}P`;
-    card.appendChild(my);
-  }else if(!closed){
-    const entry=document.createElement("div");
-    entry.className="entry";
-
-    const stakes=document.createElement("div");
-    stakes.className="stakes";
-
-    [50,100,300,500].forEach(s=>{
-      const b=document.createElement("button");
-      b.textContent=`${s}P`;
-      if(s===selectedStake)b.classList.add("active");
-      if(Number(profile?.points||0)<s)b.disabled=true;
-      b.onclick=()=>{selectedStake=s;render();};
-      stakes.appendChild(b);
+  if (p.myVote) {
+    card.insertAdjacentHTML("beforeend",
+      `<div class="my-pick">${choiceText(p.category,p.myVote.choice)} · ${p.myVote.stake}P</div>`);
+  } else if (!closed) {
+    const entry = document.createElement("div"); entry.className="entry";
+    const stakeRow = document.createElement("div"); stakeRow.className="stake-row";
+    [50,100,300,500].forEach(s => {
+      const b=document.createElement("button"); b.className="stake-btn"+(s===selectedStake?" active":"");
+      b.textContent=`${s}P`; if(Number(profile?.points||0)<s) b.disabled=true;
+      b.onclick=()=>{ selectedStake=s; renderMarkets(); };
+      stakeRow.appendChild(b);
     });
-
-    const pickBtns=document.createElement("div");
-    pickBtns.className="pickBtns";
-
-    const rainBtn=document.createElement("button");
-    rainBtn.className="rain";
-    rainBtn.textContent=labels.yes;
-    rainBtn.disabled=Number(profile?.points||0)<selectedStake;
-    rainBtn.onclick=()=>vote(p.id,"rain");
-
-    const clearBtn=document.createElement("button");
-    clearBtn.className="clear";
-    clearBtn.textContent=labels.no;
-    clearBtn.disabled=Number(profile?.points||0)<selectedStake;
-    clearBtn.onclick=()=>vote(p.id,"clear");
-
-    pickBtns.append(rainBtn,clearBtn);
-    entry.append(stakes,pickBtns);
-    card.appendChild(entry);
+    const pickRow=document.createElement("div"); pickRow.className="pick-row";
+    const rBtn=document.createElement("button"); rBtn.className="pick-btn rain"; rBtn.textContent=L.yes;
+    rBtn.disabled=Number(profile?.points||0)<selectedStake; rBtn.onclick=()=>vote(p.id,"rain");
+    const cBtn=document.createElement("button"); cBtn.className="pick-btn clear"; cBtn.textContent=L.no;
+    cBtn.disabled=Number(profile?.points||0)<selectedStake; cBtn.onclick=()=>vote(p.id,"clear");
+    pickRow.append(rBtn,cBtn); entry.append(stakeRow,pickRow); card.appendChild(entry);
   }
 
-  const mood=document.createElement("div");
-  mood.className="mood";
+  // mood
+  const mood=document.createElement("div"); mood.className="mood";
+  mood.innerHTML=`
+    <div class="mood-head"><span>실시간 반응</span><small>${p.totalStake||0}P 참여</small></div>
+    <div class="react-row">
+      ${[["angry","예보 틀림"],["laugh","웃김"],["agree","인정"]].map(([t,l])=>
+        `<button class="react-btn" onclick="react('${p.id}','${t}')">${l} ${p.reactionCount?.[t]||0}</button>`
+      ).join("")}
+    </div>`;
 
-  const moodTitle=document.createElement("div");
-  moodTitle.className="moodTitle";
-  moodTitle.innerHTML=`<span>실시간 반응</span><span>${p.totalStake||0}P 참여</span>`;
-
-  const reactions=document.createElement("div");
-  reactions.className="reactions";
-
-  [["angry","예보 틀림"],["laugh","웃김"],["agree","인정"]].forEach(([type,label])=>{
-    const b=document.createElement("button");
-    b.textContent=`${label} ${p.reactionCount?.[type]||0}`;
-    b.onclick=()=>react(p.id,type);
-    reactions.appendChild(b);
+  (showComments ? cmts : cmts.slice(0,1)).forEach(c => {
+    const d=document.createElement("div"); d.className=showComments?"comment":"comment-preview";
+    d.innerHTML=`<b>${c.nickname||"익명"}</b><p>${c.body||""}</p>`;
+    mood.appendChild(d);
   });
 
-  mood.append(moodTitle,reactions);
+  const toggle=document.createElement("button"); toggle.className="comment-toggle";
+  toggle.textContent=showComments?"반응 접기":`반응 ${cmts.length}개 보기`;
+  toggle.onclick=()=>{ openComments[p.id]=!openComments[p.id]; renderMarkets(); };
+  mood.appendChild(toggle);
 
-  previewComments.forEach(c=>{
-    const div=document.createElement("div");
-    div.className=isOpen?"comment":"commentPreview";
-
-    const nick=document.createElement("b");
-    nick.textContent=c.nickname || "익명";
-
-    const body=document.createElement("p");
-    body.textContent=c.body || "";
-
-    div.append(nick,body);
-    mood.appendChild(div);
-  });
-
-  const toggleBtn=document.createElement("button");
-  toggleBtn.className="commentToggle";
-  toggleBtn.textContent=isOpen?"반응 접기":`반응 ${comments.length}개 보기`;
-  toggleBtn.onclick=()=>{openComments[p.id]=!openComments[p.id];render();};
-  mood.appendChild(toggleBtn);
-
-  if(isOpen){
-    const form=document.createElement("div");
-    form.className="commentForm";
-
-    const input=document.createElement("input");
-    input.placeholder="지금 하늘, 체감 근거 남기기";
-    input.maxLength=140;
-    input.dataset.commentInput="1";
-    input.dataset.pid=p.id;
-    input.value=drafts[p.id]||"";
-    input.onkeydown=e=>{if(e.key==="Enter")submitComment(p.id,input);};
-
-    const submit=document.createElement("button");
-    submit.textContent="POST";
-    submit.onclick=()=>submitComment(p.id,input);
-
-    form.append(input,submit);
-    mood.appendChild(form);
+  if (showComments) {
+    const form=document.createElement("div"); form.className="comment-form";
+    const inp=document.createElement("input");
+    inp.placeholder="지금 하늘, 체감 근거 남기기"; inp.maxLength=140;
+    inp.dataset.cid=p.id; inp.value=drafts[p.id]||"";
+    inp.onkeydown=e=>{ if(e.key==="Enter") submitComment(p.id,inp); };
+    const sub=document.createElement("button"); sub.textContent="POST";
+    sub.onclick=()=>submitComment(p.id,inp);
+    form.append(inp,sub); mood.appendChild(form);
   }
-
   card.appendChild(mood);
   return card;
 }
 
-function createClosedCard(p){
-  const labels=pickLabels(p.category);
-  const isSettled=p.status==="settled" || p.result;
-  const badgeText=isSettled ? "정산 완료" : "결과 대기";
-
-  const card=document.createElement("section");
-  card.className="card small closedCard";
-
-  const top=document.createElement("div");
-  top.className="marketTop";
-
-  const badge=document.createElement("div");
-  badge.className="badge";
-  badge.textContent=p.region || "지역";
-
-  const timer=document.createElement("div");
-  timer.className="timer";
-  timer.textContent="마감";
-
-  top.append(badge,timer);
-
-  const title=document.createElement("div");
-  title.className="card-title";
-  title.textContent=p.title || "예측";
-
-  const status=document.createElement("div");
-  status.className=`closedBadge ${isSettled ? "settled" : "pending"}`;
-  status.textContent=badgeText;
-
-  const row=document.createElement("div");
-  row.className="smallRow";
-  row.innerHTML=`<div class="smallPercent">${labels.yes} ${p.rainPercent}% · ${labels.no} ${p.clearPercent}%</div>`;
-
-  card.append(top,title,status,row);
-
-  if(p.myVote){
-    const my=document.createElement("div");
-    my.className="myPick";
-    my.textContent=`내 선택 · ${choiceText(p.category,p.myVote.choice)} · ${p.myVote.stake}P`;
-    card.appendChild(my);
-  }
-
+function mkClosedCard(p) {
+  const L=pickLabels(p.category), settled=p.status==="settled"||p.result;
+  const card=document.createElement("section"); card.className="card compact closed";
+  card.innerHTML=`
+    <div class="card-top">
+      <div class="badge">${p.region||"지역"}</div>
+      <div class="timer-tag">마감</div>
+    </div>
+    <div class="card-title">${p.title||"예측"}</div>
+    <div class="closed-badge ${settled?"settled":"pending"}">${settled?"정산 완료":"결과 대기"}</div>
+    <div class="compact-row">
+      <div class="compact-pct">${L.yes} ${p.rainPercent}% · ${L.no} ${p.clearPercent}%</div>
+    </div>`;
+  if (p.myVote)
+    card.insertAdjacentHTML("beforeend",
+      `<div class="my-pick">${choiceText(p.category,p.myVote.choice)} · ${p.myVote.stake}P</div>`);
   return card;
 }
 
-function openProfile(){
-  if(!profile)return;
-  updateStatsUI();
-  document.getElementById("profileModal").classList.add("show");
+/* ═══════════════════════════════════════════
+   ACTIONS
+═══════════════════════════════════════════ */
+async function checkin() {
+  if (!profile) { openModal("authModal"); return; }
+  const btn=document.getElementById("checkinBtn"); btn.disabled=true;
+  try { const j=await post("checkin"); toast(j.message||"출석 포인트 확인"); await load(); }
+  finally { btn.disabled=false; }
 }
 
-function closeProfile(){
-  document.getElementById("profileModal").classList.remove("show");
+async function vote(pid, choice) {
+  if (!profile) { openModal("authModal"); return; }
+  const j=await post("vote",{predictionId:pid,choice,stake:selectedStake});
+  if (!j.ok) { toast(j.message||"참여 실패"); return; }
+  toast(`${selectedStake}P · 선택 완료 ✓`); await load();
 }
 
-async function createProfile(){
-  const input=document.getElementById("nickInput");
-  const nickname=input.value.trim();
-
-  if(nickname.length<2){
-    toast("닉네임은 2자 이상 입력해주세요.");
-    return;
-  }
-
-  const json=await post("create_profile",{nickname});
-
-  if(!json.ok){
-    toast(json.message || "가입 실패");
-    return;
-  }
-
-  toast(json.message || "가입 완료");
-  await load();
+async function submitComment(pid, inp) {
+  const txt=inp.value.trim(); if(txt.length<2){ toast("조금 더 입력해주세요."); return; }
+  const j=await post("comment",{predictionId:pid,comment:txt});
+  toast(j.message||"반응 등록 완료"); inp.value=""; delete drafts[pid]; await load();
 }
 
-async function checkin(){
-  if(!profile){
-    toast("먼저 닉네임을 만들어주세요.");
-    return;
-  }
-
-  const btn=document.getElementById("checkinBtn");
-  btn.disabled=true;
-
-  try{
-    const json=await post("checkin");
-    toast(json.message || "출석 포인트 확인");
-    await load();
-  }finally{
-    btn.disabled=false;
-  }
+async function react(pid, type) {
+  const j=await post("react",{predictionId:pid,type});
+  toast(j.message||"반응 완료"); await load();
 }
 
-async function vote(predictionId,choice){
-  const json=await post("vote",{predictionId,choice,stake:selectedStake});
-
-  if(!json.ok){
-    toast(json.message||"참여 실패");
-    return;
-  }
-
-  toast(`${selectedStake}P · 선택 완료`);
-  await load();
+async function copyInvite() {
+  const code=profile?.referral_code||"";
+  if (!code){ toast("초대코드가 아직 없습니다."); return; }
+  const txt=`WETTY BETTY 초대코드: ${code}`;
+  try {
+    if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(txt);
+    else { const ta=document.createElement("textarea"); ta.value=txt; ta.style.cssText="position:fixed;opacity:0";
+      document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); }
+    toast("초대코드 복사 완료 🎉");
+  } catch { toast("복사에 실패했습니다."); }
 }
 
-async function submitComment(predictionId,input){
-  const text=input.value.trim();
-
-  if(text.length<2){
-    toast("조금 더 입력해주세요.");
-    return;
-  }
-
-  const json=await post("comment",{predictionId,comment:text});
-  toast(json.message||"반응 등록 완료");
-  input.value="";
-  delete drafts[predictionId];
-  await load();
-}
-
-async function react(predictionId,type){
-  const json=await post("react",{predictionId,type});
-  toast(json.message||"반응 완료");
-  await load();
-}
-
-function scheduleLiveBuzz(){
+/* ═══════════════════════════════════════════
+   LIVE BUZZ
+═══════════════════════════════════════════ */
+function scheduleBuzz() {
   clearTimeout(liveBuzzTimer);
-
-  const openTargets=predictions.filter(isOpenPrediction);
-  if(!openTargets.length)return;
-
-  const delay=14000+Math.floor(Math.random()*26000);
-
-  liveBuzzTimer=setTimeout(()=>{
-    showLiveBuzz();
-    scheduleLiveBuzz();
-  },delay);
+  if (!predictions.filter(isOpen).length) return;
+  liveBuzzTimer=setTimeout(()=>{ showBuzz(); scheduleBuzz(); }, 14000+Math.random()*26000);
 }
 
-function showLiveBuzz(){
-  const targets=[...predictions]
-    .filter(isOpenPrediction)
-    .sort((a,b)=>(b.totalStake||0)-(a.totalStake||0))
-    .slice(0,8);
-
-  if(!targets.length)return;
-
+function showBuzz() {
+  const targets=[...predictions].filter(isOpen).sort((a,b)=>(b.totalStake||0)-(a.totalStake||0)).slice(0,8);
+  if (!targets.length) return;
   const p=targets[Math.floor(Math.random()*targets.length)];
-  const labels=pickLabels(p.category);
-  const side=Math.random()>0.45?labels.yes:labels.no;
-  const amount=[300,500,800,1200,2000,3500,5000][Math.floor(Math.random()*7)];
-
-  const messages=[
-    `${p.region} ${side}에 ${amount.toLocaleString()}P 유입`,
+  const L=pickLabels(p.category), side=Math.random()>.45?L.yes:L.no;
+  const amt=[300,500,800,1200,2000,3500,5000][Math.floor(Math.random()*7)];
+  const msgs=[
+    `${p.region} ${side}에 ${amt.toLocaleString()}P 유입`,
     `${p.region} 예측 참여 급증 중`,
     `${p.region} 마감 직전 몰리는 중`,
     `${p.region} 흐름이 크게 흔들리는 중`,
-    `${p.region} 현재 가장 뜨거운 예측 중 하나`
+    `${p.region} 현재 가장 뜨거운 예측`
   ];
-
-  const msg=messages[Math.floor(Math.random()*messages.length)];
-
-  if(msg===lastBuzzKey)return;
-
+  const msg=msgs[Math.floor(Math.random()*msgs.length)];
+  if (msg===lastBuzzKey) return;
   lastBuzzKey=msg;
-  liveToast(msg);
-}
-
-function liveToast(message){
-  const el=document.createElement("div");
-  el.className="liveToast";
-  el.textContent=message;
+  const el=document.createElement("div"); el.className="live-toast"; el.textContent=msg;
   document.body.appendChild(el);
-
   requestAnimationFrame(()=>el.classList.add("show"));
-
-  setTimeout(()=>{
-    el.classList.remove("show");
-    setTimeout(()=>el.remove(),250);
-  },2400);
+  setTimeout(()=>{ el.classList.remove("show"); setTimeout(()=>el.remove(),250); }, 2600);
 }
 
-async function copyInvite(){
-  const code=profile?.referral_code || "";
+/* ═══════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ load(); loadWeather(); }});
 
-  if(!code){
-    toast("초대코드가 아직 없습니다.");
-    return;
-  }
+if (!isLoggedIn) { switchAuthTab("login"); openModal("authModal"); }
 
-  const text=`WETTY BETTY 초대코드: ${code}`;
-
-  try{
-    if(navigator.clipboard && window.isSecureContext){
-      await navigator.clipboard.writeText(text);
-    }else{
-      const textarea=document.createElement("textarea");
-      textarea.value=text;
-      textarea.style.position="fixed";
-      textarea.style.opacity="0";
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      textarea.remove();
-    }
-
-    toast("초대코드 복사 완료");
-  }catch(e){
-    toast("복사에 실패했습니다.");
-  }
-}
-
-document.addEventListener("visibilitychange",()=>{
-  if(!document.hidden){
-    load();
-    loadCurrentWeather();
-  }
-});
-
-loadCurrentWeather();
+loadWeather();
 load();
-
-setInterval(()=>{
-  if(!document.hidden) load();
-},POLL_MS);
-
-setInterval(()=>{
-  if(!document.hidden) loadCurrentWeather();
-},10*60*1000);
+setInterval(()=>{ if(!document.hidden) load(); }, POLL_MS);
+setInterval(()=>{ if(!document.hidden) loadWeather(); }, WX_TTL);
 </script>
+
 </body>
 </html>
