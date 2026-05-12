@@ -103,7 +103,25 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .weatherTemp{margin-top:10px;font-family:'Syne',sans-serif;font-size:74px;line-height:.82;letter-spacing:-4px;font-weight:900}
 .weatherTemp span{font-size:.42em;vertical-align:top;position:relative;top:10px;margin-left:2px}
 .weatherDesc{margin-top:12px;color:var(--muted);font-size:13px;line-height:1.55;max-width:260px}
-.weatherIcon{width:76px;height:76px;flex:0 0 76px;border-radius:24px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.055);border:1px solid var(--line);font-size:34px;line-height:1}
+.weatherIcon{
+  width:76px;
+  height:76px;
+  flex:0 0 76px;
+
+  border-radius:24px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:rgba(255,255,255,.055);
+  border:1px solid var(--line);
+
+  font-size:34px;
+  line-height:1;
+
+  padding-top:2px;
+}
 .weatherGrid{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
 .weatherGrid div{padding:12px 8px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
 .weatherGrid span{display:block;color:var(--muted);font-size:9px;font-weight:900;white-space:nowrap}
