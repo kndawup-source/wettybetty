@@ -222,7 +222,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
   </section>
 
   <section class="board" id="rankBoard">
-    <div class="boardHead"><h2>오늘의 TOP 예측가</h2><span>RANKING</span></div>
+    <div class="boardHead">
+  <h2>주간 TOP 예측가</h2>
+  <span>THIS WEEK</span>
+</div>
     <div id="rankList"></div>
   </section>
 
@@ -777,11 +780,34 @@ function renderHotPick(){
 }
 
 function renderRanking(){
+
   const box=document.getElementById("rankList");
   if(!box) return;
 
-  if(!leaderboard.length){
-    box.innerHTML=`<div class="empty">아직 랭킹 데이터가 없습니다.</div>`;
+  const weeklyRankers = leaderboard
+    .filter(u => (u.totalPicks || u.total || 0) >= 10)
+    .sort((a,b)=>{
+
+      const hitDiff =
+        (b.hitRate || 0) - (a.hitRate || 0);
+
+      if(hitDiff !== 0){
+        return hitDiff;
+      }
+
+      return (
+        (b.totalPicks || b.total || 0) -
+        (a.totalPicks || a.total || 0)
+      );
+    })
+    .slice(0,3);
+
+  if(!weeklyRankers.length){
+    box.innerHTML=`
+      <div class="empty">
+        아직 주간 랭킹 데이터가 없습니다.
+      </div>
+    `;
     return;
   }
 
@@ -789,7 +815,7 @@ function renderRanking(){
 
   box.innerHTML="";
 
-  leaderboard.slice(0,3).forEach((u,idx)=>{
+  weeklyRankers.forEach((u,idx)=>{
 
     const div=document.createElement("div");
     div.className="boardItem";
@@ -798,12 +824,11 @@ function renderRanking(){
 
     left.innerHTML=`
       <div class="boardTitle">
-        ${medals[idx] || "🏅"} ${u.nickname || "Player"}
+        ${medals[idx]} ${u.nickname || "Player"}
       </div>
 
       <div class="boardSub">
-        적중 ${u.wins || 0}
-        · 참여 ${u.totalPicks || u.total || 0}
+        최근 7일 기준 상위 예측가
       </div>
     `;
 
@@ -812,6 +837,7 @@ function renderRanking(){
     right.textContent=`${u.hitRate || 0}%`;
 
     div.append(left,right);
+
     box.appendChild(div);
   });
 }
