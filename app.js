@@ -237,3 +237,35 @@ toast("로그아웃 완료");
 syncProfile();
 renderHotList();
 renderMarkets();
+
+function setActiveNav(index){
+  document.querySelectorAll(".nav-btn").forEach((btn,i)=>{
+    btn.classList.toggle("active", i === index);
+  });
+}
+
+function goHome(){
+  setActiveNav(0);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function goPicks(){
+  setActiveNav(1);
+  document.getElementById("marketList")?.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+function goRank(){
+  setActiveNav(2);
+  const hot = document.getElementById("hotList");
+  hot?.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+function onProfileClick(){
+  document.getElementById("profileModal")?.classList.add("show");
+}
