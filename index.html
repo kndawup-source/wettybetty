@@ -1343,7 +1343,16 @@ async function reverseGeocode(lat,lon){
     const addr=json.address||{};
     const city=addr.city||addr.county||addr.state||"";
     const district=addr.suburb||addr.city_district||addr.town||addr.village||addr.borough||"";
-    return [city,district].filter(Boolean).join(" ");
+    const dong =
+  addr.suburb ||
+  addr.neighbourhood ||
+  addr.quarter ||
+  addr.city_district ||
+  addr.town ||
+  addr.village ||
+  "";
+
+return dong || district || city || null;
   }catch(e){
     return null;
   }
