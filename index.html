@@ -335,6 +335,10 @@ button{
   border:1px solid var(--line);
 }
 
+.market-card.closed{
+  opacity:.72;
+}
+
 .market-region{
   display:inline-flex;
   padding:6px 10px;
@@ -422,6 +426,24 @@ button{
   background:rgba(223,245,106,.08);
   border:1px solid rgba(223,245,106,.22);
   color:var(--accent);
+}
+
+.closed-badge{
+  display:inline-flex;
+  margin-top:10px;
+  padding:6px 9px;
+  border-radius:999px;
+  background:rgba(255,255,255,.055);
+  border:1px solid var(--line);
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+}
+
+.closed-badge.done{
+  color:var(--accent);
+  background:rgba(223,245,106,.08);
+  border-color:rgba(223,245,106,.18);
 }
 
 .bottom-nav{
@@ -650,6 +672,13 @@ button{
 
   <div id="marketList"></div>
 
+  <section class="section-title">
+    <h2>마감된 예측</h2>
+    <span>결과 대기 / 정산 완료</span>
+  </section>
+
+  <div id="closedList"></div>
+
 </div>
 
 <nav class="bottom-nav">
@@ -709,6 +738,23 @@ button{
 <div class="toast" id="toast"></div>
 
 <script>
+const PUBLIC_HOLIDAY_SERVICE_KEY="여기에_공공데이터_API_KEY";
+
+const REGION_POOL=[
+  {id:"gangnam",name:"서울 강남",lat:37.4979,lon:127.0276,weight:95,type:"business"},
+  {id:"hongdae",name:"서울 홍대",lat:37.5563,lon:126.9236,weight:88,type:"hotplace"},
+  {id:"seongsu",name:"서울 성수",lat:37.5446,lon:127.0557,weight:86,type:"hotplace"},
+  {id:"yeouido",name:"서울 여의도",lat:37.5219,lon:126.9245,weight:84,type:"business"},
+  {id:"jamsil",name:"서울 잠실",lat:37.5133,lon:127.1002,weight:82,type:"city"},
+  {id:"incheon_airport",name:"인천공항",lat:37.4602,lon:126.4407,weight:90,type:"airport"},
+  {id:"busan_haeundae",name:"부산 해운대",lat:35.1587,lon:129.1604,weight:88,type:"beach"},
+  {id:"jeju",name:"제주",lat:33.4996,lon:126.5312,weight:92,type:"travel"},
+  {id:"gangneung",name:"강릉",lat:37.7519,lon:128.8761,weight:80,type:"travel"},
+  {id:"sokcho",name:"속초",lat:38.2070,lon:128.5918,weight:76,type:"travel"},
+  {id:"daegu",name:"대구 동성로",lat:35.8693,lon:128.5940,weight:78,type:"city"},
+  {id:"daejeon",name:"대전 둔산",lat:36.3510,lon:127.3788,weight:70,type:"city"}
+];
+
 let profile={
   nickname:"WETTY",
   points:12800,
@@ -717,59 +763,36 @@ let profile={
   referral:"WETTY777"
 };
 
-let predictions=[
+let predictions=[];
+let closedPredictions=[
   {
-    id:1,
-    region:"서울 강남",
-    title:"오늘 밤 비 올까?",
-    yes:68,
-    no:32,
-    yesLabel:"온다",
-    noLabel:"안 온다",
-    yesStake:14200,
-    noStake:6100,
-    total:20300
-  },
-  {
-    id:2,
-    region:"부산 해운대",
-    title:"내일 오전 바람 강할까?",
-    yes:54,
-    no:46,
-    yesLabel:"세다",
-    noLabel:"약하다",
-    yesStake:9100,
-    noStake:7800,
-    total:16900
-  },
-  {
-    id:3,
-    region:"제주",
-    title:"주말 비 시작될까?",
-    yes:81,
-    no:19,
-    yesLabel:"온다",
-    noLabel:"안 온다",
-    yesStake:30100,
-    noStake:4200,
-    total:34300
-  },
-  {
-    id:4,
+    id:"closed_1",
     region:"서울 성수",
-    title:"퇴근길 소나기 올까?",
-    yes:47,
-    no:53,
-    yesLabel:"온다",
-    noLabel:"안 온다",
-    yesStake:8200,
-    noStake:9400,
-    total:17600
+    title:"오후 소나기 왔을까?",
+    yes:61,
+    no:39,
+    yesLabel:"왔다",
+    noLabel:"안 왔다",
+    total:18800,
+    status:"정산 완료"
+  },
+  {
+    id:"closed_2",
+    region:"제주",
+    title:"오전 강풍 있었을까?",
+    yes:72,
+    no:28,
+    yesLabel:"있었다",
+    noLabel:"없었다",
+    total:24300,
+    status:"결과 대기"
   }
 ];
 
-let selectedNav=0;
 let toastTimer=null;
+let selectedNav=0;
+let weatherCache=new Map();
+let holidayCache=null;
 
 function toast(msg){
   const el=document.getElementById("toast");
@@ -789,6 +812,231 @@ function syncProfile(){
   document.getElementById("profilePoint").textContent=`${profile.points.toLocaleString()}P`;
   document.getElementById("profileRate").textContent=`${profile.hitRate}%`;
   document.getElementById("profileStreak").textContent=profile.streak;
+}
+
+function localDateKey(date=new Date()){
+  const y=date.getFullYear();
+  const m=String(date.getMonth()+1).padStart(2,"0");
+  const d=String(date.getDate()).padStart(2,"0");
+  return `${y}-${m}-${d}`;
+}
+
+async function isKoreanHoliday(){
+  if(!PUBLIC_HOLIDAY_SERVICE_KEY || PUBLIC_HOLIDAY_SERVICE_KEY.includes("여기에")){
+    return false;
+  }
+
+  const today=new Date();
+  const y=today.getFullYear();
+  const m=String(today.getMonth()+1).padStart(2,"0");
+  const todayKey=localDateKey(today);
+  const cacheKey=`${y}-${m}`;
+
+  if(holidayCache && holidayCache.key===cacheKey){
+    return holidayCache.dates.includes(todayKey);
+  }
+
+  try{
+    const url=`https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo?serviceKey=${encodeURIComponent(PUBLIC_HOLIDAY_SERVICE_KEY)}&solYear=${y}&solMonth=${m}&_type=json`;
+    const res=await fetch(url);
+    if(!res.ok) return false;
+
+    const json=await res.json();
+    let items=json?.response?.body?.items?.item||[];
+    if(!Array.isArray(items)) items=[items];
+
+    const dates=items
+      .filter(item=>item?.isHoliday==="Y" || item?.isHoliday===true)
+      .map(item=>{
+        const d=String(item.locdate);
+        return `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6,8)}`;
+      });
+
+    holidayCache={key:cacheKey,dates};
+    return dates.includes(todayKey);
+  }catch(e){
+    return false;
+  }
+}
+
+async function getDayMode(){
+  const day=new Date().getDay();
+  if(await isKoreanHoliday()) return "holiday";
+  if(day===0 || day===6) return "weekend";
+  return "weekday";
+}
+
+function modeLabel(mode){
+  if(mode==="holiday") return "공휴일 이슈";
+  if(mode==="weekend") return "주말 이슈";
+  return "평일 이슈";
+}
+
+async function fetchWeather(lat,lon){
+  const key=`${Number(lat).toFixed(2)},${Number(lon).toFixed(2)}`;
+  const cached=weatherCache.get(key);
+
+  if(cached && Date.now()-cached.ts<10*60*1000){
+    return cached.data;
+  }
+
+  const url=
+    `https://api.open-meteo.com/v1/forecast`+
+    `?latitude=${lat}&longitude=${lon}`+
+    `&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m`+
+    `&hourly=precipitation_probability,temperature_2m`+
+    `&past_days=1&forecast_days=1&timezone=Asia%2FSeoul`;
+
+  const res=await fetch(url);
+  if(!res.ok) throw new Error("weather error");
+
+  const json=await res.json();
+  const c=json.current||{};
+  const hourly=json.hourly||{};
+  const probs=hourly.precipitation_probability||[];
+  const temps=hourly.temperature_2m||[];
+
+  const temp=Number(c.temperature_2m||0);
+  const yesterdayTemp=Number(temps[0]||temp);
+
+  const data={
+    temp,
+    feelsLike:Number(c.apparent_temperature||temp),
+    precipitation:Number(c.precipitation||0),
+    code:Number(c.weather_code||0),
+    wind:Number(c.wind_speed_10m||0),
+    rainProb:Number(probs[0]||0),
+    tempDiff:Math.round(temp-yesterdayTemp)
+  };
+
+  weatherCache.set(key,{data,ts:Date.now()});
+  return data;
+}
+
+function hasWeatherIssue(w){
+  return w.rainProb>=35 || w.precipitation>0 || w.wind>=8 || Math.abs(w.tempDiff)>=5 || w.temp>=30 || w.temp<=0;
+}
+
+function getModeBonus(region,mode){
+  let bonus=0;
+
+  if(mode==="holiday"){
+    if(region.type==="travel") bonus+=35;
+    if(region.type==="airport") bonus+=32;
+    if(region.type==="beach") bonus+=28;
+    if(region.type==="hotplace") bonus+=18;
+  }else if(mode==="weekend"){
+    if(region.type==="travel") bonus+=28;
+    if(region.type==="beach") bonus+=25;
+    if(region.type==="airport") bonus+=20;
+    if(region.type==="hotplace") bonus+=20;
+  }else{
+    if(region.type==="business") bonus+=24;
+    if(region.type==="city") bonus+=16;
+    if(region.type==="hotplace") bonus+=12;
+  }
+
+  return bonus;
+}
+
+function getWeatherScore(w,region,mode){
+  let score=region.weight+getModeBonus(region,mode);
+
+  if(w.rainProb>=70) score+=45;
+  else if(w.rainProb>=35) score+=28;
+
+  if(w.precipitation>0) score+=40;
+  if(w.wind>=8) score+=24;
+  if(Math.abs(w.tempDiff)>=5) score+=22;
+  if(w.temp>=30) score+=20;
+  if(w.temp<=0) score+=20;
+
+  return score;
+}
+
+function makePrediction(region,w,score,mode){
+  let title=`${region.name}, 비 올까?`;
+  let yesLabel="온다";
+  let noLabel="안 온다";
+  let base=w.rainProb;
+
+  if(w.wind>=8){
+    title=`${region.name}, 바람 강할까?`;
+    yesLabel="세다";
+    noLabel="약하다";
+    base=w.wind*8;
+  }
+
+  if(w.temp>=30){
+    title=`${region.name}, 오늘 덥게 느껴질까?`;
+    yesLabel="덥다";
+    noLabel="괜찮다";
+    base=w.feelsLike*2.4;
+  }
+
+  if(w.temp<=0){
+    title=`${region.name}, 오늘 춥게 느껴질까?`;
+    yesLabel="춥다";
+    noLabel="괜찮다";
+    base=70-w.feelsLike*2;
+  }
+
+  const yes=Math.max(5,Math.min(95,Math.round(base)));
+  const no=100-yes;
+
+  return {
+    id:region.id,
+    region:region.name,
+    title,
+    yes,
+    no,
+    yesLabel,
+    noLabel,
+    yesStake:yes*180,
+    noStake:no*120,
+    total:score*250,
+    issue:modeLabel(mode)
+  };
+}
+
+async function buildPredictions(){
+  const mode=await getDayMode();
+  const list=[];
+
+  for(const region of REGION_POOL){
+    try{
+      const w=await fetchWeather(region.lat,region.lon);
+      if(!hasWeatherIssue(w)) continue;
+
+      const score=getWeatherScore(w,region,mode);
+      list.push(makePrediction(region,w,score,mode));
+    }catch(e){}
+  }
+
+  predictions=list
+    .sort((a,b)=>b.total-a.total)
+    .slice(0,7);
+
+  if(!predictions.length){
+    predictions=[
+      {
+        id:"fallback",
+        region:"서울 강남",
+        title:"오늘 밤 비 올까?",
+        yes:48,
+        no:52,
+        yesLabel:"온다",
+        noLabel:"안 온다",
+        yesStake:8400,
+        noStake:9200,
+        total:17600,
+        issue:"기본 예측"
+      }
+    ];
+  }
+
+  renderHotList();
+  renderMarkets();
 }
 
 function renderHotList(){
@@ -829,7 +1077,7 @@ function renderMarkets(){
       <div class="market-title">${item.title}</div>
 
       <div class="market-meta">
-        <span>실시간 참여</span>
+        <span>${item.issue}</span>
         <span>${item.total.toLocaleString()}P</span>
       </div>
 
@@ -848,13 +1096,32 @@ function renderMarkets(){
       </div>
 
       <div class="vote-row">
-        <button class="vote-btn rain" onclick="vote('${item.title}','${item.yesLabel}')">
-          ${item.yesLabel}
-        </button>
+        <button class="vote-btn rain" onclick="vote('${item.title}','${item.yesLabel}')">${item.yesLabel}</button>
+        <button class="vote-btn clear" onclick="vote('${item.title}','${item.noLabel}')">${item.noLabel}</button>
+      </div>
+    `;
 
-        <button class="vote-btn clear" onclick="vote('${item.title}','${item.noLabel}')">
-          ${item.noLabel}
-        </button>
+    box.appendChild(card);
+  });
+}
+
+function renderClosed(){
+  const box=document.getElementById("closedList");
+  box.innerHTML="";
+
+  closedPredictions.forEach(item=>{
+    const done=item.status==="정산 완료";
+    const card=document.createElement("div");
+    card.className="market-card closed";
+
+    card.innerHTML=`
+      <div class="market-region">${item.region}</div>
+      <div class="market-title">${item.title}</div>
+      <div class="closed-badge ${done?"done":""}">${item.status}</div>
+
+      <div class="market-meta">
+        <span>${item.yesLabel} ${item.yes}% · ${item.noLabel} ${item.no}%</span>
+        <span>${item.total.toLocaleString()}P</span>
       </div>
     `;
 
@@ -865,7 +1132,6 @@ function renderMarkets(){
 function vote(title,choice){
   const ok=confirm(`${title}\n\n'${choice}'에 참여할까요?`);
   if(!ok) return;
-
   toast(`${choice} 참여 완료 ✓`);
 }
 
@@ -944,35 +1210,19 @@ function weatherDesc(rainProb,precipitation){
   return "현재는 비교적 안정적인 날씨입니다.";
 }
 
-async function fetchWeather(lat,lon){
-  const url=
-    `https://api.open-meteo.com/v1/forecast`+
-    `?latitude=${lat}&longitude=${lon}`+
-    `&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m`+
-    `&hourly=precipitation_probability,temperature_2m`+
-    `&past_days=1&forecast_days=1&timezone=Asia%2FSeoul`;
-
-  const res=await fetch(url);
-  if(!res.ok) throw new Error("weather error");
-
-  const json=await res.json();
-  const c=json.current||{};
-  const hourly=json.hourly||{};
-  const probs=hourly.precipitation_probability||[];
-  const temps=hourly.temperature_2m||[];
-
-  const temp=Number(c.temperature_2m||0);
-  const yesterdayTemp=Number(temps[0]||temp);
-
-  return {
-    temp,
-    feelsLike:Number(c.apparent_temperature||temp),
-    precipitation:Number(c.precipitation||0),
-    code:Number(c.weather_code||0),
-    wind:Number(c.wind_speed_10m||0),
-    rainProb:Number(probs[0]||0),
-    tempDiff:Math.round(temp-yesterdayTemp)
-  };
+async function reverseGeocode(lat,lon){
+  try{
+    const url=`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=ko`;
+    const res=await fetch(url);
+    if(!res.ok) return null;
+    const json=await res.json();
+    const addr=json.address||{};
+    const city=addr.city||addr.county||addr.state||"";
+    const district=addr.suburb||addr.city_district||addr.town||addr.village||addr.borough||"";
+    return [city,district].filter(Boolean).join(" ");
+  }catch(e){
+    return null;
+  }
 }
 
 async function loadCurrentWeather(){
@@ -995,7 +1245,10 @@ async function loadCurrentWeather(){
       document.getElementById("tempDiff").textContent=`${w.tempDiff>=0?"+":""}${w.tempDiff}°`;
       document.getElementById("weatherIcon").textContent=getWeatherEmoji(w.code,w.rainProb,w.precipitation);
       document.getElementById("currentDesc").textContent=weatherDesc(w.rainProb,w.precipitation);
-      document.getElementById("currentLocationText").textContent="📍 현재 위치";
+
+      const locationName=await reverseGeocode(lat,lon);
+      document.getElementById("currentLocationText").textContent=
+        locationName ? `📍 ${locationName}` : "📍 현재 위치";
 
     }catch(e){
       setWeatherFallback();
@@ -1017,14 +1270,16 @@ function setWeatherFallback(){
 }
 
 function refreshWeather(){
+  weatherCache.clear();
   toast("날씨 새로고침 중 🌦️");
   loadCurrentWeather();
+  buildPredictions();
 }
 
 syncProfile();
-renderHotList();
-renderMarkets();
+renderClosed();
 loadCurrentWeather();
+buildPredictions();
 </script>
 
 </body>
