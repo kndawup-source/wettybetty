@@ -621,7 +621,7 @@ button{
 
     <div class="weather-top">
       <div>
-        <div class="weather-kicker" id="currentLocationText">📍 현재 날씨</div>
+        <div class="weather-kicker" id="currentLocationText">📍 위치 확인중...</div>
         <div class="temp" id="currentTemp">--°</div>
         <div class="weather-desc" id="currentDesc">위치 권한을 허용하면 현재 날씨가 표시됩니다.</div>
       </div>
@@ -765,34 +765,16 @@ let profile={
 
 let predictions=[];
 let closedPredictions=[
-  {
-    id:"closed_1",
-    region:"서울 성수",
-    title:"오후 소나기 왔을까?",
-    yes:61,
-    no:39,
-    yesLabel:"왔다",
-    noLabel:"안 왔다",
-    total:18800,
-    status:"정산 완료"
-  },
-  {
-    id:"closed_2",
-    region:"제주",
-    title:"오전 강풍 있었을까?",
-    yes:72,
-    no:28,
-    yesLabel:"있었다",
-    noLabel:"없었다",
-    total:24300,
-    status:"결과 대기"
-  }
+  {id:"closed_1",region:"서울 성수",title:"오후 소나기 왔을까?",yes:61,no:39,yesLabel:"왔다",noLabel:"안 왔다",total:18800,status:"정산 완료"},
+  {id:"closed_2",region:"제주",title:"오전 강풍 있었을까?",yes:72,no:28,yesLabel:"있었다",noLabel:"없었다",total:24300,status:"결과 대기"}
 ];
 
 let toastTimer=null;
 let selectedNav=0;
 let weatherCache=new Map();
 let holidayCache=null;
+let lastLocationKey="";
+let locationWatchId=null;
 
 function toast(msg){
   const el=document.getElementById("toast");
@@ -1013,9 +995,7 @@ async function buildPredictions(){
     }catch(e){}
   }
 
-  predictions=list
-    .sort((a,b)=>b.total-a.total)
-    .slice(0,7);
+  predictions=list.sort((a,b)=>b.total-a.total).slice(0,7);
 
   if(!predictions.length){
     predictions=[
@@ -1043,11 +1023,7 @@ function renderHotList(){
   const box=document.getElementById("hotList");
   box.innerHTML="";
 
-  const sorted=[...predictions]
-    .sort((a,b)=>b.total-a.total)
-    .slice(0,3);
-
-  sorted.forEach((item,index)=>{
+  predictions.slice(0,3).forEach((item,index)=>{
     const div=document.createElement("div");
     div.className="board-item";
 
@@ -1167,7 +1143,6 @@ function logout(){
 
 function setActiveNav(index){
   selectedNav=index;
-
   document.querySelectorAll(".nav-btn").forEach((btn,i)=>{
     btn.classList.toggle("active",i===index);
   });
@@ -1225,37 +1200,72 @@ async function reverseGeocode(lat,lon){
   }
 }
 
+async function applyCurrentPosition(pos){
+  try{
+    const lat=pos.coords.latitude;
+    const lon=pos.coords.longitude;
+    const locationKey=`${lat.toFixed(3)},${lon.toFixed(3)}`;
+
+    const w=await fetchWeather(lat,lon);
+
+    document.getElementById("currentTemp").textContent=`${Math.round(w.temp)}°`;
+    document.getElementById("feelsLike").textContent=`${Math.round(w.feelsLike)}°`;
+    document.getElementById("rainChance").textContent=`${w.rainProb}%`;
+    document.getElementById("windSpeed").textContent=`${w.wind.toFixed(1)}m/s`;
+    document.getElementById("tempDiff").textContent=`${w.tempDiff>=0?"+":""}${w.tempDiff}°`;
+    document.getElementById("weatherIcon").textContent=getWeatherEmoji(w.code,w.rainProb,w.precipitation);
+    document.getElementById("currentDesc").textContent=weatherDesc(w.rainProb,w.precipitation);
+
+    if(locationKey!==lastLocationKey){
+      lastLocationKey=locationKey;
+
+      const locationName=await reverseGeocode(lat,lon);
+
+      document.getElementById("currentLocationText").textContent=
+        locationName ? `📍 ${locationName}` : "📍 현재 위치";
+    }
+
+  }catch(e){
+    setWeatherFallback();
+  }
+}
+
 async function loadCurrentWeather(){
   if(!navigator.geolocation){
     setWeatherFallback();
     return;
   }
 
-  navigator.geolocation.getCurrentPosition(async pos=>{
-    try{
-      const lat=pos.coords.latitude;
-      const lon=pos.coords.longitude;
-
-      const w=await fetchWeather(lat,lon);
-
-      document.getElementById("currentTemp").textContent=`${Math.round(w.temp)}°`;
-      document.getElementById("feelsLike").textContent=`${Math.round(w.feelsLike)}°`;
-      document.getElementById("rainChance").textContent=`${w.rainProb}%`;
-      document.getElementById("windSpeed").textContent=`${w.wind.toFixed(1)}m/s`;
-      document.getElementById("tempDiff").textContent=`${w.tempDiff>=0?"+":""}${w.tempDiff}°`;
-      document.getElementById("weatherIcon").textContent=getWeatherEmoji(w.code,w.rainProb,w.precipitation);
-      document.getElementById("currentDesc").textContent=weatherDesc(w.rainProb,w.precipitation);
-
-      const locationName=await reverseGeocode(lat,lon);
-      document.getElementById("currentLocationText").textContent=
-        locationName ? `📍 ${locationName}` : "📍 현재 위치";
-
-    }catch(e){
+  navigator.geolocation.getCurrentPosition(
+    async pos=>{
+      await applyCurrentPosition(pos);
+    },
+    ()=>{
       setWeatherFallback();
+    },
+    {
+      enableHighAccuracy:true,
+      timeout:10000,
+      maximumAge:60000
     }
-  },()=>{
-    setWeatherFallback();
-  });
+  );
+}
+
+function watchCurrentLocation(){
+  if(!navigator.geolocation) return;
+  if(locationWatchId!==null) return;
+
+  locationWatchId=navigator.geolocation.watchPosition(
+    async pos=>{
+      await applyCurrentPosition(pos);
+    },
+    ()=>{},
+    {
+      enableHighAccuracy:true,
+      timeout:10000,
+      maximumAge:60000
+    }
+  );
 }
 
 function setWeatherFallback(){
@@ -1271,6 +1281,7 @@ function setWeatherFallback(){
 
 function refreshWeather(){
   weatherCache.clear();
+  lastLocationKey="";
   toast("날씨 새로고침 중 🌦️");
   loadCurrentWeather();
   buildPredictions();
@@ -1279,7 +1290,12 @@ function refreshWeather(){
 syncProfile();
 renderClosed();
 loadCurrentWeather();
+watchCurrentLocation();
 buildPredictions();
+
+setInterval(()=>{
+  loadCurrentWeather();
+},10*60*1000);
 </script>
 
 </body>
