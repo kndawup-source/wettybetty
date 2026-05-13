@@ -2,202 +2,1442 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 <title>WETTY BETTY</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Noto+Sans+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="./style.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  
+<style>
+:root{
+  --bg:#050d16;--panel:#0b1620;--line:rgba(255,255,255,.08);
+  --text:#edf4fa;--muted:#8193a0;--soft:#b8c8c8;
+  --accent:#dff56a;--blue:#82c7ff;--green:#b8ff7a;--red:#ff6f6f;
+  --shadow:0 22px 64px rgba(0,0,0,.34);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif}
+button,input{font-family:inherit}
+button{cursor:pointer;border:0;transition:.12s}
+button:active{transform:scale(.96);filter:brightness(1.12)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.app{
+  width:100%;max-width:480px;margin:0 auto;min-height:100dvh;padding:16px 16px 56px;
+  background:
+    radial-gradient(circle at 50% -10%,rgba(223,245,106,.10),transparent 34%),
+    radial-gradient(circle at 100% 12%,rgba(130,199,255,.08),transparent 32%),
+    linear-gradient(180deg,#07121c 0%,#050d16 46%,#050d16 100%);
+}
+.header{height:58px;display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.logo{font-family:'Syne',sans-serif;font-size:23px;font-weight:900;letter-spacing:-1px}
+.logo span{color:var(--accent)}
+.sub{margin-top:5px;color:var(--muted);font-size:10px;font-weight:900;letter-spacing:1px}
+.profileChip{width:138px;padding:9px 10px;border-radius:18px;background:rgba(255,255,255,.045);border:1px solid var(--line);text-align:right}
+.profileName{color:var(--soft);font-size:11px;font-weight:900;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.points{margin-top:3px;color:var(--accent);font-size:12px;font-weight:900;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.scoreBar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.scoreBar button,.scoreBar div{min-height:52px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid var(--line);padding:9px 8px;text-align:left}
+.scoreBar span{display:block;color:var(--muted);font-size:9px;font-weight:900;letter-spacing:.7px}
+.scoreBar b{display:block;margin-top:5px;color:var(--text);font-size:15px;font-weight:900}
+.scoreBar button b{color:var(--accent)}
+.weatherBoard{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.07);background:#0d1823;border-radius:30px;padding:20px;margin-bottom:12px;box-shadow:var(--shadow)}
+.weatherBoard:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,0));pointer-events:none}
+.weatherTop{position:relative;z-index:1;display:flex;justify-content:space-between;gap:14px}
+.kicker{display:inline-flex;padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.055);border:1px solid var(--line);color:var(--soft);font-size:10px;font-weight:900}
+.weatherTemp{margin-top:10px;font-family:'Syne',sans-serif;font-size:74px;line-height:.82;letter-spacing:-4px;font-weight:900}
+.weatherTemp span{font-size:.42em;vertical-align:top;position:relative;top:10px;margin-left:2px}
+.weatherDesc{margin-top:12px;color:var(--muted);font-size:13px;line-height:1.55;max-width:260px}
+.weatherIcon{width:76px;height:76px;flex:0 0 76px;border-radius:24px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.055);border:1px solid var(--line);font-size:34px;line-height:1}
+.weatherGrid{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
+.weatherGrid div{padding:12px 8px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.weatherGrid span{display:block;color:var(--muted);font-size:9px;font-weight:900;white-space:nowrap}
+.weatherGrid b{display:block;margin-top:5px;color:var(--text);font-size:14px;font-weight:900}
+.hotPickBox{position:relative;z-index:2;margin-top:16px;padding:14px;border-radius:20px;background:rgba(223,245,106,.08);border:1px solid rgba(223,245,106,.18)}
+.hotPickTop{display:flex;justify-content:space-between;align-items:center;color:var(--accent);font-size:10px;font-weight:900;letter-spacing:.8px}
+.hotPickTitle{margin-top:8px;font-size:17px;line-height:1.28;font-weight:900}
+.hotPickMeta{margin-top:8px;display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px;font-weight:900}
+.actions{position:relative;z-index:3;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.btn{position:relative;z-index:2;height:44px;border-radius:15px;font-size:12px;font-weight:900;background:#dff56a;color:#07100d;box-shadow:none;overflow:hidden}
+.btn.dark{background:#111d27;color:var(--text);border:1px solid var(--line)}
+.board{border:1px solid var(--line);background:rgba(255,255,255,.035);border-radius:22px;padding:14px;margin:12px 0 16px}
+.boardHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.boardHead h2{font-size:14px;font-weight:900}
+.boardHead span{color:var(--accent);font-size:10px;font-weight:900}
+.boardItem{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--line)}
+.boardItem:first-child{border-top:0}
+.boardTitle{font-size:13px;font-weight:900}
+.boardSub{margin-top:3px;color:var(--muted);font-size:11px}
+.boardRight{color:var(--accent);font-size:13px;font-weight:900;white-space:nowrap}
+.sectionHead{display:flex;justify-content:space-between;align-items:center;margin:18px 2px 10px}
+.sectionHead h2{font-size:15px;font-weight:900}
+.sectionHead span{color:var(--muted);font-size:11px;font-weight:900}
+.card{border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.052),rgba(255,255,255,.02)),var(--panel);border-radius:25px;padding:16px;margin:10px 0;box-shadow:0 16px 42px rgba(0,0,0,.23)}
+.card.small{padding:13px;border-radius:20px;box-shadow:none}
+.marketTop{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.badge{display:inline-flex;padding:6px 10px;border-radius:999px;background:rgba(130,199,255,.095);border:1px solid rgba(130,199,255,.14);color:var(--blue);font-size:10px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timer{color:var(--muted);font-size:10px;font-weight:900}
+.timer.urgent{color:#ff8d8d;animation:pulse 1s infinite}
+@keyframes pulse{0%{opacity:1}50%{opacity:.45}100%{opacity:1}}
+.card-title{margin-top:12px;font-size:22px;line-height:1.25;letter-spacing:-.8px;font-weight:900}
+.card.small .card-title{font-size:15px;margin-top:9px}
+.marketStatus{display:inline-flex;margin-top:10px;padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.055);border:1px solid var(--line);color:var(--soft);font-size:10px;font-weight:900}
+.marketStatus.hot{color:#ffda6a;border-color:rgba(255,218,106,.22);background:rgba(255,218,106,.09)}
+.marketStatus.debate{color:var(--blue);border-color:rgba(130,199,255,.2);background:rgba(130,199,255,.08)}
+.marketStatus.calm{color:var(--muted)}
+.marketMeta{display:flex;justify-content:space-between;gap:8px;margin-top:9px;color:var(--muted);font-size:11px;line-height:1.45}
+.official{color:var(--soft);font-weight:900;white-space:nowrap}
+.odds{margin-top:15px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.odd{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:18px;padding:14px}
+.odd label{display:block;color:var(--muted);font-size:10px;font-weight:900}
+.odd strong{display:block;margin-top:7px;font-family:'Syne',sans-serif;font-size:32px;line-height:1}
+.odd small{display:block;margin-top:7px;color:var(--muted);font-size:10px;font-weight:800}
+.odd.rain strong{color:var(--blue)}
+.odd.clear strong{color:var(--green)}
+.bar{margin-top:13px;height:8px;border-radius:999px;background:rgba(184,255,122,.2);overflow:hidden}
+.fill{height:100%;background:linear-gradient(90deg,var(--blue),#b5e1ff)}
+.reasonBox{margin-top:12px;padding:12px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+.reasonTitle{color:var(--accent);font-size:10px;font-weight:900;letter-spacing:.7px}
+.reasonText{margin-top:6px;color:#d9e6ef;font-size:12px;line-height:1.5;font-weight:700}
+.reasonSource{margin-top:8px;color:var(--muted);font-size:10px;font-weight:900}
+.entry{margin-top:14px}
+.stakes{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.stakes button{height:38px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--soft);border-radius:13px;font-size:12px;font-weight:900}
+.stakes button.active{background:var(--text);color:#050d16}
+.pickBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.pickBtns button{height:46px;border-radius:15px;font-size:14px;font-weight:900}
+.pickBtns .rain{background:rgba(130,199,255,.14);border:1px solid rgba(130,199,255,.27);color:var(--blue)}
+.pickBtns .clear{background:rgba(184,255,122,.12);border:1px solid rgba(184,255,122,.24);color:var(--green)}
+.myPick{margin-top:13px;padding:12px;border-radius:15px;background:rgba(223,245,106,.075);border:1px solid rgba(223,245,106,.17);color:var(--accent);font-size:12px;font-weight:900}
+.mood{margin-top:15px;border-top:1px solid var(--line);padding-top:13px}
+.moodTitle{display:flex;justify-content:space-between;gap:8px;color:var(--soft);font-size:11px;font-weight:900;margin-bottom:9px}
+.moodTitle span:last-child{color:var(--muted);white-space:nowrap}
+.reactions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
+.reactions button{height:38px;border-radius:13px;background:rgba(255,255,255,.04);color:var(--soft);border:1px solid var(--line);font-size:11px;font-weight:900}
+.commentPreview,.comment{margin-top:8px;padding:10px 11px;border-radius:14px;background:rgba(255,255,255,.032);border:1px solid rgba(255,255,255,.055)}
+.commentPreview b,.comment b{color:var(--accent);font-size:10px;font-weight:900}
+.commentPreview p,.comment p{margin-top:4px;color:#dce7ee;font-size:12px;line-height:1.45}
+.commentToggle{width:100%;height:38px;margin-top:9px;border-radius:13px;background:rgba(255,255,255,.045);border:1px solid var(--line);color:var(--soft);font-size:12px;font-weight:900}
+.commentForm{display:flex;gap:7px;margin-top:10px}
+.commentForm input{flex:1;min-width:0;height:42px;background:rgba(0,0,0,.18);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:0 12px;font-size:12px;outline:none}
+.commentForm button{width:58px;border-radius:14px;background:rgba(255,255,255,.075);color:var(--text);font-size:12px;font-weight:900}
+.smallRow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px}
+.smallPercent{color:var(--soft);font-size:12px;font-weight:900}
+.smallBtn{height:34px;padding:0 12px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--text);font-size:11px;font-weight:900}
+.closedCard{opacity:.72}
+.closedCard .card-title{font-size:16px}
+.closedBadge{display:inline-flex;margin-top:10px;padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.055);border:1px solid var(--line);color:var(--muted);font-size:10px;font-weight:900}
+.closedBadge.settled{color:var(--accent);border-color:rgba(223,245,106,.2);background:rgba(223,245,106,.08)}
+.closedBadge.pending{color:var(--blue);border-color:rgba(130,199,255,.18);background:rgba(130,199,255,.07)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:20px;z-index:100;backdrop-filter:blur(8px)}
+.modal.show{display:flex}
+.modalCard{width:100%;max-width:390px;max-height:86dvh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:28px;padding:24px;box-shadow:var(--shadow)}
+.modalTop{display:flex;justify-content:space-between;gap:12px}
+.modalCard h2{font-size:24px;font-weight:900}
+.closeBtn{width:34px;height:34px;border-radius:12px;background:rgba(255,255,255,.06);color:var(--text);font-weight:900}
+.modalCard p{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.5}
+.modalCard input{width:100%;height:48px;margin-top:14px;border:1px solid var(--line);background:rgba(0,0,0,.2);color:var(--text);border-radius:16px;padding:0 14px;font-size:15px;outline:none}
+.modalCard .btn{width:100%;margin-top:12px}
+.profileStats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px}
+.profileStats div{border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:17px;padding:12px 10px}
+.profileStats span{display:block;color:var(--muted);font-size:10px;font-weight:900}
+.profileStats b{display:block;margin-top:5px;color:var(--text);font-size:17px;font-weight:900}
+.historyTitle{margin-top:20px;font-size:13px;font-weight:900;color:var(--soft)}
+.historyItem{margin-top:9px;border:1px solid var(--line);background:rgba(255,255,255,.035);border-radius:16px;padding:12px}
+.historyItem strong{display:block;font-size:13px;line-height:1.35}
+.historyItem span{display:block;margin-top:5px;color:var(--muted);font-size:11px;font-weight:800}
+.resultWin{color:var(--accent)}.resultLose{color:var(--red)}.resultPending{color:var(--blue)}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(8px);opacity:0;pointer-events:none;background:var(--text);color:#050d16;padding:12px 18px;border-radius:999px;font-size:13px;font-weight:900;transition:.2s;z-index:200}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.empty{padding:20px 0;text-align:center;color:var(--muted);font-size:13px}
+.liveToast{position:fixed;left:50%;bottom:78px;width:calc(100% - 32px);max-width:448px;transform:translateX(-50%) translateY(12px);opacity:0;z-index:210;padding:13px 15px;border-radius:18px;background:rgba(11,22,32,.96);border:1px solid rgba(223,245,106,.18);color:var(--text);font-size:13px;font-weight:900;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:.22s ease;backdrop-filter:blur(10px)}
+.liveToast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
 </head>
 
 <body>
-
 <div class="app">
-
   <header class="header">
-
-    <div class="logo-wrap">
-      <div class="logo">WETTY <em>BETTY</em></div>
+    <div>
+      <div class="logo">WETTY <span>BETTY</span></div>
       <div class="sub">WEATHER PICK CLUB</div>
     </div>
-
-    <div class="header-right">
-
-      <button class="icon-btn" onclick="toast('새 알림이 없습니다 🔔')">
-        🔔
-      </button>
-
-      <button class="profile-mini" onclick="onProfileClick()">
-        <span class="pm-icon">👤</span>
-        <span class="pm-name" id="nickname">GUEST</span>
-      </button>
-
-    </div>
-
+    <button class="profileChip" onclick="openProfile()">
+      <div class="profileName" id="nickname">GUEST</div>
+      <div class="points" id="pointsEl">0P</div>
+    </button>
   </header>
 
-  <section class="weather-board">
+  <section class="scoreBar">
+    <button onclick="openProfile()"><span>적중률</span><b id="hitRateMini">0%</b></button>
+    <div><span>참여</span><b id="picksMini">0</b></div>
+    <div><span>적중</span><b id="winsMini">0</b></div>
+    <div><span>연승</span><b id="streakMini">0</b></div>
+  </section>
 
-    <button class="refresh-btn" onclick="refreshWeather()">
-      ↻
-    </button>
-
-    <div class="weather-top">
-
-      <div class="weather-kicker" id="weatherLocation">
-  📍 위치 확인중...
-</div>
-
-        <div class="temp" id="currentTemp">
-          --°
-        </div>
-
-        <div class="weather-desc" id="weatherDesc">
-          위치 권한을 허용하면 현재 날씨가 표시됩니다.
-        </div>
+  <section class="weatherBoard">
+    <div class="weatherTop">
+      <div>
+        <div class="kicker" id="currentLocationText">📍 위치 확인중...</div>
+        <h1 class="weatherTemp" id="currentTemp">--°</h1>
+        <p class="weatherDesc" id="currentDesc">위치 권한을 허용하면 현재 날씨가 표시됩니다.</p>
       </div>
-
-      <div class="weather-icon" id="weatherIcon">
-        🌤️
-      </div>
-
+      <div class="weatherIcon" id="weatherIcon">🌤️</div>
     </div>
 
-    <div class="weather-grid">
-
-      <div class="weather-cell">
-        <span>체감</span>
-        <strong id="feelsLike">--°</strong>
-      </div>
-
-      <div class="weather-cell">
-        <span>강수</span>
-        <strong id="rainChance">--%</strong>
-      </div>
-
-      <div class="weather-cell">
-        <span>바람</span>
-        <strong id="windSpeed">--</strong>
-      </div>
-
-      <div class="weather-cell">
-        <span>변화</span>
-        <strong id="tempDiff">--°</strong>
-      </div>
-
+    <div class="weatherGrid">
+      <div><span>체감</span><b id="feelsLike">--°</b></div>
+      <div><span>1H 강수</span><b id="rainChance">--%</b></div>
+      <div><span>바람</span><b id="windSpeed">--</b></div>
+      <div><span>어제 대비</span><b id="tempDiff">--°</b></div>
     </div>
 
+    <div class="hotPickBox" id="hotPickBox" style="display:none">
+      <div class="hotPickTop">
+        <span>🔥 HOT PICK</span>
+        <span id="hotPickTimer">--</span>
+      </div>
+      <div class="hotPickTitle" id="hotPickTitle">오늘 가장 뜨거운 예측</div>
+      <div class="hotPickMeta">
+        <span id="hotPickRatio">온다 --% / 안 온다 --%</span>
+        <span id="hotPickStake">0P 참여</span>
+      </div>
+    </div>
   </section>
 
   <div class="actions">
-
-    <button class="main-btn" onclick="checkin()">
-      출석 포인트 받기
-    </button>
-
-    <button class="sub-btn" onclick="copyInvite()">
-      친구 초대 🎁
-    </button>
-
+    <button class="btn" id="checkinBtn" onclick="checkin()">출석 포인트 받기</button>
+    <button class="btn dark" onclick="copyInvite()">친구 초대</button>
   </div>
+
+  <section class="board" id="nearBoard" style="display:none">
+    <div class="boardHead"><h2>지금 근처 예측</h2><span>NEARBY</span></div>
+    <div id="nearList"></div>
+  </section>
 
   <section class="board">
-
-    <div class="board-head">
-      <h2>지금 몰리는 지역</h2>
-      <span>LIVE</span>
-    </div>
-
+    <div class="boardHead"><h2>지금 몰리는 지역</h2><span>LIVE</span></div>
     <div id="hotList"></div>
-
   </section>
 
-  <section class="section-title">
-    <h2>TOP PICKS</h2>
-    <span>실시간 예측</span>
+  <section class="board" id="rankBoard">
+    <div class="boardHead"><h2>오늘의 TOP 예측가</h2><span>RANKING</span></div>
+    <div id="rankList"></div>
   </section>
 
-  <div id="marketList"></div>
-
-</div>
-
-<div class="bottom-nav">
-
-  <button class="nav-btn active" onclick="goHome()">
-    <span>🏠</span>
-    HOME
-  </button>
-
-  <button class="nav-btn" onclick="goPicks()">
-    <span>⚡</span>
-    PICKS
-  </button>
-
-  <button class="nav-btn" onclick="goRank()">
-    <span>🏆</span>
-    RANK
-  </button>
-
-  <button class="nav-btn" onclick="onProfileClick()">
-    <span>👤</span>
-    MY
-  </button>
-
-</div>
-
-<div class="overlay" id="profileModal">
-
-  <div class="sheet">
-
-    <div class="sheet-head">
-
-      <div>
-        <h2 id="profileName">PROFILE</h2>
-        <p id="profileCode">초대코드 --</p>
-      </div>
-
-      <button class="close-btn" onclick="closeModal()">
-        ×
-      </button>
-
-    </div>
-
-    <div class="profile-stats">
-
-      <div class="stat-box">
-        <span>포인트</span>
-        <strong id="profilePoint">0</strong>
-      </div>
-
-      <div class="stat-box">
-        <span>적중률</span>
-        <strong id="profileRate">0%</strong>
-      </div>
-
-      <div class="stat-box">
-        <span>연승</span>
-        <strong id="profileStreak">0</strong>
-      </div>
-
-    </div>
-
-    <button class="main-btn full" onclick="copyInvite()">
-      초대코드 복사 🎁
-    </button>
-
-    <button class="logout-btn" onclick="logout()">
-      로그아웃
-    </button>
-
+  <div class="sectionHead">
+    <h2>TOP 5 예측</h2>
+    <span>지금 참여 가능</span>
   </div>
+  <main id="topList"></main>
 
+  <div class="sectionHead">
+    <h2>그 외 예측</h2>
+    <span>작게 보기</span>
+  </div>
+  <main id="otherList"></main>
+
+  <div class="sectionHead" id="closedSectionHead" style="display:none">
+    <h2>마감된 예측</h2>
+    <span>결과 대기 / 정산 완료</span>
+  </div>
+  <main id="closedList"></main>
+</div>
+
+<div class="modal" id="joinModal">
+  <div class="modalCard">
+    <h2>닉네임 만들기</h2>
+    <p>첫 접속 보너스로 10,000 포인트를 지급합니다.</p>
+    <input id="nickInput" placeholder="닉네임 입력" maxlength="12" onkeydown="if(event.key==='Enter')createProfile()" />
+    <button class="btn" onclick="createProfile()">시작하기</button>
+  </div>
+</div>
+
+<div class="modal" id="profileModal">
+  <div class="modalCard">
+    <div class="modalTop">
+      <div>
+        <h2 id="profileTitle">PROFILE</h2>
+        <p id="profileSub">내 예측 기록과 스코어를 확인하세요.</p>
+      </div>
+      <button class="closeBtn" onclick="closeProfile()">×</button>
+    </div>
+    <div class="profileStats">
+      <div><span>포인트</span><b id="modalCredit">0</b></div>
+      <div><span>적중률</span><b id="modalHitRate">0%</b></div>
+      <div><span>연승</span><b id="modalStreak">0</b></div>
+      <div><span>참여</span><b id="modalPicks">0</b></div>
+      <div><span>적중</span><b id="modalWins">0</b></div>
+      <div><span>대기</span><b id="modalPending">0</b></div>
+    </div>
+    <button class="btn dark" onclick="copyInvite()">초대코드 복사</button>
+    <div class="historyTitle">최근 기록</div>
+    <div id="historyList"></div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<script src="./app.js"></script>
+<script>
+const API_GAME="/api/game";
+const API_ACTION="/api/action";
+const POLL_MS=15000;
 
+let userKey=localStorage.getItem("wetty_user_key");
+let selectedStake=100;
+let profile=null;
+let predictions=[];
+let drafts={};
+let scoreHistory=[];
+let openComments={};
+let userLocation=null;
+let stats={totalPicks:0,wins:0,losses:0,pending:0,hitRate:0,currentStreak:0};
+let leaderboard=[];
+let liveBuzzTimer=null;
+let lastBuzzKey="";
+let toastTimer=null;
+let isLoading=false;
+
+const regionWeatherCache=new Map();
+const REGION_WEATHER_TTL=10*60*1000;
+const PUBLIC_HOLIDAY_SERVICE_KEY="여기에_공공데이터_API_KEY";
+const ACTIVE_REGION_LIMIT=7;
+const REGION_POOL=[
+  {id:"gangnam",name:"서울 강남",lat:37.4979,lon:127.0276,weight:95,type:"business"},
+  {id:"hongdae",name:"서울 홍대",lat:37.5563,lon:126.9236,weight:88,type:"hotplace"},
+  {id:"seongsu",name:"서울 성수",lat:37.5446,lon:127.0557,weight:86,type:"hotplace"},
+  {id:"yeouido",name:"서울 여의도",lat:37.5219,lon:126.9245,weight:84,type:"business"},
+  {id:"jamsil",name:"서울 잠실",lat:37.5133,lon:127.1002,weight:82,type:"city"},
+  {id:"incheon_airport",name:"인천공항",lat:37.4602,lon:126.4407,weight:90,type:"airport"},
+  {id:"suwon",name:"수원",lat:37.2636,lon:127.0286,weight:72,type:"city"},
+  {id:"busan_haeundae",name:"부산 해운대",lat:35.1587,lon:129.1604,weight:88,type:"beach"},
+  {id:"jeju",name:"제주",lat:33.4996,lon:126.5312,weight:92,type:"travel"},
+  {id:"gangneung",name:"강릉",lat:37.7519,lon:128.8761,weight:80,type:"travel"},
+  {id:"sokcho",name:"속초",lat:38.2070,lon:128.5918,weight:76,type:"travel"},
+  {id:"daegu",name:"대구 동성로",lat:35.8693,lon:128.5940,weight:78,type:"city"},
+  {id:"gwangju",name:"광주 충장로",lat:35.1480,lon:126.9144,weight:70,type:"city"},
+  {id:"daejeon",name:"대전 둔산",lat:36.3510,lon:127.3788,weight:70,type:"city"}
+];
+let holidayCache=null;
+
+
+if(!userKey){
+  userKey=crypto.randomUUID();
+  localStorage.setItem("wetty_user_key",userKey);
+}
+
+function toast(msg){
+  const el=document.getElementById("toast");
+  el.textContent=msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove("show"),1900);
+}
+
+async function post(action,data={}){
+  try{
+    const res=await fetch(API_ACTION,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({action,userKey,...data})
+    });
+
+    let json=null;
+    try{json=await res.json();}
+    catch(e){return {ok:false,message:"서버 응답 형식 오류"};}
+
+    if(!res.ok){
+      return {ok:false,message:json?.message||"요청 처리 실패"};
+    }
+
+    return json;
+  }catch(e){
+    return {ok:false,message:"네트워크 연결 실패"};
+  }
+}
+
+function fmtTime(v){
+  if(!v) return "-";
+  return new Date(v).toLocaleString("ko-KR",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+}
+
+function remaining(closeTime){
+  if(!closeTime) return "마감 시간 없음";
+  const diff=new Date(closeTime).getTime()-Date.now();
+  if(Number.isNaN(diff)) return "시간 확인 필요";
+  if(diff<=0) return "마감";
+  const totalMinutes=Math.ceil(diff/60000);
+  const days=Math.floor(totalMinutes/1440);
+  const hours=Math.floor((totalMinutes%1440)/60);
+  const minutes=totalMinutes%60;
+  if(days>0) return `${days}일 ${hours}시간 남음`;
+  if(hours>0) return `${hours}시간 ${minutes}분 남음`;
+  return `${minutes}분 남음`;
+}
+
+function distanceKm(a,b,c,d){
+  if(a==null||b==null||c==null||d==null) return 99999;
+  const R=6371;
+  const dLat=(c-a)*Math.PI/180;
+  const dLon=(d-b)*Math.PI/180;
+  const x=Math.sin(dLat/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+
+function weatherText(code,rainProb,precipitation){
+  if((precipitation||0)>0) return{label:"🌧️",desc:"현재 비가 감지되고 있습니다."};
+  if(rainProb>=70) return{label:"☔",desc:"강수 가능성이 높습니다."};
+  if(rainProb>=40) return{label:"🌦️",desc:"비 가능성이 애매하게 걸려 있습니다."};
+  if([0,1].includes(code)) return{label:"☀️",desc:"현재는 비교적 맑습니다."};
+  if([2,3,45,48].includes(code)) return{label:"☁️",desc:"구름이 많습니다."};
+  return{label:"🌤️",desc:"현재 날씨 기준으로 예측 흐름을 확인해보세요."};
+}
+
+
+function localDateKey(date=new Date()){
+  const y=date.getFullYear();
+  const m=String(date.getMonth()+1).padStart(2,"0");
+  const d=String(date.getDate()).padStart(2,"0");
+  return `${y}-${m}-${d}`;
+}
+
+async function isKoreanHoliday(){
+  const today=new Date();
+  const y=today.getFullYear();
+  const m=String(today.getMonth()+1).padStart(2,"0");
+  const todayKey=localDateKey(today);
+  const cacheKey=`${y}-${m}`;
+
+  if(!PUBLIC_HOLIDAY_SERVICE_KEY || PUBLIC_HOLIDAY_SERVICE_KEY.includes("여기에")){
+    return false;
+  }
+
+  if(holidayCache && holidayCache.key===cacheKey){
+    return holidayCache.dates.includes(todayKey);
+  }
+
+  try{
+    const url=`https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo`+
+      `?serviceKey=${encodeURIComponent(PUBLIC_HOLIDAY_SERVICE_KEY)}`+
+      `&solYear=${y}&solMonth=${m}&_type=json`;
+
+    const res=await fetch(url,{cache:"force-cache"});
+    if(!res.ok) return false;
+
+    const json=await res.json();
+    let items=json?.response?.body?.items?.item || [];
+    if(!Array.isArray(items)) items=[items];
+
+    const dates=items
+      .filter(item=>item?.isHoliday==="Y" || item?.isHoliday===true)
+      .map(item=>{
+        const d=String(item.locdate);
+        return `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6,8)}`;
+      });
+
+    holidayCache={key:cacheKey,dates};
+    return dates.includes(todayKey);
+  }catch(e){
+    return false;
+  }
+}
+
+async function getDayMode(){
+  const day=new Date().getDay();
+  if(await isKoreanHoliday()) return "holiday";
+  if(day===0 || day===6) return "weekend";
+  return "weekday";
+}
+
+function dayModeLabel(mode){
+  if(mode==="holiday") return "공휴일 이슈";
+  if(mode==="weekend") return "주말 이슈";
+  return "평일 이슈";
+}
+
+async function fetchRegionWeather(lat,lon){
+  const key=`${parseFloat(lat).toFixed(2)},${parseFloat(lon).toFixed(2)}`;
+  const now=Date.now();
+  const cached=regionWeatherCache.get(key);
+  if(cached&&now-cached.ts<REGION_WEATHER_TTL) return cached.data;
+
+  try{
+    const url=`https://api.open-meteo.com/v1/forecast`+
+      `?latitude=${lat}&longitude=${lon}`+
+      `&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m`+
+      `&hourly=precipitation_probability,temperature_2m`+
+      `&past_days=1&forecast_days=1&timezone=Asia%2FSeoul`;
+
+    const res=await fetch(url,{cache:"no-store"});
+    if(!res.ok) return null;
+
+    const json=await res.json();
+    const c=json.current||{};
+    const hourly=json.hourly||{};
+    const times=hourly.time||[];
+    const probs=hourly.precipitation_probability||[];
+    const temps=hourly.temperature_2m||[];
+    const nowTime=new Date();
+
+    let bestIndex=0,bestDiff=Infinity;
+    for(let i=0;i<times.length;i++){
+      const diff=Math.abs(new Date(times[i]).getTime()-nowTime.getTime());
+      if(diff<bestDiff){bestDiff=diff;bestIndex=i;}
+    }
+
+    const yesterdayTime=new Date(nowTime.getTime()-24*60*60*1000);
+    let yIndex=0,yDiff=Infinity;
+    for(let i=0;i<times.length;i++){
+      const diff=Math.abs(new Date(times[i]).getTime()-yesterdayTime.getTime());
+      if(diff<yDiff){yDiff=diff;yIndex=i;}
+    }
+
+    const temp=Number(c.temperature_2m??temps[bestIndex]??0);
+    const yesterdayTemp=Number(temps[yIndex]??temp);
+
+    const data={
+      temp,
+      feelsLike:Number(c.apparent_temperature??temp),
+      precipitation:Number(c.precipitation??0),
+      code:Number(c.weather_code??0),
+      wind:Number(c.wind_speed_10m??0),
+      rainProb:Number(probs[bestIndex]??0),
+      tempDiff:Math.round(temp-yesterdayTemp)
+    };
+
+    regionWeatherCache.set(key,{data,ts:now});
+    return data;
+  }catch(e){
+    return null;
+  }
+}
+
+
+async function reverseGeocode(lat,lon){
+  try{
+    const url=`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=ko`;
+    const res=await fetch(url,{cache:"force-cache"});
+    if(!res.ok) return null;
+    const json=await res.json();
+    const addr=json.address||{};
+    const city=addr.city || addr.county || addr.state || "";
+    const district=addr.suburb || addr.city_district || addr.town || addr.village || addr.borough || "";
+    return [city,district].filter(Boolean).join(" ");
+  }catch(e){
+    return null;
+  }
+}
+
+function hasWeatherIssue(w){
+  return w.rainProb>=35 || w.precipitation>0 || w.wind>=8 || Math.abs(w.tempDiff)>=5 || w.temp>=30 || w.temp<=0;
+}
+
+function getModeBonus(region,mode){
+  let bonus=0;
+  if(mode==="holiday"){
+    if(region.type==="travel") bonus+=35;
+    if(region.type==="airport") bonus+=32;
+    if(region.type==="beach") bonus+=28;
+    if(region.type==="hotplace") bonus+=18;
+  }else if(mode==="weekend"){
+    if(region.type==="travel") bonus+=28;
+    if(region.type==="beach") bonus+=25;
+    if(region.type==="airport") bonus+=20;
+    if(region.type==="hotplace") bonus+=20;
+  }else{
+    if(region.type==="business") bonus+=24;
+    if(region.type==="city") bonus+=16;
+    if(region.type==="hotplace") bonus+=12;
+  }
+  return bonus;
+}
+
+function getIssueReasons(w){
+  const reasons=[];
+  if(w.precipitation>0) reasons.push("현재 강수 감지");
+  if(w.rainProb>=70) reasons.push("강수확률 높음");
+  else if(w.rainProb>=35) reasons.push("비 가능성 있음");
+  if(w.wind>=8) reasons.push("강풍 가능성");
+  if(Math.abs(w.tempDiff)>=5) reasons.push("기온 변화 큼");
+  if(w.temp>=30) reasons.push("더위 이슈");
+  if(w.temp<=0) reasons.push("추위 이슈");
+  return reasons;
+}
+
+function getWeatherIssueScore(w,region,mode){
+  let score=region.weight || 50;
+  score+=getModeBonus(region,mode);
+  if(w.rainProb>=70) score+=45;
+  else if(w.rainProb>=35) score+=28;
+  if(w.precipitation>0) score+=40;
+  if(w.wind>=8) score+=24;
+  if(Math.abs(w.tempDiff)>=5) score+=22;
+  if(w.temp>=30) score+=20;
+  if(w.temp<=0) score+=20;
+  return score;
+}
+
+function getAutoCategory(w){
+  if(w.wind>=8) return "wind";
+  if(w.temp>=30) return "heat";
+  if(w.temp<=0) return "cold";
+  return "rain";
+}
+
+function makeAutoPrediction(region,w,score,mode){
+  const category=getAutoCategory(w);
+  let title=`${region.name}, 비 올까?`;
+  let official=`${w.rainProb}%`;
+  let base=w.rainProb;
+
+  if(category==="wind"){
+    title=`${region.name}, 바람 강할까?`;
+    official=`${w.wind.toFixed(1)}m/s`;
+    base=w.wind*8;
+  }
+  if(category==="heat"){
+    title=`${region.name}, 오늘 덥게 느껴질까?`;
+    official=`${Math.round(w.feelsLike)}°`;
+    base=w.feelsLike*2.4;
+  }
+  if(category==="cold"){
+    title=`${region.name}, 오늘 춥게 느껴질까?`;
+    official=`${Math.round(w.feelsLike)}°`;
+    base=70-w.feelsLike*2;
+  }
+
+  const rainPercent=Math.max(5,Math.min(95,Math.round(base)));
+  const clearPercent=100-rainPercent;
+  const now=Date.now();
+
+  return {
+    id:`auto_${region.id}`,
+    region:region.name,
+    title,
+    category,
+    lat:region.lat,
+    lon:region.lon,
+    status:"open",
+    priority:score,
+    rainPercent,
+    clearPercent,
+    rainStake:rainPercent*180,
+    clearStake:clearPercent*120,
+    totalStake:score*250,
+    rain_threshold_mm:0.1,
+    official_forecast:official,
+    close_time:new Date(now+3*60*60*1000).toISOString(),
+    target_time:new Date(now+5*60*60*1000).toISOString(),
+    weatherIssueReasons:[dayModeLabel(mode),...getIssueReasons(w)],
+    comments:[],
+    reactionCount:{angry:0,laugh:0,agree:0}
+  };
+}
+
+async function buildActivePredictionsFromRegionPool(){
+  const mode=await getDayMode();
+  const list=[];
+
+  for(const region of REGION_POOL){
+    const w=await fetchRegionWeather(region.lat,region.lon);
+    if(!w || !hasWeatherIssue(w)) continue;
+    const score=getWeatherIssueScore(w,region,mode);
+    list.push(makeAutoPrediction(region,w,score,mode));
+  }
+
+  return list.sort((a,b)=>(b.priority||0)-(a.priority||0)).slice(0,ACTIVE_REGION_LIMIT);
+}
+
+async function loadCurrentWeather(){
+  try{
+    if(!navigator.geolocation){setWeatherFallback();return;}
+
+    navigator.geolocation.getCurrentPosition(async pos=>{
+      const lat=pos.coords.latitude;
+      const lon=pos.coords.longitude;
+      userLocation={lat,lon};
+
+      reverseGeocode(lat,lon).then(locationName=>{
+        const el=document.getElementById("currentLocationText");
+        if(el) el.textContent=locationName ? `📍 ${locationName}` : "📍 현재 위치";
+      });
+
+      const w=await fetchRegionWeather(lat,lon);
+      if(!w){setWeatherFallback();return;}
+
+      document.getElementById("currentTemp").innerHTML=`${Math.round(w.temp)}<span>°</span>`;
+      document.getElementById("feelsLike").textContent=`${Math.round(w.feelsLike)}°`;
+      document.getElementById("rainChance").textContent=`${w.rainProb}%`;
+      document.getElementById("windSpeed").textContent=`${w.wind.toFixed(1)}m/s`;
+      document.getElementById("tempDiff").textContent=`${w.tempDiff>=0?"+":""}${w.tempDiff}°`;
+
+      const info=weatherText(w.code,w.rainProb,w.precipitation);
+      document.getElementById("currentDesc").textContent=info.desc;
+      document.getElementById("weatherIcon").textContent=info.label;
+
+      renderNearList();
+    },()=>setWeatherFallback());
+  }catch(e){
+    setWeatherFallback();
+  }
+}
+
+function setWeatherFallback(){
+  document.getElementById("currentTemp").textContent="--°";
+  document.getElementById("currentDesc").textContent="위치 권한을 허용하면 현재 날씨가 표시됩니다.";
+  document.getElementById("feelsLike").textContent="--°";
+  document.getElementById("rainChance").textContent="--%";
+  document.getElementById("windSpeed").textContent="--";
+  document.getElementById("tempDiff").textContent="--°";
+  document.getElementById("weatherIcon").textContent="🌤️";
+  const locationEl=document.getElementById("currentLocationText");
+  if(locationEl) locationEl.textContent="📍 위치 권한 필요";
+}
+
+async function load(){
+  if(isLoading) return;
+  isLoading=true;
+
+  try{
+    const res=await fetch(
+      `${API_GAME}?userKey=${encodeURIComponent(userKey)}&_=${Date.now()}`,
+      {cache:"no-store"}
+    );
+
+    let json=null;
+    try{json=await res.json();}
+    catch(e){toast("서버 응답을 읽지 못했습니다.");return;}
+
+    if(!res.ok || !json.ok){
+      toast(json?.message || "불러오기 실패");
+      return;
+    }
+
+    profile=json.profile || null;
+    const serverPredictions=Array.isArray(json.predictions) ? json.predictions : [];
+    const autoPredictions=await buildActivePredictionsFromRegionPool();
+    const serverIds=new Set(serverPredictions.map(p=>p.id));
+    predictions=[
+      ...serverPredictions,
+      ...autoPredictions.filter(p=>!serverIds.has(p.id))
+    ];
+    scoreHistory=Array.isArray(json.scoreHistory) ? json.scoreHistory : [];
+    stats=json.stats || {totalPicks:0,wins:0,losses:0,pending:0,hitRate:0,currentStreak:0};
+    leaderboard=Array.isArray(json.leaderboard) ? json.leaderboard : [];
+
+    if(!profile){
+      document.getElementById("joinModal").classList.add("show");
+      return;
+    }
+
+    document.getElementById("joinModal").classList.remove("show");
+    document.getElementById("nickname").textContent=profile.nickname || "Player";
+    document.getElementById("pointsEl").textContent=`${Number(profile.points||0).toLocaleString()}P`;
+
+    updateStatsUI();
+    renderHotList();
+    renderNearList();
+    renderHotPick();
+    renderRanking();
+    render();
+    scheduleLiveBuzz();
+  }catch(e){
+    toast("데이터를 불러오지 못했습니다.");
+  }finally{
+    isLoading=false;
+  }
+}
+
+function sortedPredictions(){
+  return [...predictions].sort((a,b)=>{
+    const scoreA=(a.totalStake||0)+(a.priority||0);
+    const scoreB=(b.totalStake||0)+(b.priority||0);
+    if(scoreB!==scoreA) return scoreB-scoreA;
+    return new Date(a.close_time)-new Date(b.close_time);
+  });
+}
+
+function isOpenPrediction(p){
+  return p.status==="open" && new Date(p.close_time).getTime()>Date.now();
+}
+
+function pickLabels(category){
+  if(category==="wind") return {yes:"세다",no:"약하다"};
+  if(category==="dust") return {yes:"나쁘다",no:"좋다"};
+  if(category==="heat") return {yes:"덥다",no:"선선하다"};
+  if(category==="cold") return {yes:"춥다",no:"안 춥다"};
+  if(category==="humidity") return {yes:"습하다",no:"쾌적하다"};
+  if(category==="typhoon") return {yes:"위험하다",no:"잠잠하다"};
+  return {yes:"온다",no:"안 온다"};
+}
+
+function choiceText(category,choice){
+  const labels=pickLabels(category);
+  return choice==="rain"?labels.yes:labels.no;
+}
+
+function buildReason(p){
+  if(p.weatherIssueReasons?.length){
+    return p.weatherIssueReasons.join(" · ");
+  }
+
+  const rain=p.rainPercent||0;
+  if(p.category==="wind") return `현재 풍속 상승 흐름 감지 · 순간 돌풍 가능성`;
+  if(p.category==="dust") return `미세먼지 농도 상승 흐름 · 외부 활동 주의`;
+  if(p.category==="heat") return `체감온도 상승 중 · 오후 더위 가능성`;
+  if(p.category==="cold") return `기온 하락 흐름 감지 · 쌀쌀할 가능성`;
+  if(p.category==="humidity") return `습도 증가 흐름 · 불쾌지수 상승 가능성`;
+  if(p.category==="typhoon") return `강풍권 접근 가능성 · 기압 변화 감지`;
+  if(rain>=70) return `강수확률 ${rain}% · 비구름 접근 중`;
+  if(rain>=40) return `강수 가능성 상승 흐름 감지`;
+  return `현재 대기 흐름 안정적`;
+}
+
+function marketStatus(p){
+  const total=p.totalStake||0;
+  const gap=Math.abs((p.rainPercent||0)-(p.clearPercent||0));
+  if(total>=3000) return {text:"🔥 과열",cls:"hot"};
+  if(total>=1000&&gap<=15) return {text:"🌧 논쟁중",cls:"debate"};
+  if(total<=100) return {text:"🧊 한산",cls:"calm"};
+  return {text:"⚡ 상승중",cls:"hot"};
+}
+
+function updateStatsUI(){
+  document.getElementById("hitRateMini").textContent=`${stats.hitRate||0}%`;
+  document.getElementById("picksMini").textContent=stats.totalPicks||0;
+  document.getElementById("winsMini").textContent=stats.wins||0;
+  document.getElementById("streakMini").textContent=stats.currentStreak||0;
+
+  document.getElementById("profileTitle").textContent=profile?.nickname||"PROFILE";
+  document.getElementById("profileSub").textContent=`초대코드 ${profile?.referral_code||"-"}`;
+  document.getElementById("modalCredit").textContent=Number(profile?.points||0).toLocaleString();
+  document.getElementById("modalHitRate").textContent=`${stats.hitRate||0}%`;
+  document.getElementById("modalStreak").textContent=stats.currentStreak||0;
+  document.getElementById("modalPicks").textContent=stats.totalPicks||0;
+  document.getElementById("modalWins").textContent=stats.wins||0;
+  document.getElementById("modalPending").textContent=stats.pending||0;
+
+  renderHistory();
+}
+
+function renderBoardItem(box,p,idx,rightText){
+  const labels=pickLabels(p.category);
+  const div=document.createElement("div");
+  div.className="boardItem";
+
+  const left=document.createElement("div");
+  const title=document.createElement("div");
+  title.className="boardTitle";
+  title.textContent=`${idx}. ${p.region}`;
+
+  const sub=document.createElement("div");
+  sub.className="boardSub";
+  sub.textContent=`${p.title} · ${labels.yes} ${p.rainPercent}% / ${labels.no} ${p.clearPercent}%`;
+
+  const right=document.createElement("div");
+  right.className="boardRight";
+  right.textContent=rightText;
+
+  left.append(title,sub);
+  div.append(left,right);
+  box.appendChild(div);
+}
+
+function renderHotList(){
+  const box=document.getElementById("hotList");
+  const hot=sortedPredictions().filter(isOpenPrediction).slice(0,3);
+
+  if(!hot.length){
+    box.innerHTML=`<div class="empty">현재 열린 예측이 없습니다.</div>`;
+    return;
+  }
+
+  box.innerHTML="";
+  hot.forEach((p,idx)=>renderBoardItem(box,p,idx+1,`${p.totalStake||0}P`));
+}
+
+function renderNearList(){
+  const board=document.getElementById("nearBoard");
+  const box=document.getElementById("nearList");
+
+  if(!userLocation||!predictions.length){
+    board.style.display="none";
+    return;
+  }
+
+  const near=predictions
+    .filter(isOpenPrediction)
+    .map(p=>({...p,distance:distanceKm(userLocation.lat,userLocation.lon,p.lat,p.lon)}))
+    .filter(p=>p.distance<=8)
+    .sort((a,b)=>a.distance-b.distance)
+    .slice(0,3);
+
+  if(!near.length){
+    board.style.display="none";
+    return;
+  }
+
+  board.style.display="block";
+  box.innerHTML="";
+  near.forEach((p,idx)=>renderBoardItem(box,p,idx+1,`${p.distance.toFixed(1)}km`));
+}
+
+function renderHotPick(){
+  const box=document.getElementById("hotPickBox");
+  if(!box) return;
+
+  const hot=sortedPredictions().filter(isOpenPrediction)[0];
+
+  if(!hot){
+    box.style.display="none";
+    return;
+  }
+
+  const labels=pickLabels(hot.category);
+
+  box.style.display="block";
+  document.getElementById("hotPickTitle").textContent=hot.title;
+  document.getElementById("hotPickTimer").textContent=remaining(hot.close_time);
+  document.getElementById("hotPickRatio").textContent=`${labels.yes} ${hot.rainPercent}% / ${labels.no} ${hot.clearPercent}%`;
+  document.getElementById("hotPickStake").textContent=`${hot.totalStake||0}P 참여`;
+}
+
+function renderRanking(){
+  const box=document.getElementById("rankList");
+  if(!box) return;
+
+  if(!leaderboard.length){
+    box.innerHTML=`<div class="empty">아직 랭킹 데이터가 없습니다.</div>`;
+    return;
+  }
+
+  box.innerHTML="";
+  leaderboard.slice(0,3).forEach((u,idx)=>{
+    const div=document.createElement("div");
+    div.className="boardItem";
+
+    const left=document.createElement("div");
+    left.innerHTML=`<div class="boardTitle">${idx+1}. ${u.nickname||"Player"}</div><div class="boardSub">적중 ${u.wins||0} · 참여 ${u.totalPicks||u.total||0}</div>`;
+
+    const right=document.createElement("div");
+    right.className="boardRight";
+    right.textContent=`${u.hitRate||0}%`;
+
+    div.append(left,right);
+    box.appendChild(div);
+  });
+}
+
+function renderHistory(){
+  const box=document.getElementById("historyList");
+
+  if(!scoreHistory.length){
+    box.innerHTML=`<div class="historyItem"><span>아직 참여 기록이 없습니다.</span></div>`;
+    return;
+  }
+
+  box.innerHTML="";
+
+  scoreHistory.forEach(item=>{
+    const settled=item.status==="settled"||item.result;
+    let resultText="대기",cls="resultPending";
+
+    if(settled&&item.is_correct===true){resultText="적중";cls="resultWin";}
+    else if(settled&&item.is_correct===false){resultText="실패";cls="resultLose";}
+
+    const div=document.createElement("div");
+    div.className="historyItem";
+
+    const title=document.createElement("strong");
+    title.textContent=item.title || "예측";
+
+    const meta=document.createElement("span");
+    meta.innerHTML=`선택 ${item.choice==="rain"?"온다":"안 온다"} · ${item.stake}P · <b class="${cls}">${resultText}</b>`;
+
+    div.append(title,meta);
+    box.appendChild(div);
+  });
+}
+
+function render(){
+  const topList=document.getElementById("topList");
+  const otherList=document.getElementById("otherList");
+  const closedList=document.getElementById("closedList");
+  const closedHead=document.getElementById("closedSectionHead");
+
+  document.querySelectorAll("[data-comment-input]").forEach(input=>{
+    drafts[input.dataset.pid]=input.value;
+  });
+
+  const now=Date.now();
+  const oneDayAgo=now-24*60*60*1000;
+  const sorted=sortedPredictions();
+
+  const openMarkets=sorted.filter(p=>{
+    const closeTime=new Date(p.close_time).getTime();
+    return p.status==="open" && closeTime>now;
+  });
+
+  const closedMarkets=sorted.filter(p=>{
+    const closeTime=new Date(p.close_time).getTime();
+    const targetTime=new Date(p.target_time || p.close_time).getTime();
+    const isClosed=p.status!=="open" || closeTime<=now;
+    const isRecent=targetTime>=oneDayAgo;
+    return isClosed && isRecent;
+  });
+
+  const topMarkets=openMarkets.slice(0,5);
+  const otherMarkets=openMarkets.slice(5);
+
+  topList.innerHTML="";
+  otherList.innerHTML="";
+  closedList.innerHTML="";
+
+  if(!topMarkets.length){
+    topList.innerHTML=`<div class="empty">지금 열린 예측이 없습니다.</div>`;
+  }else{
+    topMarkets.forEach(p=>topList.appendChild(createMarketCard(p,false)));
+  }
+
+  if(!otherMarkets.length){
+    otherList.innerHTML=`<div class="empty">그 외 열린 예측이 없습니다.</div>`;
+  }else{
+    otherMarkets.forEach(p=>otherList.appendChild(createMarketCard(p,true)));
+  }
+
+  if(!closedMarkets.length){
+    closedHead.style.display="none";
+  }else{
+    closedHead.style.display="flex";
+    closedMarkets.slice(0,8).forEach(p=>closedList.appendChild(createClosedCard(p)));
+  }
+}
+
+function createMarketCard(p,isSmall){
+  const closed=!isOpenPrediction(p);
+  const isOpen=!!openComments[p.id];
+  const comments=p.comments||[];
+  const previewComments=isOpen?comments:comments.slice(0,1);
+  const labels=pickLabels(p.category);
+
+  const card=document.createElement("section");
+  card.className=isSmall?"card small":"card";
+
+  const top=document.createElement("div");
+  top.className="marketTop";
+
+  const badge=document.createElement("div");
+  badge.className="badge";
+  badge.textContent=p.region || "지역";
+
+  const timer=document.createElement("div");
+  timer.className="timer";
+  timer.textContent=remaining(p.close_time);
+
+  if(new Date(p.close_time).getTime()-Date.now()<=30*60*1000){
+    timer.classList.add("urgent");
+  }
+
+  top.append(badge,timer);
+
+  const title=document.createElement("div");
+  title.className="card-title";
+  title.textContent=p.title || "예측";
+
+  card.append(top,title);
+
+  if(isSmall){
+    const row=document.createElement("div");
+    row.className="smallRow";
+    row.innerHTML=`<div class="smallPercent">${labels.yes} ${p.rainPercent}% · ${labels.no} ${p.clearPercent}%</div>`;
+
+    const btn=document.createElement("button");
+    btn.className="smallBtn";
+    btn.textContent="열기";
+    btn.onclick=()=>{openComments[p.id]=true;card.replaceWith(createMarketCard(p,false));};
+
+    row.appendChild(btn);
+    card.appendChild(row);
+    return card;
+  }
+
+  const status=marketStatus(p);
+  const statusEl=document.createElement("div");
+  statusEl.className=`marketStatus ${status.cls}`;
+  statusEl.textContent=status.text;
+
+  const meta=document.createElement("div");
+  meta.className="marketMeta";
+
+  const settle=document.createElement("span");
+  settle.textContent=`결과 발표 ${fmtTime(p.target_time)} · ${p.rain_threshold_mm||0}mm+`;
+
+  const official=document.createElement("span");
+  official.className="official";
+  official.textContent=`예보 ${p.official_forecast||"UNKNOWN"}`;
+
+  meta.append(settle,official);
+
+  const odds=document.createElement("div");
+  odds.className="odds";
+
+  const rain=document.createElement("div");
+  rain.className="odd rain";
+  rain.innerHTML=`<label>${labels.yes}</label><strong>${p.rainPercent}%</strong><small>${p.rainStake||0}P</small>`;
+
+  const clear=document.createElement("div");
+  clear.className="odd clear";
+  clear.innerHTML=`<label>${labels.no}</label><strong>${p.clearPercent}%</strong><small>${p.clearStake||0}P</small>`;
+
+  odds.append(rain,clear);
+
+  const bar=document.createElement("div");
+  bar.className="bar";
+  bar.innerHTML=`<div class="fill" style="width:${Math.max(0,Math.min(100,p.rainPercent||0))}%"></div>`;
+
+  const reason=document.createElement("div");
+  reason.className="reasonBox";
+  reason.innerHTML=`
+    <div class="reasonTitle">LIVE WEATHER SIGNAL</div>
+    <div class="reasonText">${buildReason(p)}</div>
+    <div class="reasonSource">KMA · ECMWF · OPEN METEO 기반</div>
+  `;
+
+  card.append(statusEl,meta,odds,bar,reason);
+
+  if(p.myVote){
+    const my=document.createElement("div");
+    my.className="myPick";
+    my.textContent=`내 선택 · ${choiceText(p.category,p.myVote.choice)} · ${p.myVote.stake}P`;
+    card.appendChild(my);
+  }else if(!closed){
+    const entry=document.createElement("div");
+    entry.className="entry";
+
+    const stakes=document.createElement("div");
+    stakes.className="stakes";
+
+    [50,100,300,500].forEach(s=>{
+      const b=document.createElement("button");
+      b.textContent=`${s}P`;
+      if(s===selectedStake)b.classList.add("active");
+      if(Number(profile?.points||0)<s)b.disabled=true;
+      b.onclick=()=>{selectedStake=s;render();};
+      stakes.appendChild(b);
+    });
+
+    const pickBtns=document.createElement("div");
+    pickBtns.className="pickBtns";
+
+    const rainBtn=document.createElement("button");
+    rainBtn.className="rain";
+    rainBtn.textContent=labels.yes;
+    rainBtn.disabled=Number(profile?.points||0)<selectedStake;
+    rainBtn.onclick=()=>vote(p.id,"rain");
+
+    const clearBtn=document.createElement("button");
+    clearBtn.className="clear";
+    clearBtn.textContent=labels.no;
+    clearBtn.disabled=Number(profile?.points||0)<selectedStake;
+    clearBtn.onclick=()=>vote(p.id,"clear");
+
+    pickBtns.append(rainBtn,clearBtn);
+    entry.append(stakes,pickBtns);
+    card.appendChild(entry);
+  }
+
+  const mood=document.createElement("div");
+  mood.className="mood";
+
+  const moodTitle=document.createElement("div");
+  moodTitle.className="moodTitle";
+  moodTitle.innerHTML=`<span>실시간 반응</span><span>${p.totalStake||0}P 참여</span>`;
+
+  const reactions=document.createElement("div");
+  reactions.className="reactions";
+
+  [["angry","예보 틀림"],["laugh","웃김"],["agree","인정"]].forEach(([type,label])=>{
+    const b=document.createElement("button");
+    b.textContent=`${label} ${p.reactionCount?.[type]||0}`;
+    b.onclick=()=>react(p.id,type);
+    reactions.appendChild(b);
+  });
+
+  mood.append(moodTitle,reactions);
+
+  previewComments.forEach(c=>{
+    const div=document.createElement("div");
+    div.className=isOpen?"comment":"commentPreview";
+
+    const nick=document.createElement("b");
+    nick.textContent=c.nickname || "익명";
+
+    const body=document.createElement("p");
+    body.textContent=c.body || "";
+
+    div.append(nick,body);
+    mood.appendChild(div);
+  });
+
+  const toggleBtn=document.createElement("button");
+  toggleBtn.className="commentToggle";
+  toggleBtn.textContent=isOpen?"반응 접기":`반응 ${comments.length}개 보기`;
+  toggleBtn.onclick=()=>{openComments[p.id]=!openComments[p.id];render();};
+  mood.appendChild(toggleBtn);
+
+  if(isOpen){
+    const form=document.createElement("div");
+    form.className="commentForm";
+
+    const input=document.createElement("input");
+    input.placeholder="지금 하늘, 체감 근거 남기기";
+    input.maxLength=140;
+    input.dataset.commentInput="1";
+    input.dataset.pid=p.id;
+    input.value=drafts[p.id]||"";
+    input.onkeydown=e=>{if(e.key==="Enter")submitComment(p.id,input);};
+
+    const submit=document.createElement("button");
+    submit.textContent="POST";
+    submit.onclick=()=>submitComment(p.id,input);
+
+    form.append(input,submit);
+    mood.appendChild(form);
+  }
+
+  card.appendChild(mood);
+  return card;
+}
+
+function createClosedCard(p){
+  const labels=pickLabels(p.category);
+  const isSettled=p.status==="settled" || p.result;
+  const badgeText=isSettled ? "정산 완료" : "결과 대기";
+
+  const card=document.createElement("section");
+  card.className="card small closedCard";
+
+  const top=document.createElement("div");
+  top.className="marketTop";
+
+  const badge=document.createElement("div");
+  badge.className="badge";
+  badge.textContent=p.region || "지역";
+
+  const timer=document.createElement("div");
+  timer.className="timer";
+  timer.textContent="마감";
+
+  top.append(badge,timer);
+
+  const title=document.createElement("div");
+  title.className="card-title";
+  title.textContent=p.title || "예측";
+
+  const status=document.createElement("div");
+  status.className=`closedBadge ${isSettled ? "settled" : "pending"}`;
+  status.textContent=badgeText;
+
+  const row=document.createElement("div");
+  row.className="smallRow";
+  row.innerHTML=`<div class="smallPercent">${labels.yes} ${p.rainPercent}% · ${labels.no} ${p.clearPercent}%</div>`;
+
+  card.append(top,title,status,row);
+
+  if(p.myVote){
+    const my=document.createElement("div");
+    my.className="myPick";
+    my.textContent=`내 선택 · ${choiceText(p.category,p.myVote.choice)} · ${p.myVote.stake}P`;
+    card.appendChild(my);
+  }
+
+  return card;
+}
+
+function openProfile(){
+  if(!profile)return;
+  updateStatsUI();
+  document.getElementById("profileModal").classList.add("show");
+}
+
+function closeProfile(){
+  document.getElementById("profileModal").classList.remove("show");
+}
+
+async function createProfile(){
+  const input=document.getElementById("nickInput");
+  const nickname=input.value.trim();
+
+  if(nickname.length<2){
+    toast("닉네임은 2자 이상 입력해주세요.");
+    return;
+  }
+
+  const json=await post("create_profile",{nickname});
+
+  if(!json.ok){
+    toast(json.message || "가입 실패");
+    return;
+  }
+
+  toast(json.message || "가입 완료");
+  await load();
+}
+
+async function checkin(){
+  if(!profile){
+    toast("먼저 닉네임을 만들어주세요.");
+    return;
+  }
+
+  const btn=document.getElementById("checkinBtn");
+  btn.disabled=true;
+
+  try{
+    const json=await post("checkin");
+    toast(json.message || "출석 포인트 확인");
+    await load();
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+async function vote(predictionId,choice){
+  const json=await post("vote",{predictionId,choice,stake:selectedStake});
+
+  if(!json.ok){
+    toast(json.message||"참여 실패");
+    return;
+  }
+
+  toast(`${selectedStake}P · 선택 완료`);
+  await load();
+}
+
+async function submitComment(predictionId,input){
+  const text=input.value.trim();
+
+  if(text.length<2){
+    toast("조금 더 입력해주세요.");
+    return;
+  }
+
+  const json=await post("comment",{predictionId,comment:text});
+  toast(json.message||"반응 등록 완료");
+  input.value="";
+  delete drafts[predictionId];
+  await load();
+}
+
+async function react(predictionId,type){
+  const json=await post("react",{predictionId,type});
+  toast(json.message||"반응 완료");
+  await load();
+}
+
+function scheduleLiveBuzz(){
+  clearTimeout(liveBuzzTimer);
+
+  const openTargets=predictions.filter(isOpenPrediction);
+  if(!openTargets.length)return;
+
+  const delay=14000+Math.floor(Math.random()*26000);
+
+  liveBuzzTimer=setTimeout(()=>{
+    showLiveBuzz();
+    scheduleLiveBuzz();
+  },delay);
+}
+
+function showLiveBuzz(){
+  const targets=[...predictions]
+    .filter(isOpenPrediction)
+    .sort((a,b)=>(b.totalStake||0)-(a.totalStake||0))
+    .slice(0,8);
+
+  if(!targets.length)return;
+
+  const p=targets[Math.floor(Math.random()*targets.length)];
+  const labels=pickLabels(p.category);
+  const side=Math.random()>0.45?labels.yes:labels.no;
+  const amount=[300,500,800,1200,2000,3500,5000][Math.floor(Math.random()*7)];
+
+  const messages=[
+    `${p.region} ${side}에 ${amount.toLocaleString()}P 유입`,
+    `${p.region} 예측 참여 급증 중`,
+    `${p.region} 마감 직전 몰리는 중`,
+    `${p.region} 흐름이 크게 흔들리는 중`,
+    `${p.region} 현재 가장 뜨거운 예측 중 하나`
+  ];
+
+  const msg=messages[Math.floor(Math.random()*messages.length)];
+
+  if(msg===lastBuzzKey)return;
+
+  lastBuzzKey=msg;
+  liveToast(msg);
+}
+
+function liveToast(message){
+  const el=document.createElement("div");
+  el.className="liveToast";
+  el.textContent=message;
+  document.body.appendChild(el);
+
+  requestAnimationFrame(()=>el.classList.add("show"));
+
+  setTimeout(()=>{
+    el.classList.remove("show");
+    setTimeout(()=>el.remove(),250);
+  },2400);
+}
+
+async function copyInvite(){
+  const code=profile?.referral_code || "";
+
+  if(!code){
+    toast("초대코드가 아직 없습니다.");
+    return;
+  }
+
+  const text=`WETTY BETTY 초대코드: ${code}`;
+
+  try{
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(text);
+    }else{
+      const textarea=document.createElement("textarea");
+      textarea.value=text;
+      textarea.style.position="fixed";
+      textarea.style.opacity="0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      textarea.remove();
+    }
+
+    toast("초대코드 복사 완료");
+  }catch(e){
+    toast("복사에 실패했습니다.");
+  }
+}
+
+document.addEventListener("visibilitychange",()=>{
+  if(!document.hidden){
+    load();
+    loadCurrentWeather();
+  }
+});
+
+loadCurrentWeather();
+load();
+
+setInterval(()=>{
+  if(!document.hidden) load();
+},POLL_MS);
+
+setInterval(()=>{
+  if(!document.hidden) loadCurrentWeather();
+},10*60*1000);
+</script>
 </body>
 </html>
