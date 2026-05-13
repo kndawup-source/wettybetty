@@ -864,12 +864,19 @@ function addMinutes(date,min){
 
 function getNextBettingWindow(now=new Date()){
   const base=new Date(now);
+
   base.setMinutes(0,0,0);
 
-  let start=addMinutes(base,60);
+  const currentHour=base.getHours();
+  const nextEvenHour=currentHour % 2 === 0
+    ? currentHour + 2
+    : currentHour + 1;
 
-  if(now.getMinutes()>20){
-    start=addMinutes(base,120);
+  const start=new Date(base);
+  start.setHours(nextEvenHour,0,0,0);
+
+  if(start<=now){
+    start.setHours(start.getHours()+2);
   }
 
   const end=addMinutes(start,120);
