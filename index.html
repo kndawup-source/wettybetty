@@ -49,6 +49,11 @@ button{
   cursor:pointer;
 }
 
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
 .app{
   width:100%;
   max-width:480px;
@@ -366,6 +371,35 @@ button{
   font-size:11px;
 }
 
+.time-box{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
+  margin-top:12px;
+}
+
+.time-cell{
+  padding:9px 7px;
+  border-radius:13px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line);
+}
+
+.time-cell span{
+  display:block;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:900;
+}
+
+.time-cell strong{
+  display:block;
+  margin-top:4px;
+  color:var(--soft);
+  font-size:11px;
+  font-weight:900;
+}
+
 .market-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -667,7 +701,7 @@ button{
 
   <section class="section-title">
     <h2>TOP PICKS</h2>
-    <span>실시간 예측</span>
+    <span>시간대별 자동 생성</span>
   </section>
 
   <div id="marketList"></div>
@@ -747,12 +781,26 @@ const REGION_POOL=[
   {id:"yeouido",name:"서울 여의도",lat:37.5219,lon:126.9245,weight:84,type:"business"},
   {id:"jamsil",name:"서울 잠실",lat:37.5133,lon:127.1002,weight:82,type:"city"},
   {id:"incheon_airport",name:"인천공항",lat:37.4602,lon:126.4407,weight:90,type:"airport"},
+  {id:"gimpo_airport",name:"김포공항",lat:37.5583,lon:126.7906,weight:78,type:"airport"},
+  {id:"suwon",name:"수원",lat:37.2636,lon:127.0286,weight:72,type:"city"},
+  {id:"bundang",name:"분당",lat:37.3827,lon:127.1189,weight:74,type:"city"},
+  {id:"ilsan",name:"일산",lat:37.6584,lon:126.7712,weight:70,type:"city"},
+  {id:"songdo",name:"인천 송도",lat:37.3826,lon:126.6430,weight:75,type:"city"},
   {id:"busan_haeundae",name:"부산 해운대",lat:35.1587,lon:129.1604,weight:88,type:"beach"},
+  {id:"busan_seomyeon",name:"부산 서면",lat:35.1578,lon:129.0590,weight:80,type:"city"},
   {id:"jeju",name:"제주",lat:33.4996,lon:126.5312,weight:92,type:"travel"},
+  {id:"seogwipo",name:"서귀포",lat:33.2539,lon:126.5596,weight:80,type:"travel"},
   {id:"gangneung",name:"강릉",lat:37.7519,lon:128.8761,weight:80,type:"travel"},
   {id:"sokcho",name:"속초",lat:38.2070,lon:128.5918,weight:76,type:"travel"},
+  {id:"yangyang",name:"양양",lat:38.0754,lon:128.6190,weight:74,type:"beach"},
   {id:"daegu",name:"대구 동성로",lat:35.8693,lon:128.5940,weight:78,type:"city"},
-  {id:"daejeon",name:"대전 둔산",lat:36.3510,lon:127.3788,weight:70,type:"city"}
+  {id:"daejeon",name:"대전 둔산",lat:36.3510,lon:127.3788,weight:70,type:"city"},
+  {id:"gwangju",name:"광주 충장로",lat:35.1480,lon:126.9144,weight:70,type:"city"},
+  {id:"jeonju",name:"전주 한옥마을",lat:35.8140,lon:127.1530,weight:72,type:"travel"},
+  {id:"gyeongju",name:"경주",lat:35.8562,lon:129.2247,weight:74,type:"travel"},
+  {id:"pohang",name:"포항",lat:36.0190,lon:129.3435,weight:70,type:"beach"},
+  {id:"yeosu",name:"여수",lat:34.7604,lon:127.6622,weight:72,type:"travel"},
+  {id:"mokpo",name:"목포",lat:34.8118,lon:126.3922,weight:68,type:"beach"}
 ];
 
 let profile={
@@ -765,8 +813,8 @@ let profile={
 
 let predictions=[];
 let closedPredictions=[
-  {id:"closed_1",region:"서울 성수",title:"오후 소나기 왔을까?",yes:61,no:39,yesLabel:"왔다",noLabel:"안 왔다",total:18800,status:"정산 완료"},
-  {id:"closed_2",region:"제주",title:"오전 강풍 있었을까?",yes:72,no:28,yesLabel:"있었다",noLabel:"없었다",total:24300,status:"결과 대기"}
+  {id:"closed_1",regionId:"seongsu",region:"서울 성수",title:"서울 성수, 12:00~14:00 소나기 왔을까?",yes:61,no:39,yesLabel:"왔다",noLabel:"안 왔다",total:18800,status:"정산 완료",closeLabel:"11:30",targetLabel:"12:00~14:00",resultLabel:"14:10"},
+  {id:"closed_2",regionId:"jeju",region:"제주",title:"제주, 09:00~11:00 강풍 있었을까?",yes:72,no:28,yesLabel:"있었다",noLabel:"없었다",total:24300,status:"결과 대기",closeLabel:"08:30",targetLabel:"09:00~11:00",resultLabel:"11:10"}
 ];
 
 let toastTimer=null;
@@ -780,11 +828,8 @@ function toast(msg){
   const el=document.getElementById("toast");
   el.textContent=msg;
   el.classList.add("show");
-
   clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>{
-    el.classList.remove("show");
-  },1800);
+  toastTimer=setTimeout(()=>el.classList.remove("show"),1800);
 }
 
 function syncProfile(){
@@ -794,6 +839,51 @@ function syncProfile(){
   document.getElementById("profilePoint").textContent=`${profile.points.toLocaleString()}P`;
   document.getElementById("profileRate").textContent=`${profile.hitRate}%`;
   document.getElementById("profileStreak").textContent=profile.streak;
+}
+
+function pad2(n){
+  return String(n).padStart(2,"0");
+}
+
+function timeLabel(date){
+  return `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
+}
+
+function addMinutes(date,min){
+  return new Date(date.getTime()+min*60000);
+}
+
+function getNextBettingWindow(now=new Date()){
+  const base=new Date(now);
+  base.setMinutes(0,0,0);
+
+  let start=addMinutes(base,60);
+
+  if(now.getMinutes()>20){
+    start=addMinutes(base,120);
+  }
+
+  const end=addMinutes(start,120);
+  const close=addMinutes(start,-30);
+  const result=addMinutes(end,10);
+
+  return {
+    close,
+    start,
+    end,
+    result,
+    closeLabel:timeLabel(close),
+    targetLabel:`${timeLabel(start)}~${timeLabel(end)}`,
+    resultLabel:timeLabel(result)
+  };
+}
+
+function hasOpenPredictionForRegion(regionId){
+  const now=Date.now();
+
+  return predictions.some(p=>{
+    return p.regionId===regionId && p.closeTimeMs>now;
+  });
 }
 
 function localDateKey(date=new Date()){
@@ -936,28 +1026,28 @@ function getWeatherScore(w,region,mode){
   return score;
 }
 
-function makePrediction(region,w,score,mode){
-  let title=`${region.name}, 비 올까?`;
+function makePrediction(region,w,score,mode,window){
+  let title=`${region.name}, ${window.targetLabel} 비 올까?`;
   let yesLabel="온다";
   let noLabel="안 온다";
   let base=w.rainProb;
 
   if(w.wind>=8){
-    title=`${region.name}, 바람 강할까?`;
+    title=`${region.name}, ${window.targetLabel} 바람 강할까?`;
     yesLabel="세다";
     noLabel="약하다";
     base=w.wind*8;
   }
 
   if(w.temp>=30){
-    title=`${region.name}, 오늘 덥게 느껴질까?`;
+    title=`${region.name}, ${window.targetLabel} 덥게 느껴질까?`;
     yesLabel="덥다";
     noLabel="괜찮다";
     base=w.feelsLike*2.4;
   }
 
   if(w.temp<=0){
-    title=`${region.name}, 오늘 춥게 느껴질까?`;
+    title=`${region.name}, ${window.targetLabel} 춥게 느껴질까?`;
     yesLabel="춥다";
     noLabel="괜찮다";
     base=70-w.feelsLike*2;
@@ -967,7 +1057,8 @@ function makePrediction(region,w,score,mode){
   const no=100-yes;
 
   return {
-    id:region.id,
+    id:`${region.id}_${window.start.getTime()}`,
+    regionId:region.id,
     region:region.name,
     title,
     yes,
@@ -977,32 +1068,51 @@ function makePrediction(region,w,score,mode){
     yesStake:yes*180,
     noStake:no*120,
     total:score*250,
-    issue:modeLabel(mode)
+    issue:modeLabel(mode),
+    closeTimeMs:window.close.getTime(),
+    startTimeMs:window.start.getTime(),
+    endTimeMs:window.end.getTime(),
+    resultTimeMs:window.result.getTime(),
+    closeLabel:window.closeLabel,
+    targetLabel:window.targetLabel,
+    resultLabel:window.resultLabel
   };
 }
 
 async function buildPredictions(){
   const mode=await getDayMode();
+  const window=getNextBettingWindow();
   const list=[];
 
+  predictions=predictions.filter(p=>p.closeTimeMs>Date.now());
+
   for(const region of REGION_POOL){
+    if(hasOpenPredictionForRegion(region.id)) continue;
+
     try{
       const w=await fetchWeather(region.lat,region.lon);
       if(!hasWeatherIssue(w)) continue;
 
       const score=getWeatherScore(w,region,mode);
-      list.push(makePrediction(region,w,score,mode));
+      list.push(makePrediction(region,w,score,mode,window));
     }catch(e){}
   }
 
-  predictions=list.sort((a,b)=>b.total-a.total).slice(0,7);
+  predictions=[
+    ...predictions,
+    ...list.sort((a,b)=>b.total-a.total)
+  ]
+    .sort((a,b)=>b.total-a.total)
+    .slice(0,7);
 
   if(!predictions.length){
+    const window=getNextBettingWindow();
     predictions=[
       {
-        id:"fallback",
+        id:`fallback_${window.start.getTime()}`,
+        regionId:"gangnam",
         region:"서울 강남",
-        title:"오늘 밤 비 올까?",
+        title:`서울 강남, ${window.targetLabel} 비 올까?`,
         yes:48,
         no:52,
         yesLabel:"온다",
@@ -1010,7 +1120,14 @@ async function buildPredictions(){
         yesStake:8400,
         noStake:9200,
         total:17600,
-        issue:"기본 예측"
+        issue:"기본 예측",
+        closeTimeMs:window.close.getTime(),
+        startTimeMs:window.start.getTime(),
+        endTimeMs:window.end.getTime(),
+        resultTimeMs:window.result.getTime(),
+        closeLabel:window.closeLabel,
+        targetLabel:window.targetLabel,
+        resultLabel:window.resultLabel
       }
     ];
   }
@@ -1030,13 +1147,32 @@ function renderHotList(){
     div.innerHTML=`
       <div>
         <div class="bi-title">${index+1}. ${item.region}</div>
-        <div class="bi-sub">${item.title}</div>
+        <div class="bi-sub">${item.targetLabel} · 마감 ${item.closeLabel}</div>
       </div>
       <div class="bi-right">${item.total.toLocaleString()}P</div>
     `;
 
     box.appendChild(div);
   });
+}
+
+function renderTimeBox(item){
+  return `
+    <div class="time-box">
+      <div class="time-cell">
+        <span>마감</span>
+        <strong>${item.closeLabel}</strong>
+      </div>
+      <div class="time-cell">
+        <span>예측시간</span>
+        <strong>${item.targetLabel}</strong>
+      </div>
+      <div class="time-cell">
+        <span>결과</span>
+        <strong>${item.resultLabel}</strong>
+      </div>
+    </div>
+  `;
 }
 
 function renderMarkets(){
@@ -1056,6 +1192,8 @@ function renderMarkets(){
         <span>${item.issue}</span>
         <span>${item.total.toLocaleString()}P</span>
       </div>
+
+      ${renderTimeBox(item)}
 
       <div class="market-grid">
         <div class="market-cell">
@@ -1094,6 +1232,8 @@ function renderClosed(){
       <div class="market-region">${item.region}</div>
       <div class="market-title">${item.title}</div>
       <div class="closed-badge ${done?"done":""}">${item.status}</div>
+
+      ${renderTimeBox(item)}
 
       <div class="market-meta">
         <span>${item.yesLabel} ${item.yes}% · ${item.noLabel} ${item.no}%</span>
@@ -1295,6 +1435,10 @@ buildPredictions();
 
 setInterval(()=>{
   loadCurrentWeather();
+},10*60*1000);
+
+setInterval(()=>{
+  buildPredictions();
 },10*60*1000);
 </script>
 
