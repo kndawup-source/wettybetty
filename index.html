@@ -12,24 +12,28 @@
 :root{--bg:#050d16;--panel:#0b1620;--line:rgba(255,255,255,.08);--text:#edf4fa;--muted:#7f93a2;--soft:#bfd0da;--accent:#dff56a;--blue:#82c7ff;--red:#ff6f6f}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif}
-body{
-  padding-bottom:calc(150px + env(safe-area-inset-bottom));
-}
+body{padding-bottom:40px}
 button,input{font-family:inherit}
 button{border:0;cursor:pointer}
 button:disabled{opacity:.45;cursor:not-allowed}
 .hidden{display:none!important}
+
 .app,.auth-screen{width:100%;max-width:480px;margin:0 auto;min-height:100dvh}
 .app{
-  padding-bottom:calc(120px + env(safe-area-inset-bottom));
+  padding-bottom:40px;
   background:
     radial-gradient(circle at 50% -10%,rgba(223,245,106,.08),transparent 32%),
     linear-gradient(180deg,#07121c 0%,#050d16 52%,#050d16 100%);
 }
-.auth-screen{padding:38px 20px 24px;background:radial-gradient(circle at 50% -8%,rgba(223,245,106,.12),transparent 34%),linear-gradient(180deg,#07121c,#050d16)}
+.auth-screen{
+  padding:38px 20px 24px;
+  background:
+    radial-gradient(circle at 50% -8%,rgba(223,245,106,.12),transparent 34%),
+    linear-gradient(180deg,#07121c,#050d16);
+}
+
 .auth-logo{font-family:'Syne',sans-serif;font-size:34px;font-weight:900;letter-spacing:-2px;line-height:1}
 .auth-logo em,.logo em{color:var(--accent);font-style:normal}
-
 .auth-card{margin-top:34px;padding:20px;border-radius:28px;background:linear-gradient(145deg,#102131,#09131d);border:1px solid rgba(255,255,255,.08)}
 .auth-title{font-size:24px;font-weight:900;line-height:1.25}
 .auth-desc{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.6}
@@ -44,39 +48,112 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .field input::placeholder{color:rgba(127,147,162,.55)}
 .auth-main-btn{width:100%;height:50px;margin-top:16px;border-radius:17px;background:var(--accent);color:#07100c;font-weight:900;font-size:14px}
 .auth-help{margin-top:14px;color:var(--muted);font-size:11px;line-height:1.5;text-align:center}
-.header{position:sticky;top:0;z-index:50;height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:rgba(5,13,22,.94);backdrop-filter:blur(14px)}
-.logo{font-family:'Syne',sans-serif;font-size:22px;font-weight:900;letter-spacing:-1px}
 
+.header{
+  position:sticky;
+  top:0;
+  z-index:50;
+  height:58px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  background:rgba(5,13,22,.94);
+  backdrop-filter:blur(14px);
+}
+.logo{font-family:'Syne',sans-serif;font-size:22px;font-weight:900;letter-spacing:-1px}
 .header-right{display:flex;align-items:center;gap:8px}
-.icon-btn,.profile-mini{height:38px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--text)}
+.icon-btn,.profile-mini{
+  height:38px;
+  border-radius:14px;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--line);
+  color:var(--text);
+}
 .icon-btn{width:38px;font-size:15px}
 .profile-mini{padding:0 12px;display:flex;align-items:center;gap:7px;color:var(--soft)}
 .pm-name{max-width:74px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:11px;font-weight:900}
-.weather-board{position:relative;margin:12px 16px 14px;padding:20px;border-radius:28px;background:linear-gradient(145deg,#102131,#09131d);border:1px solid rgba(255,255,255,.06);overflow:hidden}
-.refresh-btn{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--muted)}
+
+.weather-board{
+  position:relative;
+  margin:12px 16px 14px;
+  padding:20px;
+  border-radius:24px;
+  background:linear-gradient(145deg,#102131,#09131d);
+  border:1px solid rgba(255,255,255,.06);
+  overflow:hidden;
+  box-shadow:0 20px 50px rgba(0,0,0,.28);
+}
+.refresh-btn{
+  position:absolute;
+  top:14px;
+  right:14px;
+  width:30px;
+  height:30px;
+  border-radius:10px;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--line);
+  color:var(--muted);
+}
 .weather-top{display:flex;justify-content:space-between;gap:12px}
-.weather-kicker{display:inline-flex;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--soft);font-size:10px;font-weight:900}
-.temp{margin-top:10px;font-family:'Syne',sans-serif;font-size:72px;line-height:.88;letter-spacing:-4px;font-weight:900}
+.weather-kicker{display:inline-flex;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--soft);font-size:9px;font-weight:900}
+.temp{margin-top:10px;font-family:'Syne',sans-serif;font-size:64px;line-height:.88;letter-spacing:-4px;font-weight:900}
 .weather-desc{margin-top:10px;max-width:220px;color:var(--muted);font-size:12px;line-height:1.5}
 .weather-icon{width:74px;height:74px;flex:0 0 74px;border-radius:22px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.05);border:1px solid var(--line);font-size:32px}
 .weather-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:16px}
 .weather-cell{padding:10px 8px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
 .weather-cell span{display:block;color:var(--muted);font-size:9px;font-weight:900}
 .weather-cell strong{display:block;margin-top:5px;font-size:13px}
+
 .board{margin:0 16px 14px;padding:14px;border-radius:24px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
 .board-head,.section-title{display:flex;justify-content:space-between;align-items:center}
 .board-head{margin-bottom:8px}
 .board-head h2{font-size:14px;font-weight:900}
-.board-head span{color:var(--accent);font-size:10px;font-weight:900}
+.board-head span{
+  position:relative;
+  padding-left:10px;
+  color:var(--accent);
+  font-size:10px;
+  font-weight:900;
+}
+.board-head span::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:50%;
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:var(--accent);
+  transform:translateY(-50%);
+  animation:livePulse 1.2s infinite;
+}
+@keyframes livePulse{
+  0%{opacity:.3;transform:translateY(-50%) scale(.8)}
+  50%{opacity:1;transform:translateY(-50%) scale(1)}
+  100%{opacity:.3;transform:translateY(-50%) scale(.8)}
+}
 .board-item{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--line)}
 .board-item:first-child{border-top:0}
 .bi-title{font-size:13px;font-weight:900}
 .bi-sub{margin-top:3px;color:var(--muted);font-size:11px}
 .bi-right{color:var(--accent);font-size:13px;font-weight:900;white-space:nowrap}
+
 .section-title{margin:18px 16px 10px}
 .section-title h2{font-size:15px;font-weight:900}
 .section-title span{color:var(--muted);font-size:11px;font-weight:900}
-.market-card{margin:0 16px 12px;padding:16px;border-radius:24px;background:linear-gradient(170deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid var(--line)}
+.market-card{
+  margin:0 16px 12px;
+  padding:16px;
+  border-radius:24px;
+  background:linear-gradient(170deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+  border:1px solid var(--line);
+  animation:cardUp .35s ease;
+}
+@keyframes cardUp{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
 .market-card.closed{opacity:.72}
 .market-region{display:inline-flex;padding:6px 10px;border-radius:999px;background:rgba(130,199,255,.08);border:1px solid rgba(130,199,255,.18);color:var(--blue);font-size:10px;font-weight:900}
 .market-title{margin-top:12px;font-size:20px;line-height:1.3;font-weight:900}
@@ -94,12 +171,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .vote-btn{height:46px;border-radius:15px;font-size:14px;font-weight:900}
 .vote-btn.rain{background:rgba(130,199,255,.12);border:1px solid rgba(130,199,255,.22);color:var(--blue)}
 .vote-btn.clear{background:rgba(223,245,106,.08);border:1px solid rgba(223,245,106,.22);color:var(--accent)}
+.vote-btn:active,.main-btn:active,.sub-btn:active,.icon-btn:active,.profile-mini:active,.auth-main-btn:active{transform:scale(.97)}
 .closed-badge{display:inline-flex;margin-top:10px;padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.055);border:1px solid var(--line);color:var(--muted);font-size:10px;font-weight:900}
 .closed-badge.done{color:var(--accent);background:rgba(223,245,106,.08);border-color:rgba(223,245,106,.18)}
-.bottom-nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:100%;max-width:480px;height:calc(62px + env(safe-area-inset-bottom));display:flex;align-items:flex-start;justify-content:space-around;background:rgba(5,13,22,.96);border-top:1px solid var(--line);backdrop-filter:blur(12px);z-index:9999;padding-bottom:env(safe-area-inset-bottom)}
-.nav-btn{flex:1;height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;color:var(--muted);font-size:9px;font-weight:900;border-radius:14px}
-.nav-btn span{font-size:18px;line-height:1}
-.nav-btn.active{color:var(--accent);background:rgba(223,245,106,.08)}
+
 .overlay{
   position:fixed;
   inset:0;
@@ -107,14 +182,15 @@ button:disabled{opacity:.45;cursor:not-allowed}
   align-items:center;
   justify-content:center;
   background:rgba(0,0,0,.82);
+  backdrop-filter:blur(10px);
   z-index:20000;
-  padding:20px 16px calc(86px + env(safe-area-inset-bottom));
+  padding:20px 16px calc(20px + env(safe-area-inset-bottom));
 }
 .overlay.show{display:flex}
 .sheet{
   width:100%;
   max-width:480px;
-  max-height:72dvh;
+  max-height:78dvh;
   overflow-y:auto;
   padding:16px 24px 28px;
   border-radius:32px;
@@ -135,7 +211,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .stat-box span{display:block;color:var(--muted);font-size:9px;font-weight:900}
 .stat-box strong{display:block;margin-top:4px;font-size:16px}
 .logout-btn{margin-top:12px;margin-bottom:8px;width:100%;background:rgba(255,111,111,.12);border:1px solid rgba(255,111,111,.22);color:var(--red)}
-.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(8px);padding:12px 18px;border-radius:999px;background:var(--text);color:#06100c;font-size:13px;font-weight:900;opacity:0;pointer-events:none;transition:.2s;z-index:10000}
+.toast{position:fixed;left:50%;bottom:calc(32px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(8px);padding:12px 18px;border-radius:999px;background:var(--text);color:#06100c;font-size:13px;font-weight:900;opacity:0;pointer-events:none;transition:.2s;z-index:10000}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
@@ -147,50 +223,55 @@ button:disabled{opacity:.45;cursor:not-allowed}
   <div class="auth-card">
     <div class="auth-title">날씨를 예측하고<br>포인트를 쌓아보세요.</div>
     <div class="auth-desc">전화번호 뒷자리와 PIN으로 간편하게 로그인합니다.</div>
+
     <div class="auth-tabs">
       <button class="auth-tab active" data-auth-tab="login">로그인</button>
       <button class="auth-tab" data-auth-tab="signup">가입</button>
     </div>
+
     <div class="auth-form active" id="loginForm">
       <div class="field"><label>전화번호 뒷자리 4자리</label><input id="loginPhone" inputmode="numeric" maxlength="4" placeholder="예: 1234"></div>
       <div class="field"><label>PIN 4~6자리</label><input id="loginPin" inputmode="numeric" maxlength="6" type="password" placeholder="PIN 입력"></div>
       <button class="auth-main-btn" data-action="login">로그인</button>
     </div>
+
     <div class="auth-form" id="signupForm">
       <div class="field"><label>닉네임</label><input id="signupNick" maxlength="12" placeholder="예: WETTY"></div>
       <div class="field"><label>전화번호 뒷자리 4자리</label><input id="signupPhone" inputmode="numeric" maxlength="4" placeholder="예: 1234"></div>
       <div class="field"><label>PIN 4~6자리</label><input id="signupPin" inputmode="numeric" maxlength="6" type="password" placeholder="PIN 설정"></div>
       <button class="auth-main-btn" data-action="signup">가입하고 시작</button>
     </div>
+
     <div class="auth-help">PIN은 서버에서 해시 처리됩니다. 프론트에는 저장하지 않습니다.</div>
   </div>
 </div>
 
 <div class="app hidden" id="mainApp">
   <header class="header">
-  <div>
-    <div class="logo">WETTY <em>BETTY</em></div>
-  </div>
+    <div>
+      <div class="logo">WETTY <em>BETTY</em></div>
+    </div>
 
-  <div class="header-right">
-    <button class="icon-btn" data-action="notice">🔔</button>
-    <button class="profile-mini" data-action="profile">
-      <span>👤</span>
-      <span class="pm-name" id="nickname">GUEST</span>
-    </button>
-  </div>
-</header>
+    <div class="header-right">
+      <button class="icon-btn" data-action="notice">🔔</button>
+      <button class="profile-mini" data-action="profile">
+        <span>👤</span>
+        <span class="pm-name" id="nickname">GUEST</span>
+      </button>
+    </div>
+  </header>
 
   <section class="weather-board">
     <button class="refresh-btn" data-action="refresh">↻</button>
     <div class="weather-top">
       <div>
-        <div class="weather-kicker" id="currentLocationText">📍 날씨 불러오는 중...</div>
+        <div class="weather-kicker" id="currentLocationText">📍 위치 확인중...</div>
         <div class="temp" id="currentTemp">--°</div>
-        <div class="weather-desc" id="currentDesc">현재 날씨를 확인하고 있습니다.</div>
+        <div class="weather-desc" id="currentDesc">현재 위치의 날씨를 확인하고 있습니다.</div>
       </div>
       <div class="weather-icon" id="weatherIcon">🌤️</div>
     </div>
+
     <div class="weather-grid">
       <div class="weather-cell"><span>체감</span><strong id="feelsLike">--°</strong></div>
       <div class="weather-cell"><span>강수</span><strong id="rainChance">--%</strong></div>
@@ -211,13 +292,6 @@ button:disabled{opacity:.45;cursor:not-allowed}
   <div id="closedList"></div>
 </div>
 
-<nav class="bottom-nav hidden" id="bottomNav">
-  <button class="nav-btn active" data-action="home"><span>🏠</span>HOME</button>
-  <button class="nav-btn" data-action="picks"><span>⚡</span>PICKS</button>
-  <button class="nav-btn" data-action="rank"><span>🏆</span>RANK</button>
-  <button class="nav-btn" data-action="profile"><span>👤</span>MY</button>
-</nav>
-
 <div class="overlay" id="profileModal">
   <div class="sheet">
     <div class="sheet-grip"></div>
@@ -225,15 +299,18 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <div><h2 id="profileName">PROFILE</h2><p id="profileCode">초대코드 --</p></div>
       <button class="close-btn" data-action="close-profile">×</button>
     </div>
+
     <div class="profile-stats">
       <div class="stat-box"><span>포인트</span><strong id="profilePoint">0</strong></div>
       <div class="stat-box"><span>적중률</span><strong id="profileRate">0%</strong></div>
       <div class="stat-box"><span>연승</span><strong id="profileStreak">0</strong></div>
     </div>
+
     <div class="profile-actions">
       <button class="main-btn" data-action="checkin">출석 포인트 받기</button>
       <button class="sub-btn" data-action="copy-invite">친구 초대 🎁</button>
     </div>
+
     <button class="logout-btn" data-action="logout">로그아웃</button>
   </div>
 </div>
@@ -296,20 +373,33 @@ function setAuthMode(mode){
   $("signupForm").classList.toggle("active",mode==="signup");
 }
 function showApp(){
-  $("authScreen").classList.add("hidden");$("mainApp").classList.remove("hidden");$("bottomNav").classList.remove("hidden");
-  document.body.style.paddingBottom="calc(150px + env(safe-area-inset-bottom))";
+  $("authScreen").classList.add("hidden");
+  $("mainApp").classList.remove("hidden");
+  document.body.style.paddingBottom="40px";
 }
 function showAuth(){
-  $("authScreen").classList.remove("hidden");$("mainApp").classList.add("hidden");$("bottomNav").classList.add("hidden");$("profileModal").classList.remove("show");
+  $("authScreen").classList.remove("hidden");
+  $("mainApp").classList.add("hidden");
+  $("profileModal").classList.remove("show");
   document.body.style.paddingBottom="0";
 }
 function syncProfile(){
-  $("nickname").textContent=profile.nickname;$("profileName").textContent=profile.nickname;$("profileCode").textContent=`초대코드 ${profile.referral}`;
-  $("profilePoint").textContent=`${Number(profile.points||0).toLocaleString()}P`;$("profileRate").textContent=`${profile.hitRate}%`;$("profileStreak").textContent=profile.streak;
+  $("nickname").textContent=profile.nickname;
+  $("profileName").textContent=profile.nickname;
+  $("profileCode").textContent=`초대코드 ${profile.referral}`;
+  $("profilePoint").textContent=`${Number(profile.points||0).toLocaleString()}P`;
+  $("profileRate").textContent=`${profile.hitRate}%`;
+  $("profileStreak").textContent=profile.streak;
 }
 function applyUser(user){
   currentUser=user;
-  profile={nickname:user.nickname||"WETTY",points:user.points||0,hitRate:user.vote_count>0?Math.round((user.hit_count/user.vote_count)*100):0,streak:user.streak||0,referral:user.referral_code||"------"};
+  profile={
+    nickname:user.nickname||"WETTY",
+    points:user.points||0,
+    hitRate:user.vote_count>0?Math.round((user.hit_count/user.vote_count)*100):0,
+    streak:user.streak||0,
+    referral:user.referral_code||"------"
+  };
   syncProfile();
 }
 
@@ -356,15 +446,12 @@ async function tryRestoreLogin(){
 
   try{
     const user=JSON.parse(saved);
-
     if(!user || !user.id){
       localStorage.removeItem("wetty_user");
       return false;
     }
-
     applyUser(user);
     return true;
-
   }catch(e){
     localStorage.removeItem("wetty_user");
     return false;
@@ -373,17 +460,8 @@ async function tryRestoreLogin(){
 
 function logout(){
   localStorage.removeItem("wetty_user");
-
   currentUser=null;
-
-  profile={
-    nickname:"GUEST",
-    points:0,
-    hitRate:0,
-    streak:0,
-    referral:"------"
-  };
-
+  profile={nickname:"GUEST",points:0,hitRate:0,streak:0,referral:"------"};
   syncProfile();
   showAuth();
   toast("로그아웃 완료");
@@ -392,23 +470,42 @@ function logout(){
 function getNextBettingWindow(now=new Date()){
   const base=new Date(now);base.setMinutes(0,0,0);
   const nextEvenHour=base.getHours()%2===0?base.getHours()+2:base.getHours()+1;
-  const start=new Date(base);start.setHours(nextEvenHour,0,0,0);if(start<=now) start.setHours(start.getHours()+2);
+  const start=new Date(base);start.setHours(nextEvenHour,0,0,0);
+  if(start<=now) start.setHours(start.getHours()+2);
   const end=addMinutes(start,120),close=addMinutes(start,-30),result=addMinutes(end,10);
   return {close,start,end,result,closeLabel:timeLabel(close),targetLabel:`${timeLabel(start)}~${timeLabel(end)}`,resultLabel:timeLabel(result)};
 }
+
 async function fetchWeather(lat,lon){
   const key=`${Number(lat).toFixed(2)},${Number(lon).toFixed(2)}`;
-  const cached=weatherCache.get(key); if(cached&&Date.now()-cached.ts<10*60*1000) return cached.data;
+  const cached=weatherCache.get(key);
+  if(cached&&Date.now()-cached.ts<10*60*1000) return cached.data;
+
   const url=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&hourly=precipitation_probability,temperature_2m&past_days=1&forecast_days=1&timezone=Asia%2FSeoul`;
-  const res=await fetch(url); if(!res.ok) throw new Error("weather error");
+  const res=await fetch(url);
+  if(!res.ok) throw new Error("weather error");
+
   const json=await res.json(),c=json.current||{},h=json.hourly||{},probs=h.precipitation_probability||[],temps=h.temperature_2m||[];
   const temp=Number(c.temperature_2m||0),yesterdayTemp=Number(temps[0]||temp);
-  const data={temp,feelsLike:Number(c.apparent_temperature||temp),precipitation:Number(c.precipitation||0),code:Number(c.weather_code||0),wind:Number(c.wind_speed_10m||0),rainProb:Number(probs[0]||0),tempDiff:Math.round(temp-yesterdayTemp)};
-  weatherCache.set(key,{data,ts:Date.now()}); return data;
+  const data={
+    temp,
+    feelsLike:Number(c.apparent_temperature||temp),
+    precipitation:Number(c.precipitation||0),
+    code:Number(c.weather_code||0),
+    wind:Number(c.wind_speed_10m||0),
+    rainProb:Number(probs[0]||0),
+    tempDiff:Math.round(temp-yesterdayTemp)
+  };
+  weatherCache.set(key,{data,ts:Date.now()});
+  return data;
 }
 function getWeatherEmoji(code,rainProb,precipitation){
-  if(precipitation>0) return "🌧️"; if(rainProb>=60) return "☔"; if(rainProb>=35) return "🌦️";
-  if([0,1].includes(code)) return "☀️"; if([2,3,45,48].includes(code)) return "☁️"; return "🌤️";
+  if(precipitation>0) return "🌧️";
+  if(rainProb>=60) return "☔";
+  if(rainProb>=35) return "🌦️";
+  if([0,1].includes(code)) return "☀️";
+  if([2,3,45,48].includes(code)) return "☁️";
+  return "🌤️";
 }
 function weatherDesc(rainProb,precipitation){
   if(precipitation>0) return "현재 비가 감지되고 있습니다.";
@@ -417,23 +514,29 @@ function weatherDesc(rainProb,precipitation){
   return "현재는 비교적 안정적인 날씨입니다.";
 }
 function applyWeatherToUI(w,label){
-  $("currentTemp").textContent=`${Math.round(w.temp)}°`;$("feelsLike").textContent=`${Math.round(w.feelsLike)}°`;
-  $("rainChance").textContent=`${w.rainProb}%`;$("windSpeed").textContent=`${w.wind.toFixed(1)}m/s`;
-  $("tempDiff").textContent=`${w.tempDiff>=0?"+":""}${w.tempDiff}°`;$("weatherIcon").textContent=getWeatherEmoji(w.code,w.rainProb,w.precipitation);
-  $("currentDesc").textContent=weatherDesc(w.rainProb,w.precipitation);$("currentLocationText").textContent=label;
+  $("currentTemp").textContent=`${Math.round(w.temp)}°`;
+  $("feelsLike").textContent=`${Math.round(w.feelsLike)}°`;
+  $("rainChance").textContent=`${w.rainProb}%`;
+  $("windSpeed").textContent=`${w.wind.toFixed(1)}m/s`;
+  $("tempDiff").textContent=`${w.tempDiff>=0?"+":""}${w.tempDiff}°`;
+  $("weatherIcon").textContent=getWeatherEmoji(w.code,w.rainProb,w.precipitation);
+  $("currentDesc").textContent=weatherDesc(w.rainProb,w.precipitation);
+  $("currentLocationText").textContent=label;
 }
-async function loadDefaultWeather(){try{applyWeatherToUI(await fetchWeather(37.4979,127.0276),"📍 서울 강남 기준")}catch(e){$("currentLocationText").textContent="📍 연결 확인 필요"}}
+async function loadDefaultWeather(){
+  try{
+    const w=await fetchWeather(37.4979,127.0276);
+    applyWeatherToUI(w,"📍 서울 강남 기준");
+  }catch(e){
+    $("currentLocationText").textContent="📍 연결 확인 필요";
+  }
+}
 async function reverseGeocode(lat,lon){
   try{
     const res=await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=ko`,
-      {
-        headers:{
-          "Accept":"application/json"
-        }
-      }
+      {headers:{"Accept":"application/json"}}
     );
-
     if(!res.ok) return null;
 
     const json=await res.json();
@@ -445,11 +548,11 @@ async function reverseGeocode(lat,lon){
       a.neighbourhood ||
       a.quarter ||
       a.town ||
+      a.village ||
       a.city ||
       a.county ||
       null
     );
-
   }catch(e){
     return null;
   }
@@ -463,110 +566,253 @@ async function applyCurrentPosition(pos){
 
     if(key!==lastLocationKey || !lastLocationLabel){
       lastLocationKey=key;
-
       const name=await reverseGeocode(lat,lon);
-
-      if(name){
-        lastLocationLabel=`📍 ${name}`;
-      }else{
-        lastLocationLabel=`📍 ${lat.toFixed(2)}, ${lon.toFixed(2)}`;
-      }
+      lastLocationLabel=name ? `📍 ${name}` : `📍 ${lat.toFixed(2)}, ${lon.toFixed(2)}`;
     }
 
     applyWeatherToUI(w,lastLocationLabel);
-
   }catch(e){
     await loadDefaultWeather();
   }
 }
-    applyWeatherToUI(w,label);
-  }catch(e){await loadDefaultWeather()}
-}
 async function loadCurrentWeather(){
-  await loadDefaultWeather();
-  if(!navigator.geolocation) return;
-  navigator.geolocation.getCurrentPosition(pos=>applyCurrentPosition(pos),()=>loadDefaultWeather(),{enableHighAccuracy:true,timeout:8000,maximumAge:60000});
+  if(!navigator.geolocation){
+    await loadDefaultWeather();
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async pos=>{await applyCurrentPosition(pos)},
+    async ()=>{await loadDefaultWeather()},
+    {enableHighAccuracy:true,timeout:10000,maximumAge:30000}
+  );
 }
 function watchCurrentLocation(){
   if(!navigator.geolocation||locationWatchId!==null) return;
-  locationWatchId=navigator.geolocation.watchPosition(pos=>applyCurrentPosition(pos),()=>{}, {enableHighAccuracy:true,timeout:10000,maximumAge:60000});
+  locationWatchId=navigator.geolocation.watchPosition(
+    pos=>applyCurrentPosition(pos),
+    ()=>{},
+    {enableHighAccuracy:true,timeout:10000,maximumAge:60000}
+  );
 }
 
 function hasWeatherIssue(w){return w.rainProb>=35||w.precipitation>0||w.wind>=8||Math.abs(w.tempDiff)>=5||w.temp>=30||w.temp<=0}
 function getModeBonus(region){
   const weekend=[0,6].includes(new Date().getDay());let bonus=0;
-  if(weekend){if(region.type==="travel")bonus+=28;if(region.type==="beach")bonus+=25;if(region.type==="airport")bonus+=20;if(region.type==="hotplace")bonus+=20}
-  else{if(region.type==="business")bonus+=24;if(region.type==="city")bonus+=16;if(region.type==="hotplace")bonus+=12}
+  if(weekend){
+    if(region.type==="travel")bonus+=28;
+    if(region.type==="beach")bonus+=25;
+    if(region.type==="airport")bonus+=20;
+    if(region.type==="hotplace")bonus+=20;
+  }else{
+    if(region.type==="business")bonus+=24;
+    if(region.type==="city")bonus+=16;
+    if(region.type==="hotplace")bonus+=12;
+  }
   return bonus;
 }
 function getWeatherScore(w,region){
   let score=region.weight+getModeBonus(region);
-  if(w.rainProb>=70)score+=45;else if(w.rainProb>=35)score+=28;
-  if(w.precipitation>0)score+=40;if(w.wind>=8)score+=24;if(Math.abs(w.tempDiff)>=5)score+=22;if(w.temp>=30)score+=20;if(w.temp<=0)score+=20;
+  if(w.rainProb>=70)score+=45;
+  else if(w.rainProb>=35)score+=28;
+  if(w.precipitation>0)score+=40;
+  if(w.wind>=8)score+=24;
+  if(Math.abs(w.tempDiff)>=5)score+=22;
+  if(w.temp>=30)score+=20;
+  if(w.temp<=0)score+=20;
   return score;
 }
 function makePrediction(region,w,score,window){
   let title=`${region.name}, ${window.targetLabel} 비 올까?`,yesLabel="온다",noLabel="안 온다",base=w.rainProb;
-  if(w.wind>=8){title=`${region.name}, ${window.targetLabel} 바람 강할까?`;yesLabel="세다";noLabel="약하다";base=w.wind*8}
-  if(w.temp>=30){title=`${region.name}, ${window.targetLabel} 덥게 느껴질까?`;yesLabel="덥다";noLabel="괜찮다";base=w.feelsLike*2.4}
+
+  if(w.wind>=8){
+    title=`${region.name}, ${window.targetLabel} 바람 강할까?`;
+    yesLabel="세다";
+    noLabel="약하다";
+    base=w.wind*8;
+  }
+
+  if(w.temp>=30){
+    title=`${region.name}, ${window.targetLabel} 덥게 느껴질까?`;
+    yesLabel="덥다";
+    noLabel="괜찮다";
+    base=w.feelsLike*2.4;
+  }
+
   const yes=Math.max(5,Math.min(95,Math.round(base))),no=100-yes;
-  return {id:`${region.id}_${window.start.getTime()}`,regionId:region.id,region:region.name,title,yes,no,yesLabel,noLabel,yesStake:yes*180,noStake:no*120,total:score*250,issue:"날씨 이슈",closeTimeMs:window.close.getTime(),startTimeMs:window.start.getTime(),endTimeMs:window.end.getTime(),resultTimeMs:window.result.getTime(),closeLabel:window.closeLabel,targetLabel:window.targetLabel,resultLabel:window.resultLabel};
+
+  return {
+    id:`${region.id}_${window.start.getTime()}`,
+    regionId:region.id,
+    region:region.name,
+    title,yes,no,yesLabel,noLabel,
+    yesStake:yes*180,
+    noStake:no*120,
+    total:score*250,
+    issue:"날씨 이슈",
+    closeTimeMs:window.close.getTime(),
+    startTimeMs:window.start.getTime(),
+    endTimeMs:window.end.getTime(),
+    resultTimeMs:window.result.getTime(),
+    closeLabel:window.closeLabel,
+    targetLabel:window.targetLabel,
+    resultLabel:window.resultLabel
+  };
 }
 function renderDemoPredictions(){
   const w=getNextBettingWindow();
-  predictions=[{id:"demo_gangnam",regionId:"gangnam",region:"서울 강남",title:`서울 강남, ${w.targetLabel} 비 올까?`,yes:48,no:52,yesLabel:"온다",noLabel:"안 온다",yesStake:8400,noStake:9200,total:17600,issue:"기본 예측",closeTimeMs:w.close.getTime(),startTimeMs:w.start.getTime(),endTimeMs:w.end.getTime(),resultTimeMs:w.result.getTime(),closeLabel:w.closeLabel,targetLabel:w.targetLabel,resultLabel:w.resultLabel}];
-  renderMarkets();renderHotListLocal();
+  predictions=[{
+    id:"demo_gangnam",
+    regionId:"gangnam",
+    region:"서울 강남",
+    title:`서울 강남, ${w.targetLabel} 비 올까?`,
+    yes:48,no:52,
+    yesLabel:"온다",
+    noLabel:"안 온다",
+    yesStake:8400,
+    noStake:9200,
+    total:17600,
+    issue:"기본 예측",
+    closeTimeMs:w.close.getTime(),
+    startTimeMs:w.start.getTime(),
+    endTimeMs:w.end.getTime(),
+    resultTimeMs:w.result.getTime(),
+    closeLabel:w.closeLabel,
+    targetLabel:w.targetLabel,
+    resultLabel:w.resultLabel
+  }];
+  renderMarkets();
+  renderHotListLocal();
 }
-function renderTimeBox(item){return `<div class="time-box"><div class="time-cell"><span>마감</span><strong>${item.closeLabel}</strong></div><div class="time-cell"><span>예측시간</span><strong>${item.targetLabel}</strong></div><div class="time-cell"><span>결과</span><strong>${item.resultLabel}</strong></div></div>`}
+function renderTimeBox(item){
+  return `<div class="time-box"><div class="time-cell"><span>마감</span><strong>${item.closeLabel}</strong></div><div class="time-cell"><span>예측시간</span><strong>${item.targetLabel}</strong></div><div class="time-cell"><span>결과</span><strong>${item.resultLabel}</strong></div></div>`;
+}
 function renderMarkets(){
   const box=$("marketList");box.innerHTML="";
   predictions.forEach(item=>{
     const closed=isMarketClosed(item);
-    const card=document.createElement("div");card.className="market-card";
-    card.innerHTML=`<div class="market-region">${item.region}</div><div class="market-title">${item.title}</div><div class="market-meta"><span>${closed?"마감됨":item.issue}</span><span>${Number(item.total||0).toLocaleString()}P</span></div>${renderTimeBox(item)}<div class="market-grid"><div class="market-cell"><span>${item.yesLabel}</span><strong>${item.yes}%</strong><small>${Number(item.yesStake||0).toLocaleString()}P</small></div><div class="market-cell"><span>${item.noLabel}</span><strong>${item.no}%</strong><small>${Number(item.noStake||0).toLocaleString()}P</small></div></div><div class="vote-row"><button class="vote-btn rain" data-action="vote" data-id="${item.id}" data-choice="yes" ${closed?"disabled":""}>${closed?"마감":item.yesLabel}</button><button class="vote-btn clear" data-action="vote" data-id="${item.id}" data-choice="no" ${closed?"disabled":""}>${closed?"마감":item.noLabel}</button></div>`;
+    const card=document.createElement("div");
+    card.className="market-card";
+    card.innerHTML=`
+      <div class="market-region">${item.region}</div>
+      <div class="market-title">${item.title}</div>
+      <div class="market-meta"><span>${closed?"마감됨":item.issue}</span><span>${Number(item.total||0).toLocaleString()}P</span></div>
+      ${renderTimeBox(item)}
+      <div class="market-grid">
+        <div class="market-cell"><span>${item.yesLabel}</span><strong>${item.yes}%</strong><small>${Number(item.yesStake||0).toLocaleString()}P</small></div>
+        <div class="market-cell"><span>${item.noLabel}</span><strong>${item.no}%</strong><small>${Number(item.noStake||0).toLocaleString()}P</small></div>
+      </div>
+      <div class="vote-row">
+        <button class="vote-btn rain" data-action="vote" data-id="${item.id}" data-choice="yes" ${closed?"disabled":""}>${closed?"마감":item.yesLabel}</button>
+        <button class="vote-btn clear" data-action="vote" data-id="${item.id}" data-choice="no" ${closed?"disabled":""}>${closed?"마감":item.noLabel}</button>
+      </div>
+    `;
     box.appendChild(card);
   });
 }
 function renderHotListLocal(){
   const box=$("hotList");box.innerHTML="";
   predictions.slice(0,3).forEach((item,i)=>{
-    const div=document.createElement("div");div.className="board-item";
+    const div=document.createElement("div");
+    div.className="board-item";
     div.innerHTML=`<div><div class="bi-title">${i+1}. ${item.region}</div><div class="bi-sub">${item.targetLabel} · 마감 ${item.closeLabel}</div></div><div class="bi-right">${Number(item.total||0).toLocaleString()}P</div>`;
     box.appendChild(div);
   });
 }
 function mapPredictionRow(row){
-  return {id:row.id,regionId:row.region_id,region:row.region_name,title:row.title,yes:row.yes_percent,no:row.no_percent,yesLabel:row.yes_label,noLabel:row.no_label,yesStake:row.yes_stake,noStake:row.no_stake,total:row.total_points,issue:row.issue,closeTimeMs:new Date(row.close_time).getTime(),startTimeMs:new Date(row.start_time).getTime(),endTimeMs:new Date(row.end_time).getTime(),resultTimeMs:new Date(row.result_time).getTime(),closeLabel:timeLabel(new Date(row.close_time)),targetLabel:`${timeLabel(new Date(row.start_time))}~${timeLabel(new Date(row.end_time))}`,resultLabel:timeLabel(new Date(row.result_time)),status:row.status};
+  return {
+    id:row.id,
+    regionId:row.region_id,
+    region:row.region_name,
+    title:row.title,
+    yes:row.yes_percent,
+    no:row.no_percent,
+    yesLabel:row.yes_label,
+    noLabel:row.no_label,
+    yesStake:row.yes_stake,
+    noStake:row.no_stake,
+    total:row.total_points,
+    issue:row.issue,
+    closeTimeMs:new Date(row.close_time).getTime(),
+    startTimeMs:new Date(row.start_time).getTime(),
+    endTimeMs:new Date(row.end_time).getTime(),
+    resultTimeMs:new Date(row.result_time).getTime(),
+    closeLabel:timeLabel(new Date(row.close_time)),
+    targetLabel:`${timeLabel(new Date(row.start_time))}~${timeLabel(new Date(row.end_time))}`,
+    resultLabel:timeLabel(new Date(row.result_time)),
+    status:row.status
+  };
 }
 async function savePredictionsToDB(list){
   if(!supabaseClient||!list.length)return;
-  const rows=list.map(item=>({id:item.id,region_id:item.regionId,region_name:item.region,title:item.title,issue:item.issue,yes_label:item.yesLabel,no_label:item.noLabel,yes_percent:item.yes,no_percent:item.no,yes_stake:item.yesStake,no_stake:item.noStake,total_points:item.total,close_time:new Date(item.closeTimeMs).toISOString(),start_time:new Date(item.startTimeMs).toISOString(),end_time:new Date(item.endTimeMs).toISOString(),result_time:new Date(item.resultTimeMs).toISOString(),status:"open"}));
+
+  const rows=list.map(item=>({
+    id:item.id,
+    region_id:item.regionId,
+    region_name:item.region,
+    title:item.title,
+    issue:item.issue,
+    yes_label:item.yesLabel,
+    no_label:item.noLabel,
+    yes_percent:item.yes,
+    no_percent:item.no,
+    yes_stake:item.yesStake,
+    no_stake:item.noStake,
+    total_points:item.total,
+    close_time:new Date(item.closeTimeMs).toISOString(),
+    start_time:new Date(item.startTimeMs).toISOString(),
+    end_time:new Date(item.endTimeMs).toISOString(),
+    result_time:new Date(item.resultTimeMs).toISOString(),
+    status:"open"
+  }));
+
   await supabaseClient.from("wetty_predictions").upsert(rows,{onConflict:"id"});
 }
 async function buildPredictions(){
   if(!supabaseClient)return;
   const w=getNextBettingWindow(),list=[];
+
   for(const region of REGION_POOL){
     try{
       const predictionId=`${region.id}_${w.start.getTime()}`;
       const {data:exists}=await supabaseClient.from("wetty_predictions").select("id").eq("id",predictionId).maybeSingle();
       if(exists)continue;
+
       const weather=await fetchWeather(region.lat,region.lon);
       if(!hasWeatherIssue(weather))continue;
+
       list.push(makePrediction(region,weather,getWeatherScore(weather,region),w));
     }catch(e){}
   }
+
   await savePredictionsToDB(list.sort((a,b)=>b.total-a.total).slice(0,7));
 }
 async function loadPredictionsFromDB(){
   if(!supabaseClient){renderDemoPredictions();return}
+
   try{
-    const {data,error}=await supabaseClient.from("wetty_predictions").select("*").eq("status","open").gt("close_time",new Date().toISOString()).order("total_points",{ascending:false}).limit(7);
+    const {data,error}=await supabaseClient
+      .from("wetty_predictions")
+      .select("*")
+      .eq("status","open")
+      .gt("close_time",new Date().toISOString())
+      .order("total_points",{ascending:false})
+      .limit(7);
+
     if(error)throw error;
+
     predictions=(data||[]).map(mapPredictionRow);
-    if(!predictions.length){renderDemoPredictions();return}
-    renderMarkets();renderHotListLocal();
-  }catch(e){renderDemoPredictions()}
+
+    if(!predictions.length){
+      renderDemoPredictions();
+      return;
+    }
+
+    renderMarkets();
+    renderHotListLocal();
+  }catch(e){
+    renderDemoPredictions();
+  }
 }
 async function renderClosed(){
   $("closedList").innerHTML=`<div class="market-card closed"><div class="market-region">CLOSED</div><div class="market-title">아직 마감된 예측이 없습니다</div><div class="closed-badge">결과 대기 없음</div></div>`;
@@ -574,42 +820,87 @@ async function renderClosed(){
 async function refreshUser(){
   if(!currentUser)return;
   if(!supabaseClient){syncProfile();return}
+
   const {data}=await supabaseClient.from("wetty_users").select("*").eq("id",currentUser.id).maybeSingle();
-  if(data){applyUser(data);localStorage.setItem("wetty_user",JSON.stringify(data))}
+
+  if(data){
+    applyUser(data);
+    localStorage.setItem("wetty_user",JSON.stringify(data));
+  }
 }
 async function vote(predictionId,choice,btn){
   if(!currentUser)return toast("로그인이 필요합니다");
   if(predictionId==="demo_gangnam"||!supabaseClient)return toast("실제 예측 카드에서 참여 가능합니다");
-  const item=predictions.find(p=>p.id===predictionId);if(!item)return;
+
+  const item=predictions.find(p=>p.id===predictionId);
+  if(!item)return;
   if(isMarketClosed(item))return toast("이미 마감된 예측입니다");
+
   const label=choice==="yes"?item.yesLabel:item.noLabel;
   if(!confirm(`${item.title}\n\n'${label}'에 참여할까요?`))return;
 
   setButtonLoading(btn,true,"참여중...");
+
   try{
     const {error}=await supabaseClient.from("wetty_votes").insert({prediction_id:predictionId,user_id:currentUser.id,choice,points:100});
-    if(error){if(String(error.code)==="23505")return toast("이미 참여한 예측입니다");throw error}
-    await supabaseClient.from("wetty_users").update({points:Number(currentUser.points||0)+10,vote_count:Number(currentUser.vote_count||0)+1,updated_at:new Date().toISOString()}).eq("id",currentUser.id);
+
+    if(error){
+      if(String(error.code)==="23505")return toast("이미 참여한 예측입니다");
+      throw error;
+    }
+
+    await supabaseClient.from("wetty_users").update({
+      points:Number(currentUser.points||0)+10,
+      vote_count:Number(currentUser.vote_count||0)+1,
+      updated_at:new Date().toISOString()
+    }).eq("id",currentUser.id);
+
     item.total=Number(item.total||0)+100;
-    if(choice==="yes")item.yesStake=Number(item.yesStake||0)+100;else item.noStake=Number(item.noStake||0)+100;
+    if(choice==="yes")item.yesStake=Number(item.yesStake||0)+100;
+    else item.noStake=Number(item.noStake||0)+100;
+
     const totalStake=Number(item.yesStake||0)+Number(item.noStake||0);
-    if(totalStake>0){item.yes=Math.round((Number(item.yesStake||0)/totalStake)*100);item.no=100-item.yes}
-    renderMarkets();renderHotListLocal();
+    if(totalStake>0){
+      item.yes=Math.round((Number(item.yesStake||0)/totalStake)*100);
+      item.no=100-item.yes;
+    }
+
+    renderMarkets();
+    renderHotListLocal();
     toast(`${label} 참여 완료`);
     await refreshUser();
-  }catch(e){toast("참여 처리 실패")}
-  finally{setButtonLoading(btn,false)}
+  }catch(e){
+    toast("참여 처리 실패");
+  }finally{
+    setButtonLoading(btn,false);
+  }
 }
 async function checkin(btn){
   if(!currentUser)return toast("로그인이 필요합니다");
+
   setButtonLoading(btn,true,"확인중...");
+
   try{
     const {error}=await supabaseClient.from("wetty_checkins").insert({user_id:currentUser.id,points:100});
-    if(error){if(String(error.code)==="23505")return toast("오늘은 이미 출석했습니다");throw error}
-    await supabaseClient.from("wetty_users").update({points:Number(currentUser.points||0)+100,streak:Number(currentUser.streak||0)+1,updated_at:new Date().toISOString()}).eq("id",currentUser.id);
-    toast("출석 포인트 지급 완료");await refreshUser();
-  }catch(e){toast("출석 처리 실패")}
-  finally{setButtonLoading(btn,false)}
+
+    if(error){
+      if(String(error.code)==="23505")return toast("오늘은 이미 출석했습니다");
+      throw error;
+    }
+
+    await supabaseClient.from("wetty_users").update({
+      points:Number(currentUser.points||0)+100,
+      streak:Number(currentUser.streak||0)+1,
+      updated_at:new Date().toISOString()
+    }).eq("id",currentUser.id);
+
+    toast("출석 포인트 지급 완료");
+    await refreshUser();
+  }catch(e){
+    toast("출석 처리 실패");
+  }finally{
+    setButtonLoading(btn,false);
+  }
 }
 function copyInvite(){
   const text=`WETTY BETTY 초대코드 : ${profile.referral}`;
@@ -618,16 +909,18 @@ function copyInvite(){
 }
 function openProfile(){$("profileModal").classList.add("show")}
 function closeProfile(){$("profileModal").classList.remove("show")}
-function setActiveNav(i){document.querySelectorAll(".nav-btn").forEach((b,n)=>b.classList.toggle("active",n===i))}
-function goHome(){setActiveNav(0);window.scrollTo({top:0,behavior:"smooth"})}
-function goPicks(){setActiveNav(1);$("marketList").scrollIntoView({behavior:"smooth",block:"start"})}
-function goRank(){setActiveNav(2);document.querySelector(".board").scrollIntoView({behavior:"smooth",block:"start"})}
 async function refreshWeather(){
-  weatherCache.clear();toast("날씨 새로고침 중");
-  await loadCurrentWeather();await buildPredictions();await loadPredictionsFromDB();
+  weatherCache.clear();
+  lastLocationKey="";
+  lastLocationLabel="";
+  toast("날씨 새로고침 중");
+  await loadCurrentWeather();
+  await buildPredictions();
+  await loadPredictionsFromDB();
 }
 function subscribeRealtime(){
   if(!supabaseClient||realtimeChannel)return;
+
   try{
     realtimeChannel=supabaseClient.channel("wetty-live")
       .on("postgres_changes",{event:"*",schema:"public",table:"wetty_predictions"},async()=>loadPredictionsFromDB())
@@ -636,26 +929,40 @@ function subscribeRealtime(){
   }catch(e){}
 }
 async function startAppData(){
-  renderDemoPredictions();await loadCurrentWeather();watchCurrentLocation();await buildPredictions();await loadPredictionsFromDB();await renderClosed();subscribeRealtime();
+  renderDemoPredictions();
+  await loadCurrentWeather();
+  watchCurrentLocation();
+  await buildPredictions();
+  await loadPredictionsFromDB();
+  await renderClosed();
+  subscribeRealtime();
 }
 function bindEnterKeys(){
-  ["loginPhone","loginPin"].forEach(id=>$(id)?.addEventListener("keydown",e=>{if(e.key==="Enter")login(document.querySelector('[data-action="login"]'))}));
-  ["signupNick","signupPhone","signupPin"].forEach(id=>$(id)?.addEventListener("keydown",e=>{if(e.key==="Enter")signup(document.querySelector('[data-action="signup"]'))}));
+  ["loginPhone","loginPin"].forEach(id=>$(id)?.addEventListener("keydown",e=>{
+    if(e.key==="Enter")login(document.querySelector('[data-action="login"]'));
+  }));
+  ["signupNick","signupPhone","signupPin"].forEach(id=>$(id)?.addEventListener("keydown",e=>{
+    if(e.key==="Enter")signup(document.querySelector('[data-action="signup"]'));
+  }));
 }
 function bindActions(){
   document.addEventListener("click",e=>{
-    const btn=e.target.closest("[data-action],[data-auth-tab]");if(!btn)return;
-    if(btn.dataset.authTab){setAuthMode(btn.dataset.authTab);return}
+    const btn=e.target.closest("[data-action],[data-auth-tab]");
+    if(!btn)return;
+
+    if(btn.dataset.authTab){
+      setAuthMode(btn.dataset.authTab);
+      return;
+    }
+
     const action=btn.dataset.action;
+
     if(action==="signup")signup(btn);
     if(action==="login")login(btn);
     if(action==="notice")toast("새 알림이 없습니다");
     if(action==="profile")openProfile();
     if(action==="close-profile")closeProfile();
     if(action==="refresh")refreshWeather();
-    if(action==="home")goHome();
-    if(action==="picks")goPicks();
-    if(action==="rank")goRank();
     if(action==="checkin")checkin(btn);
     if(action==="copy-invite")copyInvite();
     if(action==="logout")logout();
@@ -663,13 +970,34 @@ function bindActions(){
   });
 }
 async function init(){
-  bindActions();bindEnterKeys();syncProfile();renderDemoPredictions();
+  bindActions();
+  bindEnterKeys();
+  syncProfile();
+  renderDemoPredictions();
+
   const restored=await tryRestoreLogin();
-  if(restored){showApp();await startAppData()}else showAuth();
-  setInterval(async()=>{if(!$("mainApp").classList.contains("hidden"))await loadCurrentWeather()},10*60*1000);
-  setInterval(async()=>{if(!$("mainApp").classList.contains("hidden")){await buildPredictions();await loadPredictionsFromDB()}},10*60*1000);
+
+  if(restored){
+    showApp();
+    await startAppData();
+  }else{
+    showAuth();
+  }
+
+  setInterval(async()=>{
+    if(!$("mainApp").classList.contains("hidden"))await loadCurrentWeather();
+  },10*60*1000);
+
+  setInterval(async()=>{
+    if(!$("mainApp").classList.contains("hidden")){
+      await buildPredictions();
+      await loadPredictionsFromDB();
+    }
+  },10*60*1000);
 }
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+else init();
 
 })();
 </script>
