@@ -1,80 +1,43 @@
-import { createClient } from "@supabase/supabase-js";
 import crypto from "crypto";
+import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-function json(res, status, data) {
-  return res.status(status).json(data);
+function hashPin(pin){
+  return crypto.createHmac("sha256", process.env.PIN_SECRET).update(String(pin)).digest("hex");
 }
 
-function hashPin(pin) {
-  return crypto
-    .createHash("sha256")
-    .update(String(pin) + process.env.PIN_SECRET)
-    .digest("hex");
-}
+export default async function handler(req,res){
+  if(req.method !== "POST") return res.status(405).json({ok:false,message:"Method not allowed"});
 
-export default async function handler(req, res) {
-  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  try{
+    const {phone_last4, pin} = req.body || {};
 
-  if (req.method !== "POST") {
-    return json(res, 405, { ok: false, message: "POST만 허용됩니다." });
-  }
+    if(!/^\d{4}$/.test(phone_last4)) return res.json({ok:false,message:"전화번호 뒷자리 4자리가 필요합니다"});
+    if(!/^\d{4,6}$/.test(pin)) return res.json({ok:false,message:"PIN은 4~6자리입니다"});
 
-  try {
-    const { phone_last4, pin } = req.body || {};
-
-    const cleanPhone = String(phone_last4 || "").replace(/\D/g, "");
-    const cleanPin = String(pin || "").replace(/\D/g, "");
-
-    if (cleanPhone.length !== 4) {
-      return json(res, 400, { ok: false, message: "전화번호 뒷자리 4자리가 필요합니다." });
-    }
-
-    if (cleanPin.length < 4 || cleanPin.length > 6) {
-      return json(res, 400, { ok: false, message: "PIN은 4~6자리여야 합니다." });
-    }
-
-    const pinHash = hashPin(cleanPin);
-
-    const { data: user, error } = await supabase
+    const {data, error} = await supabase
       .from("wetty_users")
-      .select("id,nickname,points,hit_count,vote_count,streak,referral_code,pin_hash")
-      .eq("phone_last4", cleanPhone)
+      .select("id,nickname,points,vote_count,hit_count,streak,referral_code,pin_hash")
+      .eq("phone_last4", phone_last4)
       .maybeSingle();
 
-    if (error) throw error;
+    if(error) throw error;
+    if(!data) return res.json({ok:false,message:"계정을 찾을 수 없습니다"});
 
-    if (!user || user.pin_hash !== pinHash) {
-      return json(res, 401, {
-        ok: false,
-        message: "전화번호 뒷자리 또는 PIN이 올바르지 않습니다."
-      });
+    if(data.pin_hash !== hashPin(pin)){
+      return res.json({ok:false,message:"PIN이 맞지 않습니다"});
     }
 
-    const { data: updated, error: updateError } = await supabase
+    await supabase
       .from("wetty_users")
-      .update({
-        last_login_at: new Date().toISOString()
-      })
-      .eq("id", user.id)
-      .select("id,nickname,points,hit_count,vote_count,streak,referral_code,last_login_at")
-      .single();
+      .update({last_login_at:new Date().toISOString()})
+      .eq("id", data.id);
 
-    if (updateError) throw updateError;
+    delete data.pin_hash;
 
-    return json(res, 200, {
-      ok: true,
-      user: updated
-    });
-  } catch (error) {
-    console.error(error);
-    return json(res, 500, {
-      ok: false,
-      message: "로그인 처리 중 오류가 발생했습니다."
-    });
+    return res.json({ok:true,user:data});
+  }catch(e){
+    return res.status(500).json({ok:false,message:"로그인 오류",detail:e.message});
   }
 }
