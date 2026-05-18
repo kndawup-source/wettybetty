@@ -297,7 +297,7 @@ function setAuthMode(mode){
 }
 function showApp(){
   $("authScreen").classList.add("hidden");$("mainApp").classList.remove("hidden");$("bottomNav").classList.remove("hidden");
-  document.body.style.paddingBottom="calc(86px + env(safe-area-inset-bottom))";
+  document.body.style.paddingBottom="calc(150px + env(safe-area-inset-bottom))";
 }
 function showAuth(){
   $("authScreen").classList.remove("hidden");$("mainApp").classList.add("hidden");$("bottomNav").classList.add("hidden");$("profileModal").classList.remove("show");
