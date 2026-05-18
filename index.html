@@ -773,7 +773,18 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBy
 /* 초기 오류 방지를 위해 공휴일 API는 일단 꺼둠 */
 const PUBLIC_HOLIDAY_SERVICE_KEY = "";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabase = null;
+
+try{
+  if(window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY){
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }else{
+    console.warn("Supabase SDK not ready");
+  }
+}catch(e){
+  console.error("Supabase init error", e);
+  supabase = null;
+}
 
 const REGION_POOL=[
   {id:"gangnam",name:"서울 강남",lat:37.4979,lon:127.0276,weight:95,type:"business"},
