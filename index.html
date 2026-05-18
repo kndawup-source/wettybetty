@@ -7,6 +7,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
@@ -578,6 +579,7 @@ button:disabled{
   gap:8px;
   margin-top:18px;
 }
+
 .profile-actions{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -589,6 +591,7 @@ button:disabled{
 .profile-actions .sub-btn{
   width:100%;
 }
+
 .stat-box{
   padding:12px 10px;
   border-radius:16px;
@@ -706,7 +709,7 @@ button:disabled{
 
   <section class="section-title">
     <h2>TOP PICKS</h2>
-    <span>시간대별 자동 생성</span>
+    <span>실시간 참여 반영</span>
   </section>
 
   <div id="marketList"></div>
@@ -770,18 +773,22 @@ button:disabled{
     </div>
 
     <div class="profile-actions">
-  <button class="main-btn" onclick="checkin()">출석 포인트 받기</button>
-  <button class="sub-btn" onclick="copyInvite()">친구 초대 🎁</button>
-</div>
+      <button class="main-btn" onclick="checkin()">출석 포인트 받기</button>
+      <button class="sub-btn" onclick="copyInvite()">친구 초대 🎁</button>
+    </div>
 
-<button class="logout-btn" onclick="logout()">로그아웃</button>
+    <button class="logout-btn" onclick="logout()">로그아웃</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const PUBLIC_HOLIDAY_SERVICE_KEY="여기에_공공데이터_API_KEY";
+const SUPABASE_URL = "여기에_SUPABASE_URL";
+const SUPABASE_ANON_KEY = "여기에_SUPABASE_ANON_KEY";
+const PUBLIC_HOLIDAY_SERVICE_KEY = "여기에_공공데이터_API_KEY";
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const REGION_POOL=[
   {id:"gangnam",name:"서울 강남",lat:37.4979,lon:127.0276,weight:95,type:"business"},
@@ -812,26 +819,24 @@ const REGION_POOL=[
   {id:"mokpo",name:"목포",lat:34.8118,lon:126.3922,weight:68,type:"beach"}
 ];
 
+let currentUser = null;
+
 let profile={
-  nickname:"WETTY",
-  points:12800,
-  hitRate:72,
-  streak:5,
-  referral:"WETTY777"
+  nickname:"GUEST",
+  points:0,
+  hitRate:0,
+  streak:0,
+  referral:"------"
 };
 
 let predictions=[];
-let closedPredictions=[
-  {id:"closed_1",regionId:"seongsu",region:"서울 성수",title:"서울 성수, 12:00~14:00 소나기 왔을까?",yes:61,no:39,yesLabel:"왔다",noLabel:"안 왔다",total:18800,status:"정산 완료",closeLabel:"11:30",targetLabel:"12:00~14:00",resultLabel:"14:10"},
-  {id:"closed_2",regionId:"jeju",region:"제주",title:"제주, 09:00~11:00 강풍 있었을까?",yes:72,no:28,yesLabel:"있었다",noLabel:"없었다",total:24300,status:"결과 대기",closeLabel:"08:30",targetLabel:"09:00~11:00",resultLabel:"11:10"}
-];
-
 let toastTimer=null;
 let selectedNav=0;
 let weatherCache=new Map();
 let holidayCache=null;
 let lastLocationKey="";
 let locationWatchId=null;
+let realtimeChannel=null;
 
 function toast(msg){
   const el=document.getElementById("toast");
@@ -839,15 +844,6 @@ function toast(msg){
   el.classList.add("show");
   clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>el.classList.remove("show"),1800);
-}
-
-function syncProfile(){
-  document.getElementById("nickname").textContent=profile.nickname;
-  document.getElementById("profileName").textContent=profile.nickname;
-  document.getElementById("profileCode").textContent=`초대코드 ${profile.referral}`;
-  document.getElementById("profilePoint").textContent=`${profile.points.toLocaleString()}P`;
-  document.getElementById("profileRate").textContent=`${profile.hitRate}%`;
-  document.getElementById("profileStreak").textContent=profile.streak;
 }
 
 function pad2(n){
@@ -862,15 +858,107 @@ function addMinutes(date,min){
   return new Date(date.getTime()+min*60000);
 }
 
+function localDateKey(date=new Date()){
+  const y=date.getFullYear();
+  const m=String(date.getMonth()+1).padStart(2,"0");
+  const d=String(date.getDate()).padStart(2,"0");
+  return `${y}-${m}-${d}`;
+}
+
+function getDeviceId(){
+  let id=localStorage.getItem("wetty_device_id");
+
+  if(!id){
+    id=crypto.randomUUID();
+    localStorage.setItem("wetty_device_id",id);
+  }
+
+  return id;
+}
+
+function makeReferralCode(){
+  return "WT"+Math.random().toString(36).slice(2,8).toUpperCase();
+}
+
+function syncProfile(){
+  document.getElementById("nickname").textContent=profile.nickname;
+  document.getElementById("profileName").textContent=profile.nickname;
+  document.getElementById("profileCode").textContent=`초대코드 ${profile.referral}`;
+  document.getElementById("profilePoint").textContent=`${Number(profile.points||0).toLocaleString()}P`;
+  document.getElementById("profileRate").textContent=`${profile.hitRate}%`;
+  document.getElementById("profileStreak").textContent=profile.streak;
+}
+
+async function loadOrCreateUser(){
+  const deviceId=getDeviceId();
+
+  const {data:existing,error}=await supabase
+    .from("wetty_users")
+    .select("*")
+    .eq("device_id",deviceId)
+    .maybeSingle();
+
+  if(error){
+    console.error(error);
+    toast("프로필 연결 실패");
+    syncProfile();
+    return;
+  }
+
+  if(existing){
+    currentUser=existing;
+
+    profile={
+      nickname:existing.nickname || "WETTY",
+      points:existing.points || 0,
+      hitRate:existing.vote_count > 0
+        ? Math.round((existing.hit_count / existing.vote_count) * 100)
+        : 0,
+      streak:existing.streak || 0,
+      referral:existing.referral_code || "------"
+    };
+
+    syncProfile();
+    return;
+  }
+
+  const {data:created,error:createError}=await supabase
+    .from("wetty_users")
+    .insert({
+      device_id:deviceId,
+      nickname:"WETTY",
+      referral_code:makeReferralCode(),
+      points:0
+    })
+    .select("*")
+    .single();
+
+  if(createError){
+    console.error(createError);
+    toast("프로필 생성 실패");
+    syncProfile();
+    return;
+  }
+
+  currentUser=created;
+
+  profile={
+    nickname:created.nickname,
+    points:created.points || 0,
+    hitRate:0,
+    streak:created.streak || 0,
+    referral:created.referral_code
+  };
+
+  syncProfile();
+}
+
 function getNextBettingWindow(now=new Date()){
   const base=new Date(now);
-
   base.setMinutes(0,0,0);
 
   const currentHour=base.getHours();
-  const nextEvenHour=currentHour % 2 === 0
-    ? currentHour + 2
-    : currentHour + 1;
+  const nextEvenHour=currentHour % 2 === 0 ? currentHour + 2 : currentHour + 1;
 
   const start=new Date(base);
   start.setHours(nextEvenHour,0,0,0);
@@ -894,21 +982,6 @@ function getNextBettingWindow(now=new Date()){
   };
 }
 
-function hasOpenPredictionForRegion(regionId){
-  const now=Date.now();
-
-  return predictions.some(p=>{
-    return p.regionId===regionId && p.closeTimeMs>now;
-  });
-}
-
-function localDateKey(date=new Date()){
-  const y=date.getFullYear();
-  const m=String(date.getMonth()+1).padStart(2,"0");
-  const d=String(date.getDate()).padStart(2,"0");
-  return `${y}-${m}-${d}`;
-}
-
 async function isKoreanHoliday(){
   if(!PUBLIC_HOLIDAY_SERVICE_KEY || PUBLIC_HOLIDAY_SERVICE_KEY.includes("여기에")){
     return false;
@@ -930,7 +1003,7 @@ async function isKoreanHoliday(){
     if(!res.ok) return false;
 
     const json=await res.json();
-    let items=json?.response?.body?.items?.item||[];
+    let items=json?.response?.body?.items?.item || [];
     if(!Array.isArray(items)) items=[items];
 
     const dates=items
@@ -979,21 +1052,21 @@ async function fetchWeather(lat,lon){
   if(!res.ok) throw new Error("weather error");
 
   const json=await res.json();
-  const c=json.current||{};
-  const hourly=json.hourly||{};
-  const probs=hourly.precipitation_probability||[];
-  const temps=hourly.temperature_2m||[];
+  const c=json.current || {};
+  const hourly=json.hourly || {};
+  const probs=hourly.precipitation_probability || [];
+  const temps=hourly.temperature_2m || [];
 
-  const temp=Number(c.temperature_2m||0);
-  const yesterdayTemp=Number(temps[0]||temp);
+  const temp=Number(c.temperature_2m || 0);
+  const yesterdayTemp=Number(temps[0] || temp);
 
   const data={
     temp,
-    feelsLike:Number(c.apparent_temperature||temp),
-    precipitation:Number(c.precipitation||0),
-    code:Number(c.weather_code||0),
-    wind:Number(c.wind_speed_10m||0),
-    rainProb:Number(probs[0]||0),
+    feelsLike:Number(c.apparent_temperature || temp),
+    precipitation:Number(c.precipitation || 0),
+    code:Number(c.weather_code || 0),
+    wind:Number(c.wind_speed_10m || 0),
+    rainProb:Number(probs[0] || 0),
     tempDiff:Math.round(temp-yesterdayTemp)
   };
 
@@ -1095,17 +1168,55 @@ function makePrediction(region,w,score,mode,window){
   };
 }
 
+async function savePredictionsToDB(list){
+  if(!list.length) return;
+
+  const rows=list.map(item=>({
+    id:item.id,
+    region_id:item.regionId,
+    region_name:item.region,
+    title:item.title,
+    issue:item.issue,
+    yes_label:item.yesLabel,
+    no_label:item.noLabel,
+    yes_percent:item.yes,
+    no_percent:item.no,
+    yes_stake:item.yesStake,
+    no_stake:item.noStake,
+    total_points:item.total,
+    close_time:new Date(item.closeTimeMs).toISOString(),
+    start_time:new Date(item.startTimeMs).toISOString(),
+    end_time:new Date(item.endTimeMs).toISOString(),
+    result_time:new Date(item.resultTimeMs).toISOString(),
+    status:"open"
+  }));
+
+  const {error}=await supabase
+    .from("wetty_predictions")
+    .upsert(rows,{onConflict:"id"});
+
+  if(error){
+    console.error(error);
+  }
+}
+
 async function buildPredictions(){
   const mode=await getDayMode();
   const window=getNextBettingWindow();
   const list=[];
 
-  predictions=predictions.filter(p=>p.closeTimeMs>Date.now());
-
   for(const region of REGION_POOL){
-    if(hasOpenPredictionForRegion(region.id)) continue;
-
     try{
+      const predictionId=`${region.id}_${window.start.getTime()}`;
+
+      const {data:exists}=await supabase
+        .from("wetty_predictions")
+        .select("id")
+        .eq("id",predictionId)
+        .maybeSingle();
+
+      if(exists) continue;
+
       const w=await fetchWeather(region.lat,region.lon);
       if(!hasWeatherIssue(w)) continue;
 
@@ -1114,58 +1225,122 @@ async function buildPredictions(){
     }catch(e){}
   }
 
-  predictions=[
-    ...predictions,
-    ...list.sort((a,b)=>b.total-a.total)
-  ]
-    .sort((a,b)=>b.total-a.total)
-    .slice(0,7);
+  const sorted=list.sort((a,b)=>b.total-a.total).slice(0,7);
 
-  if(!predictions.length){
-    const window=getNextBettingWindow();
-    predictions=[
-      {
-        id:`fallback_${window.start.getTime()}`,
-        regionId:"gangnam",
-        region:"서울 강남",
-        title:`서울 강남, ${window.targetLabel} 비 올까?`,
-        yes:48,
-        no:52,
-        yesLabel:"온다",
-        noLabel:"안 온다",
-        yesStake:8400,
-        noStake:9200,
-        total:17600,
-        issue:"기본 예측",
-        closeTimeMs:window.close.getTime(),
-        startTimeMs:window.start.getTime(),
-        endTimeMs:window.end.getTime(),
-        resultTimeMs:window.result.getTime(),
-        closeLabel:window.closeLabel,
-        targetLabel:window.targetLabel,
-        resultLabel:window.resultLabel
-      }
-    ];
+  if(!sorted.length){
+    const fallback={
+      id:`fallback_gangnam_${window.start.getTime()}`,
+      regionId:"gangnam",
+      region:"서울 강남",
+      title:`서울 강남, ${window.targetLabel} 비 올까?`,
+      yes:48,
+      no:52,
+      yesLabel:"온다",
+      noLabel:"안 온다",
+      yesStake:8400,
+      noStake:9200,
+      total:17600,
+      issue:"기본 예측",
+      closeTimeMs:window.close.getTime(),
+      startTimeMs:window.start.getTime(),
+      endTimeMs:window.end.getTime(),
+      resultTimeMs:window.result.getTime(),
+      closeLabel:window.closeLabel,
+      targetLabel:window.targetLabel,
+      resultLabel:window.resultLabel
+    };
+
+    await savePredictionsToDB([fallback]);
+    return;
   }
 
-  renderHotList();
-  renderMarkets();
+  await savePredictionsToDB(sorted);
 }
 
-function renderHotList(){
+function mapPredictionRow(row){
+  return {
+    id:row.id,
+    regionId:row.region_id,
+    region:row.region_name,
+    title:row.title,
+    yes:row.yes_percent,
+    no:row.no_percent,
+    yesLabel:row.yes_label,
+    noLabel:row.no_label,
+    yesStake:row.yes_stake,
+    noStake:row.no_stake,
+    total:row.total_points,
+    issue:row.issue,
+    closeTimeMs:new Date(row.close_time).getTime(),
+    startTimeMs:new Date(row.start_time).getTime(),
+    endTimeMs:new Date(row.end_time).getTime(),
+    resultTimeMs:new Date(row.result_time).getTime(),
+    closeLabel:timeLabel(new Date(row.close_time)),
+    targetLabel:`${timeLabel(new Date(row.start_time))}~${timeLabel(new Date(row.end_time))}`,
+    resultLabel:timeLabel(new Date(row.result_time)),
+    status:row.status
+  };
+}
+
+async function loadPredictionsFromDB(){
+  const {data,error}=await supabase
+    .from("wetty_predictions")
+    .select("*")
+    .eq("status","open")
+    .gt("close_time",new Date().toISOString())
+    .order("total_points",{ascending:false})
+    .limit(7);
+
+  if(error){
+    console.error(error);
+    return;
+  }
+
+  predictions=(data || []).map(mapPredictionRow);
+
+  renderMarkets();
+  await renderHotList();
+}
+
+async function renderHotList(){
   const box=document.getElementById("hotList");
   box.innerHTML="";
 
-  predictions.slice(0,3).forEach((item,index)=>{
+  const {data,error}=await supabase
+    .from("wetty_predictions")
+    .select("id,region_name,start_time,end_time,close_time,total_points")
+    .eq("status","open")
+    .gt("close_time",new Date().toISOString())
+    .order("total_points",{ascending:false})
+    .limit(3);
+
+  if(error || !data || !data.length){
+    box.innerHTML=`
+      <div class="board-item">
+        <div>
+          <div class="bi-title">아직 몰리는 지역이 없습니다</div>
+          <div class="bi-sub">참여가 생기면 실시간으로 표시됩니다</div>
+        </div>
+        <div class="bi-right">LIVE</div>
+      </div>
+    `;
+    return;
+  }
+
+  data.forEach((item,index)=>{
     const div=document.createElement("div");
     div.className="board-item";
 
+    const start=new Date(item.start_time);
+    const end=new Date(item.end_time);
+    const close=new Date(item.close_time);
+
     div.innerHTML=`
       <div>
-        <div class="bi-title">${index+1}. ${item.region}</div>
-        <div class="bi-sub">${item.targetLabel} · 마감 ${item.closeLabel}</div>
+        <div class="bi-title">${index+1}. ${item.region_name}</div>
+        <div class="bi-sub">${timeLabel(start)}~${timeLabel(end)} · 마감 ${timeLabel(close)}</div>
       </div>
-      <div class="bi-right">${item.total.toLocaleString()}P</div>
+      <div class="bi-right">${Number(item.total_points || 0).toLocaleString()}P</div>
     `;
 
     box.appendChild(div);
@@ -1195,6 +1370,20 @@ function renderMarkets(){
   const box=document.getElementById("marketList");
   box.innerHTML="";
 
+  if(!predictions.length){
+    box.innerHTML=`
+      <div class="market-card">
+        <div class="market-region">READY</div>
+        <div class="market-title">예측 카드를 준비하고 있습니다</div>
+        <div class="market-meta">
+          <span>날씨 데이터 확인중</span>
+          <span>LIVE</span>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
   predictions.forEach(item=>{
     const card=document.createElement("div");
     card.className="market-card";
@@ -1206,7 +1395,7 @@ function renderMarkets(){
 
       <div class="market-meta">
         <span>${item.issue}</span>
-        <span>${item.total.toLocaleString()}P</span>
+        <span>${Number(item.total || 0).toLocaleString()}P</span>
       </div>
 
       ${renderTimeBox(item)}
@@ -1215,19 +1404,19 @@ function renderMarkets(){
         <div class="market-cell">
           <span>${item.yesLabel}</span>
           <strong>${item.yes}%</strong>
-          <small>${item.yesStake.toLocaleString()}P</small>
+          <small>${Number(item.yesStake || 0).toLocaleString()}P</small>
         </div>
 
         <div class="market-cell">
           <span>${item.noLabel}</span>
           <strong>${item.no}%</strong>
-          <small>${item.noStake.toLocaleString()}P</small>
+          <small>${Number(item.noStake || 0).toLocaleString()}P</small>
         </div>
       </div>
 
       <div class="vote-row">
-        <button class="vote-btn rain" onclick="vote('${item.title}','${item.yesLabel}')">${item.yesLabel}</button>
-        <button class="vote-btn clear" onclick="vote('${item.title}','${item.noLabel}')">${item.noLabel}</button>
+        <button class="vote-btn rain" onclick="vote('${item.id}','yes')">${item.yesLabel}</button>
+        <button class="vote-btn clear" onclick="vote('${item.id}','no')">${item.noLabel}</button>
       </div>
     `;
 
@@ -1235,25 +1424,46 @@ function renderMarkets(){
   });
 }
 
-function renderClosed(){
+async function renderClosed(){
   const box=document.getElementById("closedList");
   box.innerHTML="";
 
-  closedPredictions.forEach(item=>{
-    const done=item.status==="정산 완료";
+  const {data,error}=await supabase
+    .from("wetty_predictions")
+    .select("*")
+    .in("status",["closed","settled"])
+    .order("end_time",{ascending:false})
+    .limit(5);
+
+  if(error || !data || !data.length){
+    box.innerHTML=`
+      <div class="market-card closed">
+        <div class="market-region">CLOSED</div>
+        <div class="market-title">아직 마감된 예측이 없습니다</div>
+        <div class="closed-badge">결과 대기 없음</div>
+      </div>
+    `;
+    return;
+  }
+
+  data.forEach(row=>{
+    const item=mapPredictionRow(row);
+    const done=row.status==="settled";
     const card=document.createElement("div");
     card.className="market-card closed";
 
     card.innerHTML=`
       <div class="market-region">${item.region}</div>
       <div class="market-title">${item.title}</div>
-      <div class="closed-badge ${done?"done":""}">${item.status}</div>
+      <div class="closed-badge ${done ? "done" : ""}">
+        ${done ? "정산 완료" : "결과 대기"}
+      </div>
 
       ${renderTimeBox(item)}
 
       <div class="market-meta">
         <span>${item.yesLabel} ${item.yes}% · ${item.noLabel} ${item.no}%</span>
-        <span>${item.total.toLocaleString()}P</span>
+        <span>${Number(item.total || 0).toLocaleString()}P</span>
       </div>
     `;
 
@@ -1261,16 +1471,131 @@ function renderClosed(){
   });
 }
 
-function vote(title,choice){
-  const ok=confirm(`${title}\n\n'${choice}'에 참여할까요?`);
-  if(!ok) return;
-  toast(`${choice} 참여 완료 ✓`);
+async function refreshPredictionStats(predictionId){
+  const {data,error}=await supabase
+    .from("wetty_votes")
+    .select("choice,points")
+    .eq("prediction_id",predictionId);
+
+  if(error){
+    console.error(error);
+    return;
+  }
+
+  const votes=data || [];
+  const yesVotes=votes.filter(v=>v.choice==="yes");
+  const noVotes=votes.filter(v=>v.choice==="no");
+
+  const yesPoints=yesVotes.reduce((sum,v)=>sum+Number(v.points || 0),0);
+  const noPoints=noVotes.reduce((sum,v)=>sum+Number(v.points || 0),0);
+  const total=yesPoints+noPoints;
+
+  if(total<=0) return;
+
+  const yesPercent=Math.round((yesPoints/total)*100);
+  const noPercent=100-yesPercent;
+
+  const {error:updateError}=await supabase
+    .from("wetty_predictions")
+    .update({
+      yes_percent:yesPercent,
+      no_percent:noPercent,
+      yes_stake:yesPoints,
+      no_stake:noPoints,
+      total_points:total
+    })
+    .eq("id",predictionId);
+
+  if(updateError){
+    console.error(updateError);
+  }
+
+  await loadPredictionsFromDB();
 }
 
-function checkin(){
-  profile.points+=100;
-  syncProfile();
+async function vote(predictionId,choice){
+  if(!currentUser){
+    toast("프로필 준비중입니다");
+    return;
+  }
+
+  const item=predictions.find(p=>p.id===predictionId);
+  if(!item) return;
+
+  const label=choice==="yes" ? item.yesLabel : item.noLabel;
+  const ok=confirm(`${item.title}\n\n'${label}'에 참여할까요?`);
+  if(!ok) return;
+
+  const {error}=await supabase
+    .from("wetty_votes")
+    .insert({
+      prediction_id:predictionId,
+      user_id:currentUser.id,
+      choice,
+      points:100
+    });
+
+  if(error){
+    if(String(error.message).toLowerCase().includes("duplicate") || String(error.code)==="23505"){
+      toast("이미 참여한 예측입니다");
+      return;
+    }
+
+    console.error(error);
+    toast("참여 처리 실패");
+    return;
+  }
+
+  await supabase
+    .from("wetty_users")
+    .update({
+      points:Number(currentUser.points || 0)+10,
+      vote_count:Number(currentUser.vote_count || 0)+1,
+      updated_at:new Date().toISOString()
+    })
+    .eq("id",currentUser.id);
+
+  toast(`${label} 참여 완료 ✓`);
+
+  await refreshPredictionStats(predictionId);
+  await loadOrCreateUser();
+}
+
+async function checkin(){
+  if(!currentUser){
+    toast("프로필 준비중입니다");
+    return;
+  }
+
+  const {error}=await supabase
+    .from("wetty_checkins")
+    .insert({
+      user_id:currentUser.id,
+      points:100
+    });
+
+  if(error){
+    if(String(error.message).toLowerCase().includes("duplicate") || String(error.code)==="23505"){
+      toast("오늘은 이미 출석했습니다");
+      return;
+    }
+
+    console.error(error);
+    toast("출석 처리 실패");
+    return;
+  }
+
+  await supabase
+    .from("wetty_users")
+    .update({
+      points:Number(currentUser.points || 0)+100,
+      streak:Number(currentUser.streak || 0)+1,
+      updated_at:new Date().toISOString()
+    })
+    .eq("id",currentUser.id);
+
   toast("출석 포인트 지급 완료 🎉");
+  await loadOrCreateUser();
 }
 
 function copyInvite(){
@@ -1293,8 +1618,10 @@ function closeProfile(){
 }
 
 function logout(){
+  localStorage.removeItem("wetty_device_id");
   closeProfile();
   toast("로그아웃 완료");
+  setTimeout(()=>location.reload(),600);
 }
 
 function setActiveNav(index){
@@ -1346,20 +1673,15 @@ async function reverseGeocode(lat,lon){
     const url=`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=ko`;
     const res=await fetch(url);
     if(!res.ok) return null;
-    const json=await res.json();
-    const addr=json.address||{};
-    const city=addr.city||addr.county||addr.state||"";
-    const district=addr.suburb||addr.city_district||addr.town||addr.village||addr.borough||"";
-    const dong =
-  addr.suburb ||
-  addr.neighbourhood ||
-  addr.quarter ||
-  addr.city_district ||
-  addr.town ||
-  addr.village ||
-  "";
 
-return dong || district || city || null;
+    const json=await res.json();
+    const addr=json.address || {};
+
+    const city=addr.city || addr.county || addr.state || "";
+    const district=addr.suburb || addr.city_district || addr.town || addr.village || addr.borough || "";
+    const dong=addr.suburb || addr.neighbourhood || addr.quarter || addr.city_district || addr.town || addr.village || "";
+
+    return dong || district || city || null;
   }catch(e){
     return null;
   }
@@ -1444,26 +1766,72 @@ function setWeatherFallback(){
   document.getElementById("currentLocationText").textContent="📍 위치 권한 필요";
 }
 
-function refreshWeather(){
+async function refreshWeather(){
   weatherCache.clear();
   lastLocationKey="";
   toast("날씨 새로고침 중 🌦️");
-  loadCurrentWeather();
-  buildPredictions();
+  await loadCurrentWeather();
+  await buildPredictions();
+  await loadPredictionsFromDB();
+  await renderClosed();
 }
 
-syncProfile();
-renderClosed();
-loadCurrentWeather();
-watchCurrentLocation();
-buildPredictions();
+function subscribeRealtime(){
+  if(realtimeChannel) return;
 
-setInterval(()=>{
-  loadCurrentWeather();
+  realtimeChannel=supabase
+    .channel("wetty-live")
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
+        table:"wetty_predictions"
+      },
+      async()=>{
+        await loadPredictionsFromDB();
+        await renderClosed();
+      }
+    )
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
+        table:"wetty_votes"
+      },
+      async()=>{
+        await loadPredictionsFromDB();
+      }
+    )
+    .subscribe();
+}
+
+async function init(){
+  syncProfile();
+
+  await loadOrCreateUser();
+
+  await loadCurrentWeather();
+  watchCurrentLocation();
+
+  await buildPredictions();
+  await loadPredictionsFromDB();
+  await renderClosed();
+
+  subscribeRealtime();
+}
+
+init();
+
+setInterval(async()=>{
+  await loadCurrentWeather();
 },10*60*1000);
 
-setInterval(()=>{
-  buildPredictions();
+setInterval(async()=>{
+  await buildPredictions();
+  await loadPredictionsFromDB();
+  await renderClosed();
 },10*60*1000);
 </script>
 
