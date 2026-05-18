@@ -12,13 +12,20 @@
 :root{--bg:#050d16;--panel:#0b1620;--line:rgba(255,255,255,.08);--text:#edf4fa;--muted:#7f93a2;--soft:#bfd0da;--accent:#dff56a;--blue:#82c7ff;--red:#ff6f6f}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif}
-body{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
+body{
+  padding-bottom:calc(150px + env(safe-area-inset-bottom));
+}
 button,input{font-family:inherit}
 button{border:0;cursor:pointer}
 button:disabled{opacity:.45;cursor:not-allowed}
 .hidden{display:none!important}
 .app,.auth-screen{width:100%;max-width:480px;margin:0 auto;min-height:100dvh}
-.app{background:radial-gradient(circle at 50% -10%,rgba(223,245,106,.08),transparent 32%),linear-gradient(180deg,#07121c 0%,#050d16 52%,#050d16 100%)}
+.app{
+  padding-bottom:calc(120px + env(safe-area-inset-bottom));
+  background:
+    radial-gradient(circle at 50% -10%,rgba(223,245,106,.08),transparent 32%),
+    linear-gradient(180deg,#07121c 0%,#050d16 52%,#050d16 100%);
+}
 .auth-screen{padding:38px 20px 24px;background:radial-gradient(circle at 50% -8%,rgba(223,245,106,.12),transparent 34%),linear-gradient(180deg,#07121c,#050d16)}
 .auth-logo{font-family:'Syne',sans-serif;font-size:34px;font-weight:900;letter-spacing:-2px;line-height:1}
 .auth-logo em,.logo em{color:var(--accent);font-style:normal}
