@@ -22,7 +22,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .auth-screen{padding:38px 20px 24px;background:radial-gradient(circle at 50% -8%,rgba(223,245,106,.12),transparent 34%),linear-gradient(180deg,#07121c,#050d16)}
 .auth-logo{font-family:'Syne',sans-serif;font-size:34px;font-weight:900;letter-spacing:-2px;line-height:1}
 .auth-logo em,.logo em{color:var(--accent);font-style:normal}
-.auth-sub{margin-top:8px;color:var(--muted);font-size:11px;font-weight:900;letter-spacing:1.3px}
+
 .auth-card{margin-top:34px;padding:20px;border-radius:28px;background:linear-gradient(145deg,#102131,#09131d);border:1px solid rgba(255,255,255,.08)}
 .auth-title{font-size:24px;font-weight:900;line-height:1.25}
 .auth-desc{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.6}
@@ -166,10 +166,13 @@ button:disabled{opacity:.45;cursor:not-allowed}
   </div>
 
   <div class="header-right">
-      <button class="icon-btn" data-action="notice">🔔</button>
-      <button class="profile-mini" data-action="profile"><span>👤</span><span class="pm-name" id="nickname">GUEST</span></button>
-    </div>
-  </header>
+    <button class="icon-btn" data-action="notice">🔔</button>
+    <button class="profile-mini" data-action="profile">
+      <span>👤</span>
+      <span class="pm-name" id="nickname">GUEST</span>
+    </button>
+  </div>
+</header>
 
   <section class="weather-board">
     <button class="refresh-btn" data-action="refresh">↻</button>
@@ -339,10 +342,7 @@ async function login(btn){
   }catch(e){console.error(e);toast("로그인 오류")}
   finally{setButtonLoading(btn,false)}
 }
-async function tryRestoreLogin(){
-  const saved=localStorage.getItem("wetty_user"); if(!saved) return false;
-  try{applyUser(JSON.parse(saved));return true}catch(e){localStorage.removeItem("wetty_user");return false}
-}
+
 async function tryRestoreLogin(){
   const saved=localStorage.getItem("wetty_user");
   if(!saved) return false;
@@ -380,11 +380,6 @@ function logout(){
   syncProfile();
   showAuth();
   toast("로그아웃 완료");
-}
-function logout(){
-  localStorage.removeItem("wetty_user");
-  currentUser=null;profile={nickname:"GUEST",points:0,hitRate:0,streak:0,referral:"------"};
-  syncProfile();showAuth();toast("로그아웃 완료");
 }
 
 function getNextBettingWindow(now=new Date()){
