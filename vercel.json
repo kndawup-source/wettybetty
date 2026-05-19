@@ -1,8 +1,0 @@
-{
-  "crons":[
-    {
-      "path":"/api/generate-predictions",
-      "schedule":"*/2 * * * *"
-    }
-  ]
-}
