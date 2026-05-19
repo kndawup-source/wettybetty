@@ -70,7 +70,7 @@ export default async function handler(req, res){
     const insertData = {
       nickname,
       phone_last4: phone,
-      pin_hash: hashPin(pin),
+      pin_hash: await hashPin(pin),
       points: 300,
       streak: 0,
       hit_count: 0,
