@@ -1,8 +1,0 @@
-{
-  "crons": [
-    {
-      "path": "/api/generate-predictions?adminKey=ADMIN_KEY",
-      "schedule": "*/30 * * * *"
-    }
-  ]
-}
