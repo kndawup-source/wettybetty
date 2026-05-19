@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>WETTY ADMIN</title>
+
+<style>
+:root{
+  --bg:#050d16;
+  --panel:#0b1620;
+  --line:rgba(255,255,255,.08);
+  --text:#edf4fa;
+  --muted:#7f93a2;
+  --soft:#bfd0da;
+  --accent:#dff56a;
+  --blue:#82c7ff;
+  --red:#ff6f6f;
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  min-height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif;
+}
+
+body{
+  padding:20px;
+}
+
+button,input,select{
+  font-family:inherit;
+}
+
+button{
+  border:0;
+  cursor:pointer;
+}
+
+.wrap{
+  width:100%;
+  max-width:760px;
+  margin:0 auto;
+}
+
+.top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:20px;
+}
+
+.brand{
+  font-size:26px;
+  font-weight:900;
+  letter-spacing:-1px;
+}
+
+.brand em{
+  color:var(--accent);
+  font-style:normal;
+}
+
+.sub{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:800;
+}
+
+.card{
+  padding:16px;
+  border-radius:22px;
+  background:linear-gradient(145deg,#102131,#09131d);
+  border:1px solid var(--line);
+  margin-bottom:12px;
+}
+
+.card.soft{
+  background:rgba(255,255,255,.035);
+}
+
+.row{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+input,select{
+  height:44px;
+  border-radius:13px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.05);
+  color:var(--text);
+  padding:0 12px;
+  outline:none;
+  font-size:14px;
+  font-weight:700;
+}
+
+input{
+  flex:1;
+  min-width:180px;
+}
+
+button{
+  height:44px;
+  padding:0 14px;
+  border-radius:13px;
+  background:var(--accent);
+  color:#07100c;
+  font-weight:900;
+  font-size:13px;
+}
+
+button.sub-btn{
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--line);
+  color:var(--text);
+}
+
+button.red{
+  background:rgba(255,111,111,.14);
+  border:1px solid rgba(255,111,111,.24);
+  color:var(--red);
+}
+
+.label{
+  margin-bottom:8px;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:900;
+}
+
+.status-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+}
+
+.stat{
+  padding:12px;
+  border-radius:16px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line);
+}
+
+.stat span{
+  display:block;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+}
+
+.stat strong{
+  display:block;
+  margin-top:6px;
+  font-size:18px;
+  font-weight:900;
+}
+
+.list{
+  margin-top:12px;
+}
+
+.pred-card{
+  padding:16px;
+  border-radius:22px;
+  background:rgba(255,255,255,.035);
+  border:1px solid var(--line);
+  margin-bottom:10px;
+}
+
+.pred-top{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start;
+}
+
+.pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:5px 9px;
+  border-radius:999px;
+  background:rgba(130,199,255,.1);
+  border:1px solid rgba(130,199,255,.18);
+  color:var(--blue);
+  font-size:11px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.pill.open{
+  background:rgba(223,245,106,.08);
+  border-color:rgba(223,245,106,.2);
+  color:var(--accent);
+}
+
+.pill.closed{
+  background:rgba(255,255,255,.06);
+  color:var(--muted);
+}
+
+.pill.settled{
+  background:rgba(223,245,106,.1);
+  color:var(--accent);
+}
+
+.pred-title{
+  margin-top:10px;
+  font-size:19px;
+  line-height:1.35;
+  font-weight:900;
+}
+
+.meta{
+  margin-top:8px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.6;
+}
+
+.score-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+  margin-top:12px;
+}
+
+.score{
+  padding:12px;
+  border-radius:16px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line);
+}
+
+.score span{
+  display:block;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+}
+
+.score strong{
+  display:block;
+  margin-top:5px;
+  font-size:20px;
+  font-weight:900;
+}
+
+.actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:12px;
+}
+
+.empty{
+  padding:28px 16px;
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:800;
+}
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:28px;
+  transform:translateX(-50%) translateY(8px);
+  padding:12px 18px;
+  border-radius:999px;
+  background:var(--text);
+  color:#06100c;
+  font-size:13px;
+  font-weight:900;
+  opacity:0;
+  pointer-events:none;
+  transition:.2s;
+  z-index:9999;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+@media(max-width:560px){
+  body{
+    padding:16px;
+  }
+
+  .top{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .status-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .score-grid{
+    grid-template-columns:1fr;
+  }
+
+  .actions{
+    grid-template-columns:1fr;
+  }
+
+  button,input,select{
+    width:100%;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <div class="brand">WETTY <em>ADMIN</em></div>
+      <div class="sub">운영자 예측 관리 · 정산 · 자동 생성</div>
+    </div>
+
+    <button class="sub-btn" onclick="loadAdmin()">새로고침</button>
+  </div>
+
+  <section class="card">
+    <div class="label">ADMIN SECRET</div>
+    <div class="row">
+      <input id="adminKey" type="password" placeholder="Vercel 환경변수 ADMIN_SECRET 입력">
+      <button onclick="saveKey()">저장</button>
+      <button class="sub-btn" onclick="clearKey()">삭제</button>
+    </div>
+  </section>
+
+  <section class="card soft">
+    <div class="label">운영 작업</div>
+    <div class="row">
+      <button onclick="generateMarket()">자동 예측 생성</button>
+      <button class="sub-btn" onclick="loadAdmin()">예측 목록 불러오기</button>
+      <button class="sub-btn" onclick="settleNow()">정산 실행</button>
+    </div>
+  </section>
+
+  <section class="card soft">
+    <div class="status-grid">
+      <div class="stat">
+        <span>전체</span>
+        <strong id="statTotal">0</strong>
+      </div>
+
+      <div class="stat">
+        <span>진행중</span>
+        <strong id="statOpen">0</strong>
+      </div>
+
+      <div class="stat">
+        <span>마감</span>
+        <strong id="statClosed">0</strong>
+      </div>
+
+      <div class="stat">
+        <span>정산완료</span>
+        <strong id="statSettled">0</strong>
+      </div>
+    </div>
+  </section>
+
+  <div class="list" id="list"></div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+let toastTimer = null;
+
+function toast(msg){
+  const el = $("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove("show"),1800);
+}
+
+function key(){
+  return $("adminKey").value.trim();
+}
+
+function saveKey(){
+  localStorage.setItem("wetty_admin_key",key());
+  toast("관리자 키 저장 완료");
+}
+
+function clearKey(){
+  localStorage.removeItem("wetty_admin_key");
+  $("adminKey").value = "";
+  toast("관리자 키 삭제 완료");
+}
+
+function setStats(list){
+  const total = list.length;
+  const open = list.filter(x=>x.status==="open").length;
+  const closed = list.filter(x=>x.status==="closed").length;
+  const settled = list.filter(x=>x.status==="settled").length;
+
+  $("statTotal").textContent = total;
+  $("statOpen").textContent = open;
+  $("statClosed").textContent = closed;
+  $("statSettled").textContent = settled;
+}
+
+function statusText(status){
+  if(status==="open") return "진행중";
+  if(status==="closed") return "마감";
+  if(status==="settled") return "정산완료";
+  return status || "대기";
+}
+
+function fmtDate(v){
+  if(!v) return "-";
+  const d = new Date(v);
+  return d.toLocaleString("ko-KR",{
+    month:"2-digit",
+    day:"2-digit",
+    hour:"2-digit",
+    minute:"2-digit"
+  });
+}
+
+function renderList(list){
+  const box = $("list");
+
+  if(!list.length){
+    box.innerHTML = `<div class="card empty">예측 데이터가 없습니다.</div>`;
+    return;
+  }
+
+  box.innerHTML = list.map(p=>{
+    const status = p.status || "open";
+
+    return `
+      <div class="pred-card">
+        <div class="pred-top">
+          <span class="pill ${status}">${statusText(status)}</span>
+          <span class="pill">${p.region_name || "-"}</span>
+        </div>
+
+        <div class="pred-title">${p.title || "-"}</div>
+
+        <div class="meta">
+          예측시간 ${fmtDate(p.start_time)} ~ ${fmtDate(p.end_time)}<br>
+          마감 ${fmtDate(p.close_time)} · 결과 ${fmtDate(p.result_time)}<br>
+          ID ${p.id}
+        </div>
+
+        <div class="score-grid">
+          <div class="score">
+            <span>${p.yes_label || "YES"}</span>
+            <strong>${p.yes_percent || 0}%</strong>
+          </div>
+
+          <div class="score">
+            <span>${p.no_label || "NO"}</span>
+            <strong>${p.no_percent || 0}%</strong>
+          </div>
+
+          <div class="score">
+            <span>총 포인트</span>
+            <strong>${Number(p.total_points || 0).toLocaleString()}P</strong>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button onclick="setResult('${p.id}','yes')">${p.yes_label || "YES"} 승리</button>
+          <button class="sub-btn" onclick="setResult('${p.id}','no')">${p.no_label || "NO"} 승리</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function loadAdmin(){
+  if(!key()){
+    toast("ADMIN_SECRET을 입력해주세요");
+    return;
+  }
+
+  try{
+    const res = await fetch("/api/admin?key=" + encodeURIComponent(key()));
+    const json = await res.json();
+
+    if(!json.ok){
+      toast(json.message || "관리자 조회 실패");
+      return;
+    }
+
+    const list = json.predictions || [];
+
+    setStats(list);
+    renderList(list);
+    toast("관리자 데이터 불러옴");
+  }catch(e){
+    toast("관리자 API 오류");
+  }
+}
+
+async function generateMarket(){
+  if(!key()){
+    toast("ADMIN_SECRET을 입력해주세요");
+    return;
+  }
+
+  try{
+    const res = await fetch("/api/auto-market-v2?key=" + encodeURIComponent(key()));
+    const json = await res.json();
+
+    if(!json.ok){
+      toast(json.message || "자동 생성 실패");
+      return;
+    }
+
+    toast(`자동 예측 생성 완료: ${json.created || 0}개`);
+    await loadAdmin();
+  }catch(e){
+    toast("자동 생성 API 오류");
+  }
+}
+
+async function settleNow(){
+  if(!key()){
+    toast("ADMIN_SECRET을 입력해주세요");
+    return;
+  }
+
+  try{
+    const res = await fetch("/api/settle-predictions?key=" + encodeURIComponent(key()));
+    const json = await res.json();
+
+    if(!json.ok){
+      toast(json.message || "정산 실패");
+      return;
+    }
+
+    toast(`정산 완료: ${json.settled || 0}개`);
+    await loadAdmin();
+  }catch(e){
+    toast("정산 API 오류");
+  }
+}
+
+async function setResult(predictionId,resultValue){
+  if(!key()){
+    toast("ADMIN_SECRET을 입력해주세요");
+    return;
+  }
+
+  const ok = confirm(`이 예측의 결과를 '${resultValue.toUpperCase()}'로 설정할까요?`);
+  if(!ok) return;
+
+  try{
+    const res = await fetch("/api/admin",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "X-Admin-Key":key()
+      },
+      body:JSON.stringify({
+        action:"set-result",
+        prediction_id:predictionId,
+        result_value:resultValue
+      })
+    });
+
+    const json = await res.json();
+
+    if(!json.ok){
+      toast(json.message || "결과 반영 실패");
+      return;
+    }
+
+    toast("결과 반영 완료");
+    await loadAdmin();
+  }catch(e){
+    toast("결과 반영 API 오류");
+  }
+}
+
+function init(){
+  $("adminKey").value = localStorage.getItem("wetty_admin_key") || "";
+
+  if($("adminKey").value){
+    loadAdmin();
+  }
+}
+
+init();
+</script>
+</body>
+</html>
