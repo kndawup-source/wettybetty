@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>WETTY BETTY LEGACY</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --bg:#050d16;
+  --panel:#0b1620;
+  --line:rgba(255,255,255,.08);
+  --text:#edf4fa;
+  --muted:#7f93a2;
+  --soft:#bfd0da;
+  --accent:#dff56a;
+  --blue:#82c7ff;
+  --red:#ff6f6f;
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  min-height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Noto Sans KR',sans-serif;
+}
+
+body{
+  padding-bottom:40px;
+}
+
+button,input{
+  font-family:inherit;
+}
+
+button{
+  border:0;
+  cursor:pointer;
+}
+
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.hidden{
+  display:none!important;
+}
+
+.app,
+.auth-screen{
+  width:100%;
+  max-width:480px;
+  margin:0 auto;
+  min-height:100dvh;
+}
+
+.app{
+  padding-bottom:40px;
+  background:
+    radial-gradient(circle at 50% -10%,rgba(223,245,106,.08),transparent 32%),
+    linear-gradient(180deg,#07121c 0%,#050d16 52%,#050d16 100%);
+}
+
+.auth-screen{
+  padding:38px 20px 24px;
+  background:
+    radial-gradient(circle at 50% -8%,rgba(223,245,106,.12),transparent 34%),
+    linear-gradient(180deg,#07121c,#050d16);
+}
+
+.auth-logo,
+.logo{
+  font-family:'Syne',sans-serif;
+  font-weight:900;
+}
+
+.auth-logo{
+  font-size:34px;
+  letter-spacing:-2px;
+  line-height:1;
+}
+
+.logo{
+  font-size:22px;
+  letter-spacing:-1px;
+}
+
+.auth-logo em,
+.logo em{
+  color:var(--accent);
+  font-style:normal;
+}
+
+.auth-card{
+  margin-top:34px;
+  padding:20px;
+  border-radius:28px;
+  background:linear-gradient(145deg,#102131,#09131d);
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.auth-title{
+  font-size:24px;
+  font-weight:900;
+  line-height:1.25;
+}
+
+.auth-desc{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.6;
+}
+
+.auth-tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:20px;
+}
+
+.auth-tab{
+  height:44px;
+  border-radius:15px;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--line);
+  color:var(--muted);
+  font-size:13px;
+  font-weight:900;
+}
+
+.auth-tab.active{
+  background:var(--accent);
+  color:#07100c;
+}
+
+.auth-form{
+  display:none;
+  margin-top:16px;
+}
+
+.auth-form.active{
+  display:block;
+}
+
+.field{
+  margin-top:10px;
+}
+
+.field label{
+  display:block;
+  margin-bottom:7px;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+}
+
+.field input{
+  width:100%;
+  height:48px;
+  padding:0 14px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.05);
+  color:var(--text);
+  outline:none;
+  font-size:15px;
+  font-weight:800;
+}
+
+.field input::placeholder{
+  color:rgba(127,147,162,.55);
+}
+
+.auth-main-btn{
+  width:100%;
+  height:50px;
+  margin-top:16px;
+  border-radius:17px;
+  background:var(--accent);
+  color:#07100c;
+  font-weight:900;
+  font-size:14px;
+}
+
+.auth-help{
+  margin-top:14px;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.5;
+  text-align:center;
+}
+
+.header{
+  position:sticky;
+  top:0;
+  z-index:50;
+  height:58px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  background:rgba(5,13,22,.94);
+  backdrop-filter:blur(14px);
+}
+
+.header-right{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.icon-btn,
+.profile-mini{
+  height:38px;
+  border-radius:14px;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--line);
+  color:var(--text);
+}
+
+.icon-btn{
+  width:38px;
+  font-size:15px;
+}
+
+.profile-mini{
+  padding:0 12px;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  color:var(--soft);
+}
+
+.pm-name{
+  max-width:74px;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  font-size:11px;
+  font-weight:900;
+}
+
+.weather-board,
+.board,
+.market-card{
+  margin:12px 16px;
+  padding:16px;
+  border-radius:24px;
+  border:1px solid var(--line);
+  background:linear-gradient(170deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+}
+
+.weather-board{
+  position:relative;
+  background:linear-gradient(145deg,#102131,#09131d);
+  box-shadow:0 20px 50px rgba(0,0,0,.28);
+}
+
+.refresh-btn{
+  position:absolute;
+  top:14px;
+  right:14px;
+  width:30px;
+  height:30px;
+  border-radius:10px;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--line);
+  color:var(--muted);
+}
+
+.weather-top{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.weather-kicker{
+  display:inline-flex;
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--line);
+  color:var(--soft);
+  font-size:9px;
+  font-weight:900;
+}
+
+.temp{
+  margin-top:10px;
+  font-family:'Syne',sans-serif;
+  font-size:64px;
+  line-height:.88;
+  letter-spacing:-4px;
+  font-weight:900;
+}
+
+.weather-desc{
+  margin-top:10px;
+  max-width:220px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.5;
+}
+
+.weather-icon{
+  width:74px;
+  height:74px;
+  flex:0 0 74px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--line);
+  font-size:32px;
+}
+
+.weather-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:7px;
+  margin-top:16px;
+}
+
+.weather-cell{
+  padding:10px 8px;
+  border-radius:14px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line);
+}
+
+.weather-cell span,
+.market-cell span,
+.time-cell span{
+  display:block;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:900;
+}
+
+.weather-cell strong{
+  display:block;
+  margin-top:5px;
+  font-size:13px;
+}
+
+.board-head,
+.section-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.board-head h2,
+.section-title h2{
+  font-size:15px;
+  font-weight:900;
+}
+
+.board-head span{
+  color:var(--accent);
+  font-size:10px;
+  font-weight:900;
+}
+
+.board-item{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:11px 0;
+  border-top:1px solid var(--line);
+}
+
+.board-item:first-child{
+  border-top:0;
+}
+
+.bi-title{
+  font-size:13px;
+  font-weight:900;
+}
+
+.bi-sub{
+  margin-top:3px;
+  color:var(--muted);
+  font-size:11px;
+}
+
+.bi-right{
+  color:var(--accent);
+  font-size:13px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.section-title{
+  margin:18px 16px 10px;
+}
+
+.section-title span{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:900;
+}
+
+.market-region{
+  display:inline-flex;
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(130,199,255,.08);
+  border:1px solid rgba(130,199,255,.18);
+  color:var(--blue);
+  font-size:10px;
+  font-weight:900;
+}
+
+.market-title{
+  margin-top:12px;
+  font-size:20px;
+  line-height:1.3;
+  font-weight:900;
+}
+
+.market-meta{
+  margin-top:8px;
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  color:var(--muted);
+  font-size:11px;
+}
+
+.time-box{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
+  margin-top:12px;
+}
+
+.time-cell{
+  padding:9px 7px;
+  border-radius:13px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line);
+}
+
+.time-cell strong{
+  display:block;
+  margin-top:4px;
+  color:var(--soft);
+  font-size:11px;
+  font-weight:900;
+}
+
+.market-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:14px;
+}
+
+.market-cell{
+  padding:13px;
+  border-radius:18px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line);
+}
+
+.market-cell strong{
+  display:block;
+  margin-top:6px;
+  font-family:'Syne',sans-serif;
+  font-size:30px;
+}
+
+.market-cell small{
+  display:block;
+  margin-top:6px;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+}
+
+.vote-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:14px;
+}
+
+.vote-btn{
+  height:46px;
+  border-radius:15px;
+  font-size:14px;
+  font-weight:900;
+}
+
+.vote-btn.rain{
+  background:rgba(130,199,255,.12);
+  border:1px solid rgba(130,199,255,.22);
+  color:var(--blue);
+}
+
+.vote-btn.clear{
+  background:rgba(223,245,106,.08);
+  border:1px solid rgba(223,245,106,.22);
+  color:var(--accent);
+}
+
+.closed-badge{
+  display:inline-flex;
+  margin-top:10px;
+  padding:6px 9px;
+  border-radius:999px;
+  background:rgba(255,255,255,.055);
+  border:1px solid var(--line);
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+}
+
+.overlay{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.82);
+  backdrop-filter:blur(10px);
+  z-index:20000;
+  padding:20px 16px;
+}
+
+.overlay.show{
+  display:flex;
+}
+
+.sheet{
+  width:100%;
+  max-width:480px;
+  max-height:78dvh;
+  overflow-y:auto;
+  padding:16px 24px 28px;
+  border-radius:32px;
+  background:var(--panel);
+  border:1px solid var(--line);
+}
+
+.sheet-grip{
+  width:44px;
+  height:5px;
+  border-radius:999px;
+  background:rgba(255,255,255,.18);
+  margin:0 auto 18px;
+}
+
+.sheet-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+}
+
+.sheet-head h2{
+  font-family:'Syne',sans-serif;
+  font-size:22px;
+}
+
+.sheet-head p{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.close-btn{
+  width:34px;
+  height:34px;
+  border-radius:12px;
+  background:rgba(255,255,255,.06);
+  color:var(--text);
+  font-size:18px;
+}
+
+.profile-stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-top:18px;
+}
+
+.profile-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:14px;
+}
+
+.main-btn,
+.sub-btn,
+.logout-btn{
+  height:46px;
+  border-radius:16px;
+  font-size:13px;
+  font-weight:900;
+}
+
+.main-btn{
+  background:var(--accent);
+  color:#07100c;
+}
+
+.sub-btn{
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--line);
+  color:var(--text);
+}
+
+.stat-box{
+  padding:12px 10px;
+  border-radius:16px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line);
+}
+
+.stat-box span{
+  display:block;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:900;
+}
+
+.stat-box strong{
+  display:block;
+  margin-top:4px;
+  font-size:16px;
+}
+
+.logout-btn{
+  margin-top:12px;
+  margin-bottom:8px;
+  width:100%;
+  background:rgba(255,111,111,.12);
+  border:1px solid rgba(255,111,111,.22);
+  color:var(--red);
+}
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:32px;
+  transform:translateX(-50%) translateY(8px);
+  padding:12px 18px;
+  border-radius:999px;
+  background:var(--text);
+  color:#06100c;
+  font-size:13px;
+  font-weight:900;
+  opacity:0;
+  pointer-events:none;
+  transition:.2s;
+  z-index:30000;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+</style>
+</head>
+
+<body>
+<div class="auth-screen" id="authScreen">
+  <div class="auth-logo">WETTY <em>BETTY</em></div>
+
+  <div class="auth-card">
+    <div class="auth-title">날씨를 예측하고<br>포인트를 쌓아보세요.</div>
+    <div class="auth-desc">전화번호 뒷자리와 PIN으로 간편하게 로그인합니다.</div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-auth-tab="login">로그인</button>
+      <button class="auth-tab" data-auth-tab="signup">가입</button>
+    </div>
+
+    <div class="auth-form active" id="loginForm">
+      <div class="field">
+        <label>전화번호 뒷자리 4자리</label>
+        <input id="loginPhone" inputmode="numeric" maxlength="4" placeholder="예: 1234">
+      </div>
+
+      <div class="field">
+        <label>PIN 4~6자리</label>
+        <input id="loginPin" inputmode="numeric" maxlength="6" type="password" placeholder="PIN 입력">
+      </div>
+
+      <button class="auth-main-btn" data-action="login">로그인</button>
+    </div>
+
+    <div class="auth-form" id="signupForm">
+      <div class="field">
+        <label>닉네임</label>
+        <input id="signupNick" maxlength="12" placeholder="예: WETTY">
+      </div>
+
+      <div class="field">
+        <label>전화번호 뒷자리 4자리</label>
+        <input id="signupPhone" inputmode="numeric" maxlength="4" placeholder="예: 1234">
+      </div>
+
+      <div class="field">
+        <label>PIN 4~6자리</label>
+        <input id="signupPin" inputmode="numeric" maxlength="6" type="password" placeholder="PIN 설정">
+      </div>
+
+      <button class="auth-main-btn" data-action="signup">가입하고 시작</button>
+    </div>
+
+    <div class="auth-help">PIN은 서버에서 해시 처리됩니다. 프론트에는 저장하지 않습니다.</div>
+  </div>
+</div>
+
+<div class="app hidden" id="mainApp">
+  <header class="header">
+    <div class="logo">WETTY <em>BETTY</em></div>
+
+    <div class="header-right">
+      <button class="icon-btn" data-action="notice">🔔</button>
+      <button class="profile-mini" data-action="profile">
+        <span>👤</span>
+        <span class="pm-name" id="nickname">GUEST</span>
+      </button>
+    </div>
+  </header>
+
+  <section class="weather-board">
+    <button class="refresh-btn" data-action="refresh">↻</button>
+
+    <div class="weather-top">
+      <div>
+        <div class="weather-kicker" id="currentLocationText">📍 위치 확인중...</div>
+        <div class="temp" id="currentTemp">--°</div>
+        <div class="weather-desc" id="currentDesc">현재 위치의 날씨를 확인하고 있습니다.</div>
+      </div>
+
+      <div class="weather-icon" id="weatherIcon">🌤️</div>
+    </div>
+
+    <div class="weather-grid">
+      <div class="weather-cell"><span>체감</span><strong id="feelsLike">--°</strong></div>
+      <div class="weather-cell"><span>강수</span><strong id="rainChance">--%</strong></div>
+      <div class="weather-cell"><span>바람</span><strong id="windSpeed">--</strong></div>
+      <div class="weather-cell"><span>변화</span><strong id="tempDiff">--°</strong></div>
+    </div>
+  </section>
+
+  <section class="board">
+    <div class="board-head">
+      <h2>지금 몰리는 지역</h2>
+      <span>LIVE</span>
+    </div>
+    <div id="hotList"></div>
+  </section>
+
+  <section class="section-title">
+    <h2>TOP PICKS</h2>
+    <span>서버 자동 생성</span>
+  </section>
+
+  <div id="marketList"></div>
+
+  <section class="section-title">
+    <h2>마감된 예측</h2>
+    <span>결과 대기 / 정산 완료</span>
+  </section>
+
+  <div id="closedList"></div>
+</div>
+
+<div class="overlay" id="profileModal">
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+
+    <div class="sheet-head">
+      <div>
+        <h2 id="profileName">PROFILE</h2>
+        <p id="profileCode">초대코드 --</p>
+      </div>
+      <button class="close-btn" data-action="close-profile">×</button>
+    </div>
+
+    <div class="profile-stats">
+      <div class="stat-box"><span>포인트</span><strong id="profilePoint">0</strong></div>
+      <div class="stat-box"><span>적중률</span><strong id="profileRate">0%</strong></div>
+      <div class="stat-box"><span>연승</span><strong id="profileStreak">0</strong></div>
+    </div>
+
+    <div class="profile-actions">
+      <button class="main-btn" data-action="checkin">출석 포인트 받기</button>
+      <button class="sub-btn" data-action="copy-invite">친구 초대 🎁</button>
+    </div>
+
+    <button class="logout-btn" data-action="logout">로그아웃</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+const SUPABASE_URL="https://zuciraifbomusdqcjxyb.supabase.co";
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXAiLCJyZWYiOiJ6dWNpcmFpZmJvbXVzZHFjanh5YiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzc4NTA3NjU3LCJleHAiOjIwOTQwODM2NTd9.QxR7EqShTwUmzgjOyH0LIrRY7TMtw0lyKpw44PRH6Qg";
+
+const db = window.supabase
+  ? window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY)
+  : null;
+
+const $ = id => document.getElementById(id);
+const pad2 = n => String(n).padStart(2,"0");
+const timeLabel = d => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+
+const state = {
+  user:null,
+  predictions:[],
+  weatherCache:new Map(),
+  locationWatchId:null,
+  lastLocationKey:"",
+  lastLocationLabel:"",
+  realtime:null
+};
+
+let toastTimer=null;
+
+function toast(msg){
+  const el=$("toast");
+  el.textContent=msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove("show"),1800);
+}
+
+function onlyDigits(v){
+  return String(v||"").replace(/\D/g,"");
+}
+
+function syncProfile(){
+  const u=state.user||{};
+  const vote=Number(u.vote_count||0);
+  const hit=Number(u.hit_count||0);
+
+  $("nickname").textContent=u.nickname||"GUEST";
+  $("profileName").textContent=u.nickname||"PROFILE";
+  $("profileCode").textContent=`초대코드 ${u.referral_code||"------"}`;
+  $("profilePoint").textContent=`${Number(u.points||0).toLocaleString()}P`;
+  $("profileRate").textContent=`${vote ? Math.round(hit/vote*100) : 0}%`;
+  $("profileStreak").textContent=u.streak||0;
+}
+
+function showApp(){
+  $("authScreen").classList.add("hidden");
+  $("mainApp").classList.remove("hidden");
+}
+
+function showAuth(){
+  $("authScreen").classList.remove("hidden");
+  $("mainApp").classList.add("hidden");
+  $("profileModal").classList.remove("show");
+}
+
+function saveSession(user){
+  sessionStorage.setItem("wetty_user_id",user.id);
+  state.user=user;
+  syncProfile();
+}
+
+function clearSession(){
+  sessionStorage.removeItem("wetty_user_id");
+}
+
+async function tryRestoreLogin(){
+  const id=sessionStorage.getItem("wetty_user_id");
+  if(!id) return false;
+
+  try{
+    const r=await fetch("/api/me",{headers:{"X-User-Id":id}});
+    const j=await r.json();
+
+    if(!j.ok) return false;
+
+    state.user=j.user;
+    syncProfile();
+    return true;
+  }catch(e){
+    clearSession();
+    return false;
+  }
+}
+
+function setAuthMode(mode){
+  document.querySelectorAll(".auth-tab").forEach(b=>{
+    b.classList.toggle("active",b.dataset.authTab===mode);
+  });
+
+  $("loginForm").classList.toggle("active",mode==="login");
+  $("signupForm").classList.toggle("active",mode==="signup");
+}
+
+function setLoading(btn,on,text){
+  if(!btn) return;
+
+  if(on){
+    btn.dataset.old=btn.textContent;
+    btn.textContent=text;
+    btn.disabled=true;
+  }else{
+    btn.textContent=btn.dataset.old||btn.textContent;
+    btn.disabled=false;
+  }
+}
+
+async function signup(btn){
+  const nickname=String($("signupNick").value||"").trim()||"WETTY";
+  const phone_last4=onlyDigits($("signupPhone").value);
+  const pin=onlyDigits($("signupPin").value);
+
+  if(phone_last4.length!==4) return toast("전화번호 뒷자리 4자리를 입력해주세요");
+  if(pin.length<4||pin.length>6) return toast("PIN은 4~6자리로 입력해주세요");
+
+  setLoading(btn,true,"가입중...");
+
+  try{
+    const r=await fetch("/api/signup",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({nickname,phone_last4,pin})
+    });
+
+    const j=await r.json();
+
+    if(!j.ok) return toast(j.message||"가입 실패");
+
+    saveSession(j.user);
+    showApp();
+    await startApp();
+    toast("가입 완료");
+  }catch(e){
+    toast("가입 오류");
+  }finally{
+    setLoading(btn,false);
+  }
+}
+
+async function login(btn){
+  const phone_last4=onlyDigits($("loginPhone").value);
+  const pin=onlyDigits($("loginPin").value);
+
+  if(phone_last4.length!==4) return toast("전화번호 뒷자리 4자리를 입력해주세요");
+  if(pin.length<4||pin.length>6) return toast("PIN은 4~6자리로 입력해주세요");
+
+  setLoading(btn,true,"로그인중...");
+
+  try{
+    const r=await fetch("/api/login",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({phone_last4,pin})
+    });
+
+    const j=await r.json();
+
+    if(!j.ok) return toast(j.message||"로그인 실패");
+
+    saveSession(j.user);
+    showApp();
+    await startApp();
+    toast("로그인 완료");
+  }catch(e){
+    toast("로그인 오류");
+  }finally{
+    setLoading(btn,false);
+  }
+}
+
+function logout(){
+  clearSession();
+  state.user=null;
+  syncProfile();
+  showAuth();
+  toast("로그아웃 완료");
+}
+
+async function fetchWeather(lat,lon){
+  const key=`${Number(lat).toFixed(2)},${Number(lon).toFixed(2)}`;
+  const c=state.weatherCache.get(key);
+
+  if(c && Date.now()-c.ts<600000) return c.data;
+
+  const url=
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`+
+    `&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m`+
+    `&hourly=precipitation_probability,temperature_2m`+
+    `&past_days=1&forecast_days=1&timezone=Asia%2FSeoul`;
+
+  const r=await fetch(url);
+  if(!r.ok) throw new Error("weather");
+
+  const j=await r.json();
+  const cur=j.current||{};
+  const h=j.hourly||{};
+  const probs=h.precipitation_probability||[];
+  const temps=h.temperature_2m||[];
+
+  const temp=Number(cur.temperature_2m||0);
+  const y=Number(temps[0]||temp);
+
+  const data={
+    temp,
+    feelsLike:Number(cur.apparent_temperature||temp),
+    precipitation:Number(cur.precipitation||0),
+    code:Number(cur.weather_code||0),
+    wind:Number(cur.wind_speed_10m||0),
+    rainProb:Number(probs[0]||0),
+    tempDiff:Math.round(temp-y)
+  };
+
+  state.weatherCache.set(key,{data,ts:Date.now()});
+  return data;
+}
+
+function emoji(code,rain,prec){
+  if(prec>0) return "🌧️";
+  if(rain>=60) return "☔";
+  if(rain>=35) return "🌦️";
+  if([0,1].includes(code)) return "☀️";
+  if([2,3,45,48].includes(code)) return "☁️";
+  return "🌤️";
+}
+
+function desc(rain,prec){
+  if(prec>0) return "현재 비가 감지되고 있습니다.";
+  if(rain>=60) return "비 가능성이 높은 흐름입니다.";
+  if(rain>=35) return "비가 올지 애매한 흐름입니다.";
+  return "현재는 비교적 안정적인 날씨입니다.";
+}
+
+function applyWeather(w,label){
+  $("currentTemp").textContent=`${Math.round(w.temp)}°`;
+  $("feelsLike").textContent=`${Math.round(w.feelsLike)}°`;
+  $("rainChance").textContent=`${w.rainProb}%`;
+  $("windSpeed").textContent=`${w.wind.toFixed(1)}m/s`;
+  $("tempDiff").textContent=`${w.tempDiff>=0?"+":""}${w.tempDiff}°`;
+  $("weatherIcon").textContent=emoji(w.code,w.rainProb,w.precipitation);
+  $("currentDesc").textContent=desc(w.rainProb,w.precipitation);
+  $("currentLocationText").textContent=label;
+}
+
+async function reverseGeo(lat,lon){
+  try{
+    const r=await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=ko`
+    );
+
+    if(!r.ok) return null;
+
+    const j=await r.json();
+    const a=j.address||{};
+
+    return (
+      a.city_district ||
+      a.suburb ||
+      a.neighbourhood ||
+      a.quarter ||
+      a.town ||
+      a.village ||
+      a.city ||
+      a.county ||
+      null
+    );
+  }catch(e){
+    return null;
+  }
+}
+
+async function defaultWeather(){
+  try{
+    applyWeather(await fetchWeather(37.4979,127.0276),"📍 서울 강남 기준");
+  }catch(e){
+    $("currentLocationText").textContent="📍 연결 확인 필요";
+  }
+}
+
+async function applyPos(pos){
+  try{
+    const lat=pos.coords.latitude;
+    const lon=pos.coords.longitude;
+    const key=`${lat.toFixed(3)},${lon.toFixed(3)}`;
+
+    const w=await fetchWeather(lat,lon);
+
+    if(key!==state.lastLocationKey || !state.lastLocationLabel){
+      state.lastLocationKey=key;
+      const name=await reverseGeo(lat,lon);
+      state.lastLocationLabel=name ? `📍 ${name}` : `📍 ${lat.toFixed(2)}, ${lon.toFixed(2)}`;
+    }
+
+    applyWeather(w,state.lastLocationLabel);
+  }catch(e){
+    await defaultWeather();
+  }
+}
+
+async function loadWeather(){
+  if(!navigator.geolocation) return defaultWeather();
+
+  navigator.geolocation.getCurrentPosition(
+    p=>applyPos(p),
+    ()=>defaultWeather(),
+    {
+      enableHighAccuracy:true,
+      timeout:10000,
+      maximumAge:30000
+    }
+  );
+}
+
+function watchLocation(){
+  if(!navigator.geolocation || state.locationWatchId!==null) return;
+
+  state.locationWatchId=navigator.geolocation.watchPosition(
+    p=>applyPos(p),
+    ()=>{},
+    {
+      enableHighAccuracy:true,
+      timeout:10000,
+      maximumAge:60000
+    }
+  );
+}
+
+function renderTime(item){
+  return `
+    <div class="time-box">
+      <div class="time-cell">
+        <span>마감</span>
+        <strong>${timeLabel(new Date(item.close_time||item.closeTimeMs))}</strong>
+      </div>
+      <div class="time-cell">
+        <span>예측시간</span>
+        <strong>${timeLabel(new Date(item.start_time||item.startTimeMs))}~${timeLabel(new Date(item.end_time||item.endTimeMs))}</strong>
+      </div>
+      <div class="time-cell">
+        <span>결과</span>
+        <strong>${timeLabel(new Date(item.result_time||item.resultTimeMs))}</strong>
+      </div>
+    </div>
+  `;
+}
+
+function mapRow(r){
+  return {
+    id:r.id,
+    region:r.region_name,
+    title:r.title,
+    yes:r.yes_percent,
+    no:r.no_percent,
+    yesLabel:r.yes_label,
+    noLabel:r.no_label,
+    yesStake:r.yes_stake,
+    noStake:r.no_stake,
+    total:r.total_points,
+    issue:r.issue,
+    closeTimeMs:new Date(r.close_time).getTime(),
+    startTimeMs:new Date(r.start_time).getTime(),
+    endTimeMs:new Date(r.end_time).getTime(),
+    resultTimeMs:new Date(r.result_time).getTime(),
+    status:r.status
+  };
+}
+
+function demo(){
+  const now=new Date();
+  const start=new Date(now.getTime()+3600000);
+  const end=new Date(start.getTime()+7200000);
+  const close=new Date(start.getTime()-1800000);
+  const result=new Date(end.getTime()+600000);
+
+  state.predictions=[{
+    id:"demo",
+    region:"서울 강남",
+    title:"서울 강남, 비 올까?",
+    yes:48,
+    no:52,
+    yesLabel:"온다",
+    noLabel:"안 온다",
+    yesStake:8400,
+    noStake:9200,
+    total:17600,
+    issue:"기본 예측",
+    closeTimeMs:close.getTime(),
+    startTimeMs:start.getTime(),
+    endTimeMs:end.getTime(),
+    resultTimeMs:result.getTime()
+  }];
+
+  renderAll();
+}
+
+function renderMarkets(){
+  const box=$("marketList");
+  box.innerHTML="";
+
+  state.predictions.forEach(item=>{
+    const closed=Date.now()>=Number(item.closeTimeMs||0);
+    const card=document.createElement("div");
+    card.className="market-card";
+
+    card.innerHTML=`
+      <div class="market-region">${item.region}</div>
+      <div class="market-title">${item.title}</div>
+
+      <div class="market-meta">
+        <span>${closed?"마감됨":item.issue}</span>
+        <span>${Number(item.total||0).toLocaleString()}P</span>
+      </div>
+
+      ${renderTime(item)}
+
+      <div class="market-grid">
+        <div class="market-cell">
+          <span>${item.yesLabel}</span>
+          <strong>${item.yes}%</strong>
+          <small>${Number(item.yesStake||0).toLocaleString()}P</small>
+        </div>
+
+        <div class="market-cell">
+          <span>${item.noLabel}</span>
+          <strong>${item.no}%</strong>
+          <small>${Number(item.noStake||0).toLocaleString()}P</small>
+        </div>
+      </div>
+
+      <div class="vote-row">
+        <button class="vote-btn rain" data-action="vote" data-id="${item.id}" data-choice="yes" ${closed?"disabled":""}>${closed?"마감":item.yesLabel}</button>
+        <button class="vote-btn clear" data-action="vote" data-id="${item.id}" data-choice="no" ${closed?"disabled":""}>${closed?"마감":item.noLabel}</button>
+      </div>
+    `;
+
+    box.appendChild(card);
+  });
+}
+
+function renderHot(){
+  const box=$("hotList");
+  box.innerHTML="";
+
+  state.predictions.slice(0,3).forEach((item,i)=>{
+    const div=document.createElement("div");
+    div.className="board-item";
+
+    div.innerHTML=`
+      <div>
+        <div class="bi-title">${i+1}. ${item.region}</div>
+        <div class="bi-sub">${timeLabel(new Date(item.startTimeMs))}~${timeLabel(new Date(item.endTimeMs))} · 마감 ${timeLabel(new Date(item.closeTimeMs))}</div>
+      </div>
+      <div class="bi-right">${Number(item.total||0).toLocaleString()}P</div>
+    `;
+
+    box.appendChild(div);
+  });
+}
+
+function renderClosed(){
+  $("closedList").innerHTML=`
+    <div class="market-card closed">
+      <div class="market-region">CLOSED</div>
+      <div class="market-title">아직 마감된 예측이 없습니다</div>
+      <div class="closed-badge">결과 대기 없음</div>
+    </div>
+  `;
+}
+
+function renderAll(){
+  renderMarkets();
+  renderHot();
+  renderClosed();
+}
+
+async function loadPredictions(){
+  if(!db) return demo();
+
+  try{
+    const {data,error}=await db
+      .from("wetty_predictions")
+      .select("*")
+      .eq("status","open")
+      .gt("close_time",new Date().toISOString())
+      .order("total_points",{ascending:false})
+      .limit(7);
+
+    if(error) throw error;
+
+    state.predictions=(data||[]).map(mapRow);
+
+    if(!state.predictions.length) return demo();
+
+    renderAll();
+  }catch(e){
+    demo();
+  }
+}
+
+async function ensurePredictions(){
+  try{
+    await fetch("/api/auto-market-v2");
+  }catch(e){}
+}
+
+async function vote(id,choice,btn){
+  if(id==="demo") return toast("실제 예측 카드에서 참여 가능합니다");
+  if(!state.user) return toast("로그인이 필요합니다");
+  if(!confirm("참여할까요?")) return;
+
+  setLoading(btn,true,"참여중...");
+
+  try{
+    const r=await fetch("/api/vote",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "X-User-Id":state.user.id
+      },
+      body:JSON.stringify({
+        prediction_id:id,
+        choice,
+        points:100
+      })
+    });
+
+    const j=await r.json();
+
+    if(!j.ok) return toast(j.message||"참여 실패");
+
+    toast("참여 완료");
+    await refreshUser();
+    await loadPredictions();
+  }catch(e){
+    toast("참여 처리 실패");
+  }finally{
+    setLoading(btn,false);
+  }
+}
+
+async function checkin(btn){
+  if(!state.user) return toast("로그인이 필요합니다");
+
+  setLoading(btn,true,"확인중...");
+
+  try{
+    const r=await fetch("/api/checkin",{
+      method:"POST",
+      headers:{
+        "X-User-Id":state.user.id
+      }
+    });
+
+    const j=await r.json();
+
+    toast(j.message||"출석 완료");
+    await refreshUser();
+  }catch(e){
+    toast("출석 처리 실패");
+  }finally{
+    setLoading(btn,false);
+  }
+}
+
+async function refreshUser(){
+  if(!state.user) return;
+
+  try{
+    const r=await fetch("/api/me",{
+      headers:{
+        "X-User-Id":state.user.id
+      }
+    });
+
+    const j=await r.json();
+
+    if(j.ok){
+      state.user=j.user;
+      syncProfile();
+    }
+  }catch(e){}
+}
+
+function subscribe(){
+  if(!db || state.realtime) return;
+
+  state.realtime=db
+    .channel("wetty-live")
+    .on(
+      "postgres_changes",
+      {event:"*",schema:"public",table:"wetty_predictions"},
+      loadPredictions
+    )
+    .on(
+      "postgres_changes",
+      {event:"*",schema:"public",table:"wetty_votes"},
+      loadPredictions
+    )
+    .subscribe();
+}
+
+async function refresh(){
+  state.weatherCache.clear();
+  state.lastLocationKey="";
+  state.lastLocationLabel="";
+
+  toast("새로고침 중");
+
+  await loadWeather();
+  await ensurePredictions();
+  await loadPredictions();
+}
+
+async function startApp(){
+  demo();
+
+  await loadWeather();
+  watchLocation();
+
+  await ensurePredictions();
+  await loadPredictions();
+
+  subscribe();
+}
+
+function bind(){
+  document.addEventListener("click",e=>{
+    const btn=e.target.closest("[data-action],[data-auth-tab]");
+    if(!btn) return;
+
+    if(btn.dataset.authTab) return setAuthMode(btn.dataset.authTab);
+
+    const a=btn.dataset.action;
+
+    if(a==="login") login(btn);
+    if(a==="signup") signup(btn);
+    if(a==="notice") toast("새 알림이 없습니다");
+    if(a==="profile") $("profileModal").classList.add("show");
+    if(a==="close-profile") $("profileModal").classList.remove("show");
+    if(a==="checkin") checkin(btn);
+
+    if(a==="copy-invite"){
+      const t=`WETTY BETTY 초대코드 : ${(state.user||{}).referral_code||"------"}`;
+      navigator.clipboard?.writeText(t);
+      toast("초대코드 복사 완료");
+    }
+
+    if(a==="logout") logout();
+    if(a==="refresh") refresh();
+    if(a==="vote") vote(btn.dataset.id,btn.dataset.choice,btn);
+  });
+
+  $("profileModal").addEventListener("click",e=>{
+    if(e.target===$("profileModal")){
+      $("profileModal").classList.remove("show");
+    }
+  });
+}
+
+async function init(){
+  bind();
+  syncProfile();
+  demo();
+
+  const ok=await tryRestoreLogin();
+
+  if(ok){
+    showApp();
+    await startApp();
+  }else{
+    showAuth();
+  }
+
+  setInterval(()=>{
+    if(!$("mainApp").classList.contains("hidden")){
+      refresh();
+    }
+  },10*60*1000);
+}
+
+if(document.readyState==="loading"){
+  document.addEventListener("DOMContentLoaded",init);
+}else{
+  init();
+}
+
+})();
+</script>
+</body>
+</html>
