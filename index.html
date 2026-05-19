@@ -947,16 +947,31 @@ async function signup(btn){
       body:JSON.stringify({nickname,phone_last4,pin})
     });
 
-    const j=await r.json();
+    const text=await r.text();
 
-    if(!j.ok) return toast(j.message||"가입 실패");
+    let j;
+    try{
+      j=JSON.parse(text);
+    }catch(e){
+      console.error("SIGNUP NON JSON RESPONSE:", text);
+      toast("API 응답 오류");
+      return;
+    }
+
+    if(!j.ok){
+      console.error("SIGNUP API ERROR:", j);
+      toast(j.message||"가입 실패");
+      return;
+    }
 
     saveSession(j.user);
     showApp();
     await startApp();
     toast("가입 완료");
+
   }catch(e){
-    toast("가입 오류");
+    console.error("SIGNUP FETCH ERROR:", e);
+    toast("가입 API 연결 실패");
   }finally{
     setLoading(btn,false);
   }
