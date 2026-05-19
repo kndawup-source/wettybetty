@@ -1,9 +1,9 @@
 {
-  "name":"wetty-betty",
-  "version":"1.0.0",
-  "type":"module",
-  "dependencies":{
-    "@supabase/supabase-js":"^2.50.0",
-    "bcryptjs":"^2.4.3"
+  "name": "wetty-betty",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.50.0",
+    "bcryptjs": "^2.4.3"
   }
 }
