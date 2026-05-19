@@ -1,0 +1,13 @@
+{
+  "cleanUrls": true,
+  "crons": [
+    {
+      "path": "/api/auto-market-v2",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/settle-predictions",
+      "schedule": "*/15 * * * *"
+    }
+  ]
+}
