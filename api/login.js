@@ -1,7 +1,7 @@
 import {
   supabase,
   json,
-  hashPin,
+  comparePin,
   isValidPhoneLast4,
   isValidPin
 } from "./_lib.js";
@@ -36,13 +36,10 @@ export default async function handler(req, res){
       });
     }
 
-    const pinHash = hashPin(pin);
-
     const { data:user, error } = await supabase
       .from("wetty_users")
       .select("*")
       .eq("phone_last4", phone)
-      .eq("pin_hash", pinHash)
       .maybeSingle();
 
     if(error){
@@ -55,6 +52,15 @@ export default async function handler(req, res){
     }
 
     if(!user){
+      return json(res,401,{
+        ok:false,
+        message:"전화번호 또는 PIN이 올바르지 않습니다"
+      });
+    }
+
+    const ok = await comparePin(pin, user.pin_hash);
+
+    if(!ok){
       return json(res,401,{
         ok:false,
         message:"전화번호 또는 PIN이 올바르지 않습니다"
